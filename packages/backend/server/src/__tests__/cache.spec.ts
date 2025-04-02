@@ -1,24 +1,28 @@
 import { TestingModule } from '@nestjs/testing';
-import test from 'ava';
+import ava, { type TestFn } from 'ava';
 
 import { FunctionalityModules } from '../app.module';
 import { Cache } from '../base/cache';
 import { createTestingModule } from './utils';
 
-let cache: Cache;
-let module: TestingModule;
-test.before(async () => {
-  module = await createTestingModule({
+const test = ava as TestFn<{
+  cache: Cache;
+  module: TestingModule;
+}>;
+
+test.before(async t => {
+  t.context.module = await createTestingModule({
     imports: FunctionalityModules,
   });
-  cache = module.get(Cache);
+  t.context.cache = t.context.module.get(Cache);
 });
 
-test.after.always(async () => {
-  await module.close();
+test.after.always(async t => {
+  await t.context.module.close();
 });
 
 test('should be able to set normal cache', async t => {
+  const cache = t.context.cache;
   t.true(await cache.set('test', 1));
   t.is(await cache.get<number>('test'), 1);
 
@@ -31,12 +35,14 @@ test('should be able to set normal cache', async t => {
 });
 
 test('should be able to set cache with non-exiting flag', async t => {
+  const cache = t.context.cache;
   t.true(await cache.setnx('test-nx', 1));
   t.false(await cache.setnx('test-nx', 2));
   t.is(await cache.get('test-nx'), 1);
 });
 
 test('should be able to set cache with ttl', async t => {
+  const cache = t.context.cache;
   t.true(await cache.set('test-ttl', 1));
   t.is(await cache.get('test-ttl'), 1);
 
@@ -47,6 +53,7 @@ test('should be able to set cache with ttl', async t => {
 });
 
 test('should be able to incr/decr number cache', async t => {
+  const cache = t.context.cache;
   t.true(await cache.set('test-incr', 1));
   t.is(await cache.increase('test-incr'), 2);
   t.is(await cache.increase('test-incr'), 3);
@@ -59,6 +66,7 @@ test('should be able to incr/decr number cache', async t => {
 });
 
 test('should be able to manipulate list cache', async t => {
+  const cache = t.context.cache;
   t.is(await cache.pushBack('test-list', 1), 1);
   t.is(await cache.pushBack('test-list', 2, 3, 4), 4);
   t.is(await cache.len('test-list'), 4);
@@ -73,6 +81,7 @@ test('should be able to manipulate list cache', async t => {
 });
 
 test('should be able to manipulate map cache', async t => {
+  const cache = t.context.cache;
   t.is(await cache.mapSet('test-map', 'a', 1), true);
   t.is(await cache.mapSet('test-map', 'b', 2), true);
   t.is(await cache.mapLen('test-map'), 2);

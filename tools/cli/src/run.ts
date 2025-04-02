@@ -1,4 +1,3 @@
-import { Path } from '@affine-tools/utils/path';
 import { execAsync } from '@affine-tools/utils/process';
 import type { Package, PackageName } from '@affine-tools/utils/workspace';
 
@@ -10,8 +9,6 @@ interface RunScriptOptions {
   ignoreIfNotFound?: boolean;
 }
 
-const currentDir = Path.dir(import.meta.url);
-
 const ignoreLoaderScripts = [
   'vitest',
   'vite',
@@ -20,6 +17,7 @@ const ignoreLoaderScripts = [
   'cap',
   'tsc',
   'typedoc',
+  'playwright',
   /^r$/,
   /electron(?!-)/,
 ];
@@ -162,20 +160,17 @@ export class RunCommand extends PackageCommand {
 
     const bin = args[0] === 'yarn' ? args[1] : args[0];
 
-    const loader = currentDir.join('../register.js').toFileUrl().toString();
-
     // very simple test for auto ts/mjs scripts
     const isLoaderRequired =
       !ignoreLoaderScripts.some(ignore => new RegExp(ignore).test(bin)) ||
-      process.env.NODE_OPTIONS?.includes('ts-node/esm') ||
-      process.env.NODE_OPTIONS?.includes(loader);
+      process.env.NODE_OPTIONS?.includes('@oxc-node/core/register');
 
     let NODE_OPTIONS = process.env.NODE_OPTIONS
       ? [process.env.NODE_OPTIONS]
       : [];
 
     if (isLoaderRequired) {
-      NODE_OPTIONS.push(`--import=${loader}`);
+      NODE_OPTIONS.push(`--import=@oxc-node/core/register`);
     }
 
     if (args[0] !== 'yarn') {
