@@ -6,7 +6,10 @@ import {
   pressEscape,
   selectAllByKeyboard,
 } from '@affine-test/kit/utils/keyboard';
-import { getBlockSuiteEditorTitle } from '@affine-test/kit/utils/page-logic';
+import {
+  clickNewPageButton,
+  getBlockSuiteEditorTitle,
+} from '@affine-test/kit/utils/page-logic';
 import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root';
 import type {
   MindmapElementModel,
@@ -280,6 +283,19 @@ export class EditorUtils {
       await page.getByTestId('tag-delete-button').click();
     }
     await page.waitForTimeout(100);
+  }
+
+  public static async createDoc(page: Page, title: string, docContent: string) {
+    await clickNewPageButton(page);
+    await page.keyboard.insertText(title);
+    await this.focusToEditor(page);
+    const texts = docContent.split('\n');
+    for (const [index, line] of texts.entries()) {
+      await page.keyboard.insertText(line);
+      if (index !== texts.length - 1) {
+        await page.keyboard.press('Enter');
+      }
+    }
   }
 
   public static async createCollectionAndDoc(
