@@ -1,8 +1,6 @@
 import { AiPromptRole } from '@prisma/client';
 import { z } from 'zod';
 
-import { type CopilotProvider } from './provider';
-
 export enum CopilotProviderType {
   Anthropic = 'anthropic',
   FAL = 'fal',
@@ -11,13 +9,9 @@ export enum CopilotProviderType {
   Perplexity = 'perplexity',
 }
 
-export enum CopilotCapability {
-  TextToText = 'text-to-text',
-  TextToEmbedding = 'text-to-embedding',
-  TextToImage = 'text-to-image',
-  ImageToImage = 'image-to-image',
-  ImageToText = 'image-to-text',
-}
+export const CopilotProviderSchema = z.object({
+  type: z.nativeEnum(CopilotProviderType),
+});
 
 export const PromptConfigStrictSchema = z.object({
   // openai
@@ -104,81 +98,32 @@ const CopilotImageOptionsSchema = CopilotProviderOptionsSchema.merge(
 
 export type CopilotImageOptions = z.infer<typeof CopilotImageOptionsSchema>;
 
-export interface CopilotTextToTextProvider extends CopilotProvider {
-  generateText(
-    messages: PromptMessage[],
-    model?: string,
-    options?: CopilotChatOptions
-  ): Promise<string>;
-  generateTextStream(
-    messages: PromptMessage[],
-    model?: string,
-    options?: CopilotChatOptions
-  ): AsyncIterable<string>;
+export enum ModelInputType {
+  Text = 'text',
+  Image = 'image',
+  Audio = 'audio',
 }
 
-export interface CopilotTextToEmbeddingProvider extends CopilotProvider {
-  generateEmbedding(
-    messages: string[] | string,
-    model: string,
-    options?: CopilotEmbeddingOptions
-  ): Promise<number[][]>;
+export enum ModelOutputType {
+  Text = 'text',
+  Reasoning = 'reasoning',
+  Embedding = 'embedding',
+  Image = 'image',
 }
 
-export interface CopilotTextToImageProvider extends CopilotProvider {
-  generateImages(
-    messages: PromptMessage[],
-    model: string,
-    options?: CopilotImageOptions
-  ): Promise<Array<string>>;
-  generateImagesStream(
-    messages: PromptMessage[],
-    model?: string,
-    options?: CopilotImageOptions
-  ): AsyncIterable<string>;
+export interface ModelCapability {
+  input: ModelInputType[];
+  output: ModelOutputType[];
+  defaultForOutputType?: boolean;
 }
 
-export interface CopilotImageToTextProvider extends CopilotProvider {
-  generateText(
-    messages: PromptMessage[],
-    model: string,
-    options?: CopilotChatOptions
-  ): Promise<string>;
-  generateTextStream(
-    messages: PromptMessage[],
-    model: string,
-    options?: CopilotChatOptions
-  ): AsyncIterable<string>;
+export interface CopilotProviderModel {
+  id: string;
+  capabilities: ModelCapability[];
 }
 
-export interface CopilotImageToImageProvider extends CopilotProvider {
-  generateImages(
-    messages: PromptMessage[],
-    model: string,
-    options?: CopilotImageOptions
-  ): Promise<Array<string>>;
-  generateImagesStream(
-    messages: PromptMessage[],
-    model?: string,
-    options?: CopilotImageOptions
-  ): AsyncIterable<string>;
+export interface ModelConditions {
+  inputType?: ModelInputType;
+  outputType?: ModelOutputType;
+  modelId?: string;
 }
-
-export type CapabilityToCopilotProvider = {
-  [CopilotCapability.TextToText]: CopilotTextToTextProvider;
-  [CopilotCapability.TextToEmbedding]: CopilotTextToEmbeddingProvider;
-  [CopilotCapability.TextToImage]: CopilotTextToImageProvider;
-  [CopilotCapability.ImageToText]: CopilotImageToTextProvider;
-  [CopilotCapability.ImageToImage]: CopilotImageToImageProvider;
-};
-
-export type CopilotTextProvider =
-  | CopilotTextToTextProvider
-  | CopilotImageToTextProvider;
-export type CopilotImageProvider =
-  | CopilotTextToImageProvider
-  | CopilotImageToImageProvider;
-export type CopilotAllProvider =
-  | CopilotTextProvider
-  | CopilotImageProvider
-  | CopilotTextToEmbeddingProvider;

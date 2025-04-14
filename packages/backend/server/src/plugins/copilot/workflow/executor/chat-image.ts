@@ -3,8 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { ChatPrompt, PromptService } from '../../prompt';
 import {
   CopilotChatOptions,
-  CopilotImageProvider,
+  CopilotProvider,
   CopilotProviderFactory,
+  ModelOutputType,
 } from '../../providers';
 import { WorkflowNodeData, WorkflowNodeType } from '../types';
 import { NodeExecuteResult, NodeExecuteState, NodeExecutorType } from './types';
@@ -25,7 +26,7 @@ export class CopilotChatImageExecutor extends AutoRegisteredWorkflowExecutor {
     [
       WorkflowNodeData & { nodeType: WorkflowNodeType.Basic },
       ChatPrompt,
-      CopilotImageProvider,
+      CopilotProvider,
     ]
   > {
     if (data.nodeType !== WorkflowNodeType.Basic) {
@@ -48,7 +49,7 @@ export class CopilotChatImageExecutor extends AutoRegisteredWorkflowExecutor {
     const provider = await this.providerFactory.getProviderByModel(
       prompt.model
     );
-    if (provider && 'generateImages' in provider) {
+    if (provider && 'streamText' in provider) {
       return [data, prompt, provider];
     }
 
@@ -71,25 +72,26 @@ export class CopilotChatImageExecutor extends AutoRegisteredWorkflowExecutor {
 
     const finalMessage = prompt.finish(params);
     const config = { ...prompt.config, ...options };
+    const stream = provider.streamText(
+      { modelId: prompt.model, outputType: ModelOutputType.Image },
+      finalMessage,
+      config
+    );
     if (paramKey) {
       // update params with custom key
-      const result = {
-        [paramKey]: await provider.generateImages(
-          finalMessage,
-          prompt.model,
-          config
-        ),
-      };
+
+      const params = [];
+      for await (const attachment of stream) {
+        params.push(attachment);
+      }
+
+      const result = { [paramKey]: params };
       yield {
         type: NodeExecuteState.Params,
         params: paramToucher?.(result) ?? result,
       };
     } else {
-      for await (const attachment of provider.generateImagesStream(
-        finalMessage,
-        prompt.model,
-        config
-      )) {
+      for await (const attachment of stream) {
         yield { type: NodeExecuteState.Attachment, nodeId: id, attachment };
       }
     }

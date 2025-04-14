@@ -1,9 +1,12 @@
 import { randomBytes } from 'node:crypto';
 
 import {
-  CopilotCapability,
   CopilotChatOptions,
   CopilotEmbeddingOptions,
+  CopilotImageOptions,
+  ModelConditions,
+  ModelInputType,
+  ModelOutputType,
   PromptMessage,
 } from '../../plugins/copilot/providers';
 import {
@@ -14,49 +17,162 @@ import { sleep } from '../utils/utils';
 
 export class MockCopilotProvider extends OpenAIProvider {
   override readonly models = [
-    'test',
-    'gpt-4o',
-    'gpt-4o-2024-08-06',
-    'gpt-4.1',
-    'gpt-4.1-2025-04-14',
-    'gpt-4.1-mini',
-    'fast-sdxl/image-to-image',
-    'lcm-sd15-i2i',
-    'clarity-upscaler',
-    'imageutils/rembg',
-    'gemini-2.5-pro-preview-03-25',
+    {
+      name: 'Mock Model',
+      id: 'test',
+      capabilities: [
+        {
+          output: [ModelOutputType.Text],
+          input: [ModelInputType.Text],
+          defaultForCapability: true,
+        },
+      ],
+    },
+    {
+      name: 'Mock Image Model',
+      id: 'test-image',
+      capabilities: [
+        {
+          output: [ModelOutputType.Image],
+          input: [ModelInputType.Text],
+          defaultForCapability: true,
+        },
+      ],
+    },
+    {
+      name: 'GPT-4o',
+      id: 'gpt-4o',
+      capabilities: [
+        {
+          output: [ModelOutputType.Text],
+          input: [ModelInputType.Text, ModelInputType.Image],
+        },
+      ],
+    },
+    {
+      name: 'GPT-4o-08-06',
+      id: 'gpt-4o-2024-08-06',
+      capabilities: [
+        {
+          output: [ModelOutputType.Text],
+          input: [ModelInputType.Text, ModelInputType.Image],
+        },
+      ],
+    },
+    {
+      name: 'Gpt-4.1',
+      id: 'gpt-4.1',
+      capabilities: [
+        {
+          output: [ModelOutputType.Text],
+          input: [ModelInputType.Text, ModelInputType.Image],
+        },
+      ],
+    },
+    {
+      name: 'Gpt-4.1-04-14',
+      id: 'gpt-4.1-2025-04-14',
+      capabilities: [
+        {
+          output: [ModelOutputType.Text],
+          input: [ModelInputType.Text, ModelInputType.Image],
+        },
+      ],
+    },
+    {
+      name: 'Gpt-4.1-mini',
+      id: 'gpt-4.1-mini',
+      capabilities: [
+        {
+          output: [ModelOutputType.Text],
+          input: [ModelInputType.Text, ModelInputType.Image],
+        },
+      ],
+    },
+    {
+      name: 'lcm-sd15-i2i',
+      id: 'lcm-sd15-i2i',
+      capabilities: [
+        {
+          input: [ModelInputType.Image],
+          output: [ModelOutputType.Image],
+        },
+      ],
+    },
+    {
+      name: 'clarity-upscaler',
+      id: 'clarity-upscaler',
+      capabilities: [
+        {
+          input: [ModelInputType.Image],
+          output: [ModelOutputType.Image],
+        },
+      ],
+    },
+    {
+      name: 'imageutils/rembg',
+      id: 'imageutils/rembg',
+      capabilities: [
+        {
+          input: [ModelInputType.Image],
+          output: [ModelOutputType.Image],
+        },
+      ],
+    },
+    {
+      name: 'Gemini 2.5 Pro',
+      id: 'gemini-2.5-pro-preview-03-25',
+      capabilities: [
+        {
+          input: [ModelInputType.Text, ModelInputType.Image],
+          output: [ModelOutputType.Text],
+        },
+      ],
+    },
   ];
 
-  override readonly capabilities = [
-    CopilotCapability.TextToText,
-    CopilotCapability.TextToEmbedding,
-    CopilotCapability.TextToImage,
-    CopilotCapability.ImageToImage,
-    CopilotCapability.ImageToText,
-  ];
-
-  // ====== text to text ======
-
-  override async generateText(
+  override async text(
+    cond: ModelConditions,
     messages: PromptMessage[],
-    model: string = 'test',
-    options: CopilotChatOptions = {}
+    options:
+      | CopilotChatOptions
+      | CopilotEmbeddingOptions
+      | CopilotImageOptions = {}
   ): Promise<string> {
-    await this.checkParams({ messages, model, options });
+    await this.checkParams({ messages, cond, options });
     // make some time gap for history test case
     await sleep(100);
     return 'generate text to text';
   }
 
-  override async *generateTextStream(
+  override async *streamText(
+    cond: ModelConditions,
     messages: PromptMessage[],
-    model: string = 'gpt-4.1-mini',
-    options: CopilotChatOptions = {}
+    options: CopilotChatOptions | CopilotImageOptions = {}
   ): AsyncIterable<string> {
-    await this.checkParams({ messages, model, options });
+    await this.checkParams({ messages, cond, options });
 
     // make some time gap for history test case
     await sleep(100);
+
+    if (cond.outputType === ModelOutputType.Image) {
+      const { content: prompt } = [...messages].pop() || {};
+      if (!prompt) throw new Error('Prompt is required');
+
+      const imageUrls = [
+        `https://example.com/${cond.modelId || 'test'}.jpg`,
+        prompt,
+      ];
+
+      for (const imageUrl of imageUrls) {
+        yield imageUrl;
+        if (options.signal?.aborted) {
+          break;
+        }
+      }
+      return;
+    }
+
     const result = 'generate text to text stream';
     for (const message of result) {
       yield message;
@@ -69,49 +185,15 @@ export class MockCopilotProvider extends OpenAIProvider {
   // ====== text to embedding ======
 
   override async generateEmbedding(
+    cond: ModelConditions,
     messages: string | string[],
-    model: string,
     options: CopilotEmbeddingOptions = { dimensions: DEFAULT_DIMENSIONS }
   ): Promise<number[][]> {
     messages = Array.isArray(messages) ? messages : [messages];
-    await this.checkParams({ embeddings: messages, model, options });
+    await this.checkParams({ embeddings: messages, cond, options });
 
     // make some time gap for history test case
     await sleep(100);
     return [Array.from(randomBytes(options.dimensions)).map(v => v % 128)];
-  }
-
-  // ====== text to image ======
-  override async generateImages(
-    messages: PromptMessage[],
-    model: string = 'test',
-    _options: {
-      signal?: AbortSignal;
-      user?: string;
-    } = {}
-  ): Promise<Array<string>> {
-    const { content: prompt } = messages[0] || {};
-    if (!prompt) {
-      throw new Error('Prompt is required');
-    }
-
-    // make some time gap for history test case
-    await sleep(100);
-    // just let test case can easily verify the final prompt
-    return [`https://example.com/${model}.jpg`, prompt];
-  }
-
-  override async *generateImagesStream(
-    messages: PromptMessage[],
-    model: string = 'dall-e-3',
-    options: {
-      signal?: AbortSignal;
-      user?: string;
-    } = {}
-  ): AsyncIterable<string> {
-    const ret = await this.generateImages(messages, model, options);
-    for (const url of ret) {
-      yield url;
-    }
   }
 }

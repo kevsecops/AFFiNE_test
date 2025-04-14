@@ -16,9 +16,10 @@ import {
 import { Models } from '../../../models';
 import { PromptService } from '../prompt';
 import {
-  CopilotCapability,
+  CopilotProvider,
   CopilotProviderFactory,
-  CopilotTextProvider,
+  ModelInputType,
+  ModelOutputType,
   PromptMessage,
 } from '../providers';
 import { CopilotStorage } from '../storage';
@@ -154,9 +155,10 @@ export class CopilotTranscriptionService {
     return ret;
   }
 
-  private async getProvider(model: string): Promise<CopilotTextProvider> {
-    let provider = await this.providerFactory.getProviderByCapability(
-      CopilotCapability.TextToText,
+  private async getProvider(model: string): Promise<CopilotProvider> {
+    let provider = await this.providerFactory.getProviderByOutputType(
+      ModelOutputType.Text,
+      ModelInputType.Text,
       { model }
     );
 
@@ -178,9 +180,9 @@ export class CopilotTranscriptionService {
     }
 
     const provider = await this.getProvider(prompt.model);
-    return provider.generateText(
+    return provider.text(
+      { modelId: prompt.model },
       [...prompt.finish({ schema }), { role: 'user', content: '', ...message }],
-      prompt.model,
       Object.assign({}, prompt.config)
     );
   }

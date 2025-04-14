@@ -12,10 +12,12 @@ import {
 } from '../../../base';
 import { CopilotProvider } from './provider';
 import {
-  CopilotCapability,
+  ChatMessageRole,
   CopilotChatOptions,
   CopilotProviderType,
-  CopilotTextToTextProvider,
+  ModelConditions,
+  ModelInputType,
+  ModelOutputType,
   PromptMessage,
 } from './types';
 import { chatToGPTMessage, CitationParser } from './utils';
@@ -46,17 +48,51 @@ const PerplexityErrorSchema = z.union([
 
 type PerplexityError = z.infer<typeof PerplexityErrorSchema>;
 
-export class PerplexityProvider
-  extends CopilotProvider<PerplexityConfig>
-  implements CopilotTextToTextProvider
-{
+export class PerplexityProvider extends CopilotProvider<PerplexityConfig> {
   readonly type = CopilotProviderType.Perplexity;
-  readonly capabilities = [CopilotCapability.TextToText];
+
   readonly models = [
-    'sonar',
-    'sonar-pro',
-    'sonar-reasoning',
-    'sonar-reasoning-pro',
+    {
+      name: 'Sonar',
+      id: 'sonar',
+      capabilities: [
+        {
+          input: [ModelInputType.Text],
+          output: [ModelOutputType.Text],
+          defaultForOutputType: true,
+        },
+      ],
+    },
+    {
+      name: 'Sonar Pro',
+      id: 'sonar-pro',
+      capabilities: [
+        {
+          input: [ModelInputType.Text],
+          output: [ModelOutputType.Text],
+        },
+      ],
+    },
+    {
+      name: 'Sonar Reasoning',
+      id: 'sonar-reasoning',
+      capabilities: [
+        {
+          input: [ModelInputType.Text],
+          output: [ModelOutputType.Text],
+        },
+      ],
+    },
+    {
+      name: 'Sonar Reasoning Pro',
+      id: 'sonar-reasoning-pro',
+      capabilities: [
+        {
+          input: [ModelInputType.Text],
+          output: [ModelOutputType.Text],
+        },
+      ],
+    },
   ];
 
   #instance!: VercelPerplexityProvider;
@@ -73,18 +109,20 @@ export class PerplexityProvider
     });
   }
 
-  async generateText(
+  async text(
+    cond: ModelConditions,
     messages: PromptMessage[],
-    model: string = 'sonar',
     options: CopilotChatOptions = {}
   ): Promise<string> {
-    await this.checkParams({ messages, model, options });
+    await this.checkParams({ messages, cond });
+    const model = this.selectModel(cond);
+
     try {
-      metrics.ai.counter('chat_text_calls').add(1, { model });
+      metrics.ai.counter('chat_text_calls').add(1, { model: model.id });
 
       const [system, msgs] = await chatToGPTMessage(messages, false);
 
-      const modelInstance = this.#instance(model);
+      const modelInstance = this.#instance(model.id);
 
       const { text, sources } = await generateText({
         model: modelInstance,
@@ -105,23 +143,25 @@ export class PerplexityProvider
       result += parser.end();
       return result;
     } catch (e: any) {
-      metrics.ai.counter('chat_text_errors').add(1, { model });
+      metrics.ai.counter('chat_text_errors').add(1, { model: model.id });
       throw this.handleError(e);
     }
   }
 
-  async *generateTextStream(
+  async *streamText(
+    cond: ModelConditions,
     messages: PromptMessage[],
-    model: string = 'sonar',
     options: CopilotChatOptions = {}
   ): AsyncIterable<string> {
-    await this.checkParams({ messages, model, options });
+    await this.checkParams({ messages, cond });
+    const model = this.selectModel(cond);
+
     try {
-      metrics.ai.counter('chat_text_stream_calls').add(1, { model });
+      metrics.ai.counter('chat_text_stream_calls').add(1, { model: model.id });
 
       const [system, msgs] = await chatToGPTMessage(messages, false);
 
-      const modelInstance = this.#instance(model);
+      const modelInstance = this.#instance(model.id);
 
       const stream = streamText({
         model: modelInstance,
@@ -168,21 +208,47 @@ export class PerplexityProvider
         }
       }
     } catch (e) {
-      metrics.ai.counter('chat_text_stream_errors').add(1, { model });
+      metrics.ai.counter('chat_text_stream_errors').add(1, { model: model.id });
       throw e;
     }
   }
 
   protected async checkParams({
-    model,
+    messages,
+    cond,
   }: {
     messages?: PromptMessage[];
-    embeddings?: string[];
-    model: string;
-    options: CopilotChatOptions;
+    cond: ModelConditions;
   }) {
-    if (!(await this.isModelAvailable(model))) {
-      throw new CopilotPromptInvalid(`Invalid model: ${model}`);
+    if (!(await this.isModelAvailable(cond))) {
+      throw new CopilotPromptInvalid(`Model not available: ${cond}`);
+    }
+    if (Array.isArray(messages) && messages.length > 0) {
+      if (
+        messages.some(
+          m =>
+            // check non-object
+            typeof m !== 'object' ||
+            !m ||
+            // check content
+            typeof m.content !== 'string' ||
+            // content and attachments must exist at least one
+            ((!m.content || !m.content.trim()) &&
+              (!Array.isArray(m.attachments) || !m.attachments.length))
+        )
+      ) {
+        throw new CopilotPromptInvalid('Empty message content');
+      }
+      if (
+        messages.some(
+          m =>
+            typeof m.role !== 'string' ||
+            !m.role ||
+            !ChatMessageRole.includes(m.role)
+        )
+      ) {
+        throw new CopilotPromptInvalid('Invalid message role');
+      }
     }
   }
 

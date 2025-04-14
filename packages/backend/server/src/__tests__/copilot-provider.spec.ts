@@ -6,7 +6,10 @@ import { AuthService } from '../core/auth';
 import { QuotaModule } from '../core/quota';
 import { CopilotModule } from '../plugins/copilot';
 import { prompts, PromptService } from '../plugins/copilot/prompt';
-import { CopilotProviderFactory } from '../plugins/copilot/providers';
+import {
+  CopilotProviderFactory,
+  ModelOutputType,
+} from '../plugins/copilot/providers';
 import { TranscriptionResponseSchema } from '../plugins/copilot/transcript/types';
 import {
   CopilotChatTextExecutor,
@@ -550,8 +553,9 @@ for (const { name, promptName, messages, verifier, type } of actions) {
         const provider = (await factory.getProviderByModel(prompt.model))!;
         t.truthy(provider, 'should have provider');
         await retry(`action: ${promptName}`, t, async t => {
-          if (type === 'text' && 'generateText' in provider) {
-            const result = await provider.generateText(
+          if (type === 'text' && 'text' in provider) {
+            const result = await provider.text(
+              { modelId: prompt.model },
               [
                 ...prompt.finish(
                   messages.reduce(
@@ -562,13 +566,13 @@ for (const { name, promptName, messages, verifier, type } of actions) {
                 ),
                 ...messages,
               ],
-              prompt.model,
               Object.assign({}, prompt.config)
             );
             t.truthy(result, 'should return result');
             verifier?.(t, result);
-          } else if (type === 'image' && 'generateImages' in provider) {
-            const result = await provider.generateImages(
+          } else if (type === 'image' && 'streamText' in provider) {
+            const stream = provider.streamText(
+              { modelId: prompt.model, outputType: ModelOutputType.Image },
               [
                 ...prompt.finish(
                   messages.reduce(
@@ -578,9 +582,14 @@ for (const { name, promptName, messages, verifier, type } of actions) {
                   )
                 ),
                 ...messages,
-              ],
-              prompt.model
+              ]
             );
+
+            const result = [];
+            for await (const attachment of stream) {
+              result.push(attachment);
+            }
+
             t.truthy(result.length, 'should return result');
             for (const r of result) {
               verifier?.(t, r);

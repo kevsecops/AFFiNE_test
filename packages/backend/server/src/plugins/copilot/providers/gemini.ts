@@ -19,10 +19,13 @@ import {
 import { CopilotProvider } from './provider';
 import {
   ChatMessageRole,
-  CopilotCapability,
   CopilotChatOptions,
+  CopilotEmbeddingOptions,
+  CopilotImageOptions,
   CopilotProviderType,
-  CopilotTextToTextProvider,
+  ModelConditions,
+  ModelInputType,
+  ModelOutputType,
   PromptMessage,
 } from './types';
 import { chatToGPTMessage } from './utils';
@@ -34,18 +37,49 @@ export type GeminiConfig = {
   baseUrl?: string;
 };
 
-export class GeminiProvider
-  extends CopilotProvider<GeminiConfig>
-  implements CopilotTextToTextProvider
-{
+export class GeminiProvider extends CopilotProvider<GeminiConfig> {
   override readonly type = CopilotProviderType.Gemini;
-  override readonly capabilities = [CopilotCapability.TextToText];
-  override readonly models = [
-    // text to text
-    'gemini-2.0-flash-001',
-    'gemini-2.5-pro-preview-03-25',
-    // embeddings
-    'text-embedding-004',
+
+  readonly models = [
+    {
+      name: 'Gemini 2.0 Flash',
+      id: 'gemini-2.0-flash-001',
+      capabilities: [
+        {
+          output: [ModelOutputType.Text],
+          input: [
+            ModelInputType.Text,
+            ModelInputType.Image,
+            ModelInputType.Audio,
+          ],
+          defaultForOutputType: true,
+        },
+      ],
+    },
+    {
+      name: 'Gemini 2.5 Pro',
+      id: 'gemini-2.5-pro-preview-03-25',
+      capabilities: [
+        {
+          input: [
+            ModelInputType.Text,
+            ModelInputType.Image,
+            ModelInputType.Audio,
+          ],
+          output: [ModelOutputType.Text],
+        },
+      ],
+    },
+    {
+      name: 'Text Embedding 004',
+      id: 'text-embedding-004',
+      capabilities: [
+        {
+          input: [ModelInputType.Text],
+          output: [ModelOutputType.Embedding],
+        },
+      ],
+    },
   ];
 
   #instance!: GoogleGenerativeAIProvider;
@@ -65,14 +99,14 @@ export class GeminiProvider
   protected async checkParams({
     messages,
     embeddings,
-    model,
+    cond,
   }: {
     messages?: PromptMessage[];
     embeddings?: string[];
-    model: string;
+    cond: ModelConditions;
   }) {
-    if (!(await this.isModelAvailable(model))) {
-      throw new CopilotPromptInvalid(`Invalid model: ${model}`);
+    if (!(await this.isModelAvailable(cond))) {
+      throw new CopilotPromptInvalid(`Model not available: ${cond}`);
     }
     if (Array.isArray(messages) && messages.length > 0) {
       if (
@@ -127,21 +161,26 @@ export class GeminiProvider
     }
   }
 
-  // ====== text to text ======
-  async generateText(
+  override async text(
+    cond: ModelConditions,
     messages: PromptMessage[],
-    model: string = 'gemini-2.0-flash-001',
-    options: CopilotChatOptions = {}
+    options:
+      | CopilotChatOptions
+      | CopilotEmbeddingOptions
+      | CopilotImageOptions = {}
   ): Promise<string> {
-    await this.checkParams({ messages, model });
+    await this.checkParams({ messages, cond });
+    const model = this.selectModel(cond);
 
     try {
-      metrics.ai.counter('chat_text_calls').add(1, { model });
+      metrics.ai.counter('chat_text_calls').add(1, { model: model.id });
 
       const [system, msgs, schema] = await chatToGPTMessage(messages);
 
-      const modelInstance = this.#instance(model, {
-        structuredOutputs: Boolean(options.jsonMode),
+      const modelInstance = this.#instance(model.id, {
+        structuredOutputs: Boolean(
+          'jsonMode' in options ? options.jsonMode : false
+        ),
       });
       const { text } = schema
         ? await generateObject({
@@ -175,24 +214,25 @@ export class GeminiProvider
       if (!text) throw new Error('Failed to generate text');
       return text.trim();
     } catch (e: any) {
-      metrics.ai.counter('chat_text_errors').add(1, { model });
+      metrics.ai.counter('chat_text_errors').add(1, { model: model.id });
       throw this.handleError(e);
     }
   }
 
-  async *generateTextStream(
+  override async *streamText(
+    cond: ModelConditions,
     messages: PromptMessage[],
-    model: string = 'gemini-2.0-flash-001',
-    options: CopilotChatOptions = {}
+    options: CopilotChatOptions | CopilotImageOptions = {}
   ): AsyncIterable<string> {
-    await this.checkParams({ messages, model });
+    await this.checkParams({ messages, cond });
+    const model = this.selectModel(cond);
 
     try {
-      metrics.ai.counter('chat_text_stream_calls').add(1, { model });
+      metrics.ai.counter('chat_text_stream_calls').add(1, { model: model.id });
       const [system, msgs] = await chatToGPTMessage(messages);
 
       const { textStream } = streamText({
-        model: this.#instance(model),
+        model: this.#instance(model.id),
         system,
         messages: msgs,
         abortSignal: options.signal,
@@ -208,7 +248,7 @@ export class GeminiProvider
         }
       }
     } catch (e: any) {
-      metrics.ai.counter('chat_text_stream_errors').add(1, { model });
+      metrics.ai.counter('chat_text_stream_errors').add(1, { model: model.id });
       throw this.handleError(e);
     }
   }

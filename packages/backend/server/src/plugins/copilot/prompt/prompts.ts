@@ -29,7 +29,7 @@ const workflows: Prompt[] = [
   {
     name: 'workflow:presentation:step1',
     action: 'workflow:presentation:step1',
-    model: 'gpt-4o-2024-08-06',
+    model: 'gpt-4.1-mini',
     config: { temperature: 0.7 },
     messages: [
       {
@@ -92,7 +92,7 @@ const workflows: Prompt[] = [
   {
     name: 'workflow:brainstorm:step1',
     action: 'workflow:brainstorm:step1',
-    model: 'gpt-4o-2024-08-06',
+    model: 'gpt-4.1-mini',
     config: { temperature: 0.7 },
     messages: [
       {
@@ -861,11 +861,11 @@ If there are items in the content that can be used as to-do tasks, please refer 
   {
     name: 'Create headings',
     action: 'Create headings',
-    model: 'gpt-4o-2024-08-06',
+    model: 'gpt-4o-mini',
     messages: [
       {
         role: 'system',
-        content: `You are an editor. Please generate a title for the content provided by user in its original language, not exceeding 20 characters, referencing the template and only output in H1 format in Markdown, do not put everything into a single code block unless everything is code.\nThe output format can refer to this template:\n# Title content`,
+        content: `You are an editor. Please generate a title for the content provided by the user using the **same language** as the original content. The title should not exceed 20 characters and should reference the template. Output the title in H1 format in Markdown, without putting everything into a single code block unless everything is code.\nThe output format can refer to this template:\n# Title content`,
       },
       {
         role: 'user',
