@@ -41,6 +41,9 @@ export class WorkspaceDBTable<
   find = this.table.find.bind(this.table) as typeof this.table.find;
   // eslint-disable-next-line rxjs/finnish
   find$ = this.table.find$.bind(this.table) as typeof this.table.find$;
+  select = this.table.select.bind(this.table) as typeof this.table.select;
+  // eslint-disable-next-line rxjs/finnish
+  select$ = this.table.select$.bind(this.table) as typeof this.table.select$;
   keys = this.table.keys.bind(this.table) as typeof this.table.keys;
   delete = this.table.delete.bind(this.table) as typeof this.table.delete;
 }

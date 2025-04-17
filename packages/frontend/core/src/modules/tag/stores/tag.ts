@@ -1,16 +1,24 @@
-import type { Tag, Tag as TagSchema } from '@affine/env/filter';
 import type { DocsPropertiesMeta } from '@blocksuite/affine/store';
 import {
   LiveData,
   Store,
-  yjsObserveByPath,
-  yjsObserveDeep,
+  yjsGetPath,
+  yjsObservePath,
 } from '@toeverything/infra';
 import { nanoid } from 'nanoid';
 import { map, Observable, switchMap } from 'rxjs';
 import { Array as YArray } from 'yjs';
 
 import type { WorkspaceService } from '../../workspace';
+
+export type Tag = {
+  value: string;
+  id: string;
+  color: string;
+  createDate?: number | Date | undefined;
+  updateDate?: number | Date | undefined;
+  parentId?: string | undefined;
+};
 
 export class TagStore extends Store {
   get properties() {
@@ -105,13 +113,13 @@ export class TagStore extends Store {
 
   watchTagInfo(id: string) {
     return this.tagOptions$.map(
-      tags => tags.find(tag => tag.id === id) as TagSchema | undefined
+      tags => tags.find(tag => tag.id === id) as Tag | undefined
     );
   }
 
-  updateTagInfo(id: string, tagInfo: Partial<TagSchema>) {
+  updateTagInfo(id: string, tagInfo: Partial<Tag>) {
     const tag = this.tagOptions$.value.find(tag => tag.id === id) as
-      | TagSchema
+      | Tag
       | undefined;
     if (!tag) {
       return;
@@ -127,11 +135,13 @@ export class TagStore extends Store {
   }
 
   watchTagPageIds(id: string) {
-    return yjsObserveByPath(
+    return yjsGetPath(
       this.workspaceService.workspace.rootYDoc.getMap('meta'),
       'pages'
     ).pipe(
-      switchMap(yjsObserveDeep),
+      switchMap(pages => {
+        return yjsObservePath(pages, '*.tags');
+      }),
       map(meta => {
         if (meta instanceof YArray) {
           return meta

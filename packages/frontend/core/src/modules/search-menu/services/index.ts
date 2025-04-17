@@ -269,12 +269,12 @@ export class SearchMenuService extends Service {
         query,
       }),
       items: result.map(item => {
-        const title = this.highlightFuseTitle(
+        const name = this.highlightFuseTitle(
           item.matches,
-          item.item.title,
-          'title'
+          item.item.name,
+          'name'
         );
-        return this.toTagMenuItem({ ...item.item, title }, action);
+        return this.toTagMenuItem({ ...item.item, name }, action);
       }),
     };
   }
@@ -292,7 +292,7 @@ export class SearchMenuService extends Service {
     `;
     return {
       key: tag.id,
-      name: html`${unsafeHTML(tag.title)}`,
+      name: html`${unsafeHTML(tag.name)}`,
       icon: tagIcon,
       action: async () => {
         await action(tag);

@@ -1,10 +1,13 @@
 import {
   type DBSchemaBuilder,
   f,
+  type FieldSchemaBuilder,
   type ORMEntity,
   t,
 } from '@toeverything/infra';
 import { nanoid } from 'nanoid';
+
+import type { WorkspacePropertyType } from '../../workspace-property';
 
 const integrationType = f.enum('readwise', 'zotero');
 
@@ -29,7 +32,7 @@ export const AFFiNE_WORKSPACE_DB_SCHEMA = {
   docCustomPropertyInfo: {
     id: f.string().primaryKey().optional().default(nanoid),
     name: f.string().optional(),
-    type: f.string(),
+    type: f.string() as FieldSchemaBuilder<WorkspacePropertyType, false, false>,
     show: f.enum('always-show', 'always-hide', 'hide-when-empty').optional(),
     index: f.string().optional(),
     icon: f.string().optional(),

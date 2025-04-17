@@ -34,6 +34,7 @@ export const tagsMenu = style({
   left: '-3.5px',
   width: 'calc(var(--radix-popper-anchor-width) + 16px)',
   overflow: 'hidden',
+  minWidth: 400,
 });
 
 export const tagsEditorSelectedTags = style({

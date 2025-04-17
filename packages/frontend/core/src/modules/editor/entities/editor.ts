@@ -1,5 +1,5 @@
 import type { AffineEditorContainer } from '@affine/core/blocksuite/block-suite-editor';
-import type { DefaultOpenProperty } from '@affine/core/components/doc-properties';
+import type { DefaultOpenProperty } from '@affine/core/components/properties';
 import type { DocTitle } from '@blocksuite/affine/fragments/doc-title';
 import type { DocMode, ReferenceParams } from '@blocksuite/affine/model';
 import { HighlightSelection } from '@blocksuite/affine/shared/selection';

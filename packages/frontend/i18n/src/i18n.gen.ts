@@ -1840,6 +1840,10 @@ export function useAFFiNEI18N(): {
       */
     ["com.affine.editCollection.rules.include.is"](): string;
     /**
+      * `is-not`
+      */
+    ["com.affine.editCollection.rules.include.is-not"](): string;
+    /**
       * `Doc`
       */
     ["com.affine.editCollection.rules.include.page"](): string;
@@ -2082,6 +2086,10 @@ export function useAFFiNEI18N(): {
       */
     ["com.affine.filter.empty-tag"](): string;
     /**
+      * `Empty`
+      */
+    ["com.affine.filter.empty"](): string;
+    /**
       * `false`
       */
     ["com.affine.filter.false"](): string;
@@ -2106,6 +2114,42 @@ export function useAFFiNEI18N(): {
       */
     ["com.affine.filter.is-public"](): string;
     /**
+      * `between`
+      */
+    ["com.affine.filter.between"](): string;
+    /**
+      * `last 3 days`
+      */
+    ["com.affine.filter.last 3 days"](): string;
+    /**
+      * `last 7 days`
+      */
+    ["com.affine.filter.last 7 days"](): string;
+    /**
+      * `last 15 days`
+      */
+    ["com.affine.filter.last 15 days"](): string;
+    /**
+      * `last 30 days`
+      */
+    ["com.affine.filter.last 30 days"](): string;
+    /**
+      * `this week`
+      */
+    ["com.affine.filter.this week"](): string;
+    /**
+      * `this month`
+      */
+    ["com.affine.filter.this month"](): string;
+    /**
+      * `this quarter`
+      */
+    ["com.affine.filter.this quarter"](): string;
+    /**
+      * `this year`
+      */
+    ["com.affine.filter.this year"](): string;
+    /**
       * `last`
       */
     ["com.affine.filter.last"](): string;
@@ -2121,6 +2165,18 @@ export function useAFFiNEI18N(): {
       * `Add filter`
       */
     ["com.affine.filterList.button.add"](): string;
+    /**
+      * `Display`
+      */
+    ["com.affine.explorer.display-menu.button"](): string;
+    /**
+      * `Grouping`
+      */
+    ["com.affine.explorer.display-menu.grouping"](): string;
+    /**
+      * `Ordering`
+      */
+    ["com.affine.explorer.display-menu.ordering"](): string;
     /**
       * `View in Page mode`
       */

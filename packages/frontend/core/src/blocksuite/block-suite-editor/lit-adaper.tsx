@@ -49,8 +49,8 @@ import {
 } from '../../components/affine/reference-link';
 import {
   type DefaultOpenProperty,
-  DocPropertiesTable,
-} from '../../components/doc-properties';
+  WorkspacePropertiesTable,
+} from '../../components/properties';
 import {
   patchForAudioEmbedView,
   patchForPDFEmbedView,
@@ -339,7 +339,7 @@ export const BlocksuiteDocEditor = forwardRef<
         )}
         {!shared && displayDocInfo ? (
           <div className={styles.docPropertiesTableContainer}>
-            <DocPropertiesTable
+            <WorkspacePropertiesTable
               className={styles.docPropertiesTable}
               onDatabasePropertyChange={onDatabasePropertyChange}
               onPropertyChange={onPropertyChange}
