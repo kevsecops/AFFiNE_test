@@ -333,7 +333,7 @@ export class CopilotClient {
     return res.currentUser?.copilot?.contexts?.[0];
   }
 
-  async matchContext(contextId: string, content: string, limit?: number) {
+  async matchContext(content: string, contextId?: string, limit?: number) {
     const res = await this.gql({
       query: matchContextQuery,
       variables: {

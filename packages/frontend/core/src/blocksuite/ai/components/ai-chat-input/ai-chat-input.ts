@@ -627,9 +627,6 @@ export class AIChatInput extends SignalWatcher(WithDisposable(LitElement)) {
 
   private async _getMatchedContexts(userInput: string) {
     const contextId = await this.getContextId();
-    if (!contextId) {
-      return { files: [], docs: [] };
-    }
 
     const docContexts = new Map<
       string,
@@ -641,7 +638,7 @@ export class AIChatInput extends SignalWatcher(WithDisposable(LitElement)) {
     >();
 
     const { files: matchedFiles = [], docs: matchedDocs = [] } =
-      (await AIProvider.context?.matchContext(contextId, userInput)) ?? {};
+      (await AIProvider.context?.matchContext(userInput, contextId)) ?? {};
 
     matchedDocs.forEach(doc => {
       docContexts.set(doc.docId, {
@@ -655,17 +652,12 @@ export class AIChatInput extends SignalWatcher(WithDisposable(LitElement)) {
       if (context) {
         context.fileContent += `\n${file.content}`;
       } else {
-        const fileChip = this.chips.find(
-          chip => isFileChip(chip) && chip.fileId === file.fileId
-        ) as FileChip | undefined;
-        if (fileChip && fileChip.blobId) {
-          fileContexts.set(file.fileId, {
-            blobId: fileChip.blobId,
-            fileName: fileChip.file.name,
-            fileType: fileChip.file.type,
-            fileContent: file.content,
-          });
-        }
+        fileContexts.set(file.fileId, {
+          blobId: file.blobId,
+          fileName: file.name,
+          fileType: file.type,
+          fileContent: file.content,
+        });
       }
     });
 
