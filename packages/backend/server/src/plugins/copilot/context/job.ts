@@ -4,6 +4,7 @@ import {
   AFFiNELogger,
   BlobNotFound,
   Config,
+  DocNotFound,
   EventBus,
   JobQueue,
   mapAnyError,
@@ -15,7 +16,7 @@ import { Models } from '../../../models';
 import { CopilotStorage } from '../storage';
 import { readStream } from '../utils';
 import { OpenAIEmbeddingClient } from './embedding';
-import { EmbeddingClient } from './types';
+import { Chunk, DocFragment, EmbeddingClient } from './types';
 
 @Injectable()
 export class CopilotContextDocJob {
@@ -162,6 +163,43 @@ export class CopilotContextDocJob {
     }
   }
 
+  private async getDocFragment(
+    workspaceId: string,
+    docId: string
+  ): Promise<DocFragment | null> {
+    const docContent = await this.doc.getFullDocContent(workspaceId, docId);
+    const authors = await this.models.doc.getAuthors(workspaceId, docId);
+    if (docContent && docContent.summary && authors) {
+      const { title = 'Untitled', summary } = docContent;
+      const { createdAt, updatedAt, createdByUser, updatedByUser } = authors;
+      return {
+        title,
+        summary,
+        createdAt: createdAt.toDateString(),
+        updatedAt: updatedAt.toDateString(),
+        createdBy: createdByUser?.name,
+        updatedBy: updatedByUser?.name,
+      };
+    }
+    return null;
+  }
+
+  private formatDocChunks(chunks: Chunk[], fragment: DocFragment): Chunk[] {
+    return chunks.map(chunk => ({
+      index: chunk.index,
+      content: [
+        `Title: ${fragment.title}`,
+        `Created at: ${fragment.createdAt}`,
+        `Updated at: ${fragment.updatedAt}`,
+        fragment.createdBy ? `Created by: ${fragment.createdBy}` : undefined,
+        fragment.updatedBy ? `Updated by: ${fragment.updatedBy}` : undefined,
+        chunk.content,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    }));
+  }
+
   @OnJob('copilot.embedding.docs')
   async embedPendingDocs({
     contextId,
@@ -171,11 +209,12 @@ export class CopilotContextDocJob {
     if (!this.supportEmbedding) return;
 
     try {
-      const content = await this.doc.getFullDocContent(workspaceId, docId);
-      if (content) {
+      const fragment = await this.getDocFragment(workspaceId, docId);
+      if (fragment) {
         // no need to check if embeddings is empty, will throw internally
         const embeddings = await this.embeddingClient.getFileEmbeddings(
-          new File([content.summary], `${content.title}.md`)
+          new File([fragment.summary], `${fragment.title}.md`),
+          chunks => this.formatDocChunks(chunks, fragment)
         );
 
         for (const chunks of embeddings) {
@@ -185,6 +224,8 @@ export class CopilotContextDocJob {
             chunks
           );
         }
+      } else if (contextId) {
+        throw new DocNotFound({ spaceId: workspaceId, docId });
       }
     } catch (error: any) {
       if (contextId) {
