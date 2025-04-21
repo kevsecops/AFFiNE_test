@@ -501,11 +501,11 @@ export const matchContextQuery = {
 export const matchWorkspaceDocsQuery = {
   id: 'matchWorkspaceDocsQuery' as const,
   op: 'matchWorkspaceDocs',
-  query: `query matchWorkspaceDocs($contextId: String!, $content: String!, $limit: SafeInt) {
+  query: `query matchWorkspaceDocs($contextId: String!, $content: String!, $limit: SafeInt, $threshold: Float) {
   currentUser {
     copilot {
       contexts(contextId: $contextId) {
-        matchWorkspaceDocs(content: $content, limit: $limit) {
+        matchWorkspaceDocs(content: $content, limit: $limit, threshold: $threshold) {
           docId
           chunk
           content
@@ -520,11 +520,11 @@ export const matchWorkspaceDocsQuery = {
 export const matchFilesQuery = {
   id: 'matchFilesQuery' as const,
   op: 'matchFiles',
-  query: `query matchFiles($contextId: String!, $content: String!, $limit: SafeInt) {
+  query: `query matchFiles($contextId: String!, $content: String!, $limit: SafeInt, $threshold: Float) {
   currentUser {
     copilot {
       contexts(contextId: $contextId) {
-        matchFiles(content: $content, limit: $limit) {
+        matchFiles(content: $content, limit: $limit, threshold: $threshold) {
           fileId
           chunk
           content

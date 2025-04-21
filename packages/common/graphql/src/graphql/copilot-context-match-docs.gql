@@ -1,8 +1,8 @@
-query matchWorkspaceDocs($contextId: String!, $content: String!, $limit: SafeInt) {
+query matchWorkspaceDocs($contextId: String!, $content: String!, $limit: SafeInt, $threshold: Float) {
   currentUser {
     copilot {
       contexts(contextId: $contextId) {
-        matchWorkspaceDocs(content: $content, limit: $limit) {
+        matchWorkspaceDocs(content: $content, limit: $limit, threshold: $threshold) {
           docId
           chunk
           content
