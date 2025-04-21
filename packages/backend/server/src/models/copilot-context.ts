@@ -212,9 +212,18 @@ export class CopilotContextModel extends BaseModel {
     threshold: number
   ): Promise<DocChunkSimilarity[]> {
     const similarityChunks = await this.db.$queryRaw<Array<DocChunkSimilarity>>`
-      SELECT "doc_id" as "docId", "chunk", "content", "embedding" <=> ${embedding}::vector as "distance"
-      FROM "ai_workspace_embeddings"
-      WHERE "workspace_id" = ${workspaceId}
+      SELECT
+        w."doc_id" as "docId",
+        w."chunk",
+        w."content",
+        w."embedding" <=> ${embedding}::vector as "distance"
+      FROM "ai_workspace_embeddings" w
+      LEFT JOIN "ai_workspace_ignored_docs" i
+        ON i."workspace_id" = w."workspace_id"
+          AND i."doc_id" = w."doc_id"
+      WHERE
+        w."workspace_id" = ${workspaceId}
+        AND i."doc_id" IS NULL
       ORDER BY "distance" ASC
       LIMIT ${topK};
     `;
