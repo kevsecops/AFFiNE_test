@@ -780,6 +780,37 @@
         }
       }
     },
+    "search": {
+      "type": "object",
+      "description": "Configuration for search module",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable search plugin\n@default true",
+          "default": true
+        },
+        "provider": {
+          "type": "string",
+          "description": "Indexer search provider name\n@default \"manticoresearch\"\n@environment `AFFINE_INDEXER_SEARCH_PROVIDER`",
+          "default": "manticoresearch"
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "Indexer search endpoint\n@default \"http://localhost:9308\"\n@environment `AFFINE_INDEXER_SEARCH_ENDPOINT`",
+          "default": "http://localhost:9308"
+        },
+        "username": {
+          "type": "string",
+          "description": "Indexer search auth username, if not set, basic auth will be disabled. Optional for elasticsearch\n@default \"\"\n@environment `AFFINE_INDEXER_SEARCH_USERNAME`\n@link https://www.elastic.co/guide/en/elasticsearch/reference/current/http-clients.html",
+          "default": ""
+        },
+        "password": {
+          "type": "string",
+          "description": "Indexer search auth password, if not set, basic auth will be disabled. Optional for elasticsearch\n@default \"\"\n@environment `AFFINE_INDEXER_SEARCH_PASSWORD`",
+          "default": ""
+        }
+      }
+    },
     "oauth": {
       "type": "object",
       "description": "Configuration for oauth module",

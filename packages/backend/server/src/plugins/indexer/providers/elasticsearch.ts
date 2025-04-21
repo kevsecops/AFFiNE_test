@@ -86,7 +86,7 @@ export class ElasticsearchProvider extends SearchProvider {
         err instanceof InvalidSearchProviderRequest &&
         err.data.type === 'resource_already_exists_exception'
       ) {
-        this.logger.log(`table ${table} already exists`);
+        this.logger.debug(`table ${table} already exists`);
       } else {
         throw err;
       }
@@ -98,6 +98,7 @@ export class ElasticsearchProvider extends SearchProvider {
     documents: Record<string, unknown>[],
     options?: OperationOptions
   ): Promise<void> {
+    const start = Date.now();
     const records: string[] = [];
     for (const document of documents) {
       // @ts-expect-error ignore document type check
@@ -117,6 +118,9 @@ export class ElasticsearchProvider extends SearchProvider {
       query.refresh = 'true';
     }
     await this.requestBulk(table, records, query);
+    this.logger.debug(
+      `wrote ${documents.length} documents to ${table} in ${Date.now() - start}ms`
+    );
   }
 
   /**
@@ -127,6 +131,7 @@ export class ElasticsearchProvider extends SearchProvider {
     query: Record<string, any>,
     options?: OperationOptions
   ): Promise<void> {
+    const start = Date.now();
     const url = new URL(`${this.config.endpoint}/${table}/_delete_by_query`);
     if (options?.refresh) {
       url.searchParams.set('refresh', 'true');
@@ -137,7 +142,7 @@ export class ElasticsearchProvider extends SearchProvider {
       JSON.stringify({ query })
     );
     this.logger.log(
-      `deleted by query ${table} ${JSON.stringify(query)}, result: ${JSON.stringify(result)}`
+      `deleted by query ${table} ${JSON.stringify(query)} in ${Date.now() - start}ms, result: ${JSON.stringify(result)}`
     );
   }
 
@@ -238,7 +243,7 @@ export class ElasticsearchProvider extends SearchProvider {
       headers,
     });
     const data = await response.json();
-    this.logger.debug(
+    this.logger.verbose(
       `curl -X ${method} ${url} ${Object.entries(headers)
         .map(
           ([key, value]) =>

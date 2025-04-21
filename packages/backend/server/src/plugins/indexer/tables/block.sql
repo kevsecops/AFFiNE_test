@@ -1,18 +1,25 @@
 CREATE TABLE IF NOT EXISTS block (
-  workspace_id string indexed stored,
-  doc_id string indexed stored,
-  block_id string indexed stored,
+  workspace_id string attribute,
+  doc_id string attribute,
+  block_id string attribute,
   content text,
-  flavour string indexed stored,
-  blob string stored,
-  ref_doc_id string indexed stored,
+  flavour string attribute,
+  -- use flavour_indexed to match with boost
+  flavour_indexed string attribute indexed,
+  blob string attribute indexed,
+  -- ref_doc_id need match query
+  ref_doc_id string attribute indexed,
   ref string stored,
-  parent_flavour string indexed stored,
-  parent_block_id string indexed stored,
+  parent_flavour string attribute,
+  -- use parent_flavour_indexed to match with boost
+  parent_flavour_indexed string attribute indexed,
+  parent_block_id string attribute,
+  -- use parent_block_id_indexed to match with boost, exists query
+  parent_block_id_indexed string attribute indexed,
   additional string stored,
   markdown_preview string stored,
-  created_by_user_id string indexed stored,
-  updated_by_user_id string indexed stored,
+  created_by_user_id string attribute,
+  updated_by_user_id string attribute,
   created_at timestamp,
   updated_at timestamp
 )

@@ -34,6 +34,12 @@ interface MSSearchResponse {
   scroll: string;
 }
 
+const SupportIndexedAttributes = [
+  'flavour',
+  'parent_flavour',
+  'parent_block_id',
+];
+
 @Injectable()
 export class ManticoresearchProvider extends ElasticsearchProvider {
   override provider = SearchProviderName.Manticoresearch;
@@ -60,32 +66,57 @@ export class ManticoresearchProvider extends ElasticsearchProvider {
     this.logger.log(`created table ${table}, response: ${text}`);
   }
 
+  override async write(
+    table: SearchTable,
+    documents: Record<string, unknown>[],
+    options?: OperationOptions
+  ): Promise<void> {
+    if (table === SearchTable.block) {
+      documents = documents.map(document => ({
+        ...document,
+        // convert content `string[]` to `string`
+        // because manticoresearch full text search does not support `string[]`
+        content: Array.isArray(document.content)
+          ? document.content.join(' ')
+          : document.content,
+        // convert one item array to string in `blob`, `ref`, `ref_doc_id`
+        blob: this.#formatArrayValue(document.blob),
+        ref: this.#formatArrayValue(document.ref),
+        ref_doc_id: this.#formatArrayValue(document.ref_doc_id),
+        // add extra indexed attributes
+        ...SupportIndexedAttributes.reduce(
+          (acc, attribute) => {
+            acc[`${attribute}_indexed`] = document[attribute];
+            return acc;
+          },
+          {} as Record<string, unknown>
+        ),
+      }));
+    }
+    await super.write(table, documents, options);
+  }
+
   /**
-   * @see https://manual.manticoresearch.com/Data_creation_and_modification/Deleting_documents?static=true
+   * @see https://manual.manticoresearch.com/Data_creation_and_modification/Deleting_documents?static=true&client=JSON#Deleting-documents
    */
   override async deleteByQuery<T extends SearchTable>(
     table: T,
     query: Record<string, any>,
     options?: OperationOptions
   ): Promise<void> {
-    const url = new URL(`${this.config.endpoint}/bulk`);
+    const start = Date.now();
+    const url = new URL(`${this.config.endpoint}/delete`);
     if (options?.refresh) {
       url.searchParams.set('refresh', 'true');
     }
-    const body = {
-      delete: {
-        table,
-        query,
-      },
-    };
-    const result = await this.request(
-      'POST',
-      url.toString(),
-      JSON.stringify(body) + '\n',
-      'application/x-ndjson'
-    );
+    const body = JSON.stringify({
+      table,
+      // term not work on delete query, so we need to use equals instead
+      query: this.parseESQuery(query, { termMappingField: 'equals' }),
+    });
+    const result = await this.request('POST', url.toString(), body);
     this.logger.log(
-      `deleted by query ${table} ${JSON.stringify(query)}, result: ${JSON.stringify(result)}`
+      `deleted by query ${body} in ${Date.now() - start}ms, result: ${JSON.stringify(result)}`
     );
   }
 
@@ -169,8 +200,9 @@ export class ManticoresearchProvider extends ElasticsearchProvider {
   #convertToSearchBody(dsl: SearchQueryDSL) {
     const data: Record<string, any> = {
       ...dsl,
+      query: this.parseESQuery(dsl.query),
       fields: undefined,
-      _source: [...dsl._source, ...dsl.fields],
+      _source: [...new Set([...dsl._source, ...dsl.fields])],
     };
 
     // https://manual.manticoresearch.com/Searching/Pagination#Pagination-of-search-results
@@ -185,8 +217,6 @@ export class ManticoresearchProvider extends ElasticsearchProvider {
         scroll: true,
       };
     }
-    // add id to sort and make sure scroll can work
-    data.sort.push('id');
 
     // if highlight provided, add all fields to highlight
     // "highlight":{"fields":{"title":{"pre_tags":["<b>"],"post_tags":["</b>"]}}
@@ -199,6 +229,117 @@ export class ManticoresearchProvider extends ElasticsearchProvider {
     return data;
   }
 
+  private parseESQuery(
+    query: Record<string, any>,
+    options?: {
+      termMappingField?: string;
+      parentNodes?: Record<string, any>[];
+    }
+  ) {
+    let node: Record<string, any> = {};
+    if (query.bool) {
+      node.bool = {};
+      for (const occur in query.bool) {
+        const conditions = query.bool[occur];
+        if (Array.isArray(conditions)) {
+          node.bool[occur] = [];
+          // { must: [ { term: [Object] }, { bool: [Object] } ] }
+          // {
+          //   must: [ { term: [Object] }, { term: [Object] }, { bool: [Object] } ]
+          // }
+          for (const item of conditions) {
+            this.parseESQuery(item, {
+              ...options,
+              parentNodes: node.bool[occur],
+            });
+          }
+        } else {
+          // {
+          //   must_not: { term: { doc_id: 'docId' } }
+          // }
+          node.bool[occur] = this.parseESQuery(conditions, {
+            termMappingField: options?.termMappingField,
+          });
+        }
+      }
+    } else if (query.term) {
+      // {
+      //   term: {
+      //     workspace_id: {
+      //       value: 'workspaceId1'
+      //     }
+      //   }
+      // }
+      // to
+      // {
+      //   term: {
+      //     workspace_id: 'workspaceId1'
+      //   }
+      // }
+      let termField = options?.termMappingField ?? 'term';
+      let field = Object.keys(query.term)[0];
+      let value = query.term[field];
+      if (typeof value === 'object' && 'value' in value) {
+        if ('boost' in value) {
+          // {
+          //   term: {
+          //     flavour: {
+          //       value: 'affine:page',
+          //       boost: 1.5,
+          //     },
+          //   },
+          // }
+          // to
+          // {
+          //   match: {
+          //     flavour_indexed: {
+          //       query: 'affine:page',
+          //       boost: 1.5,
+          //     },
+          //   },
+          // }
+          if (SupportIndexedAttributes.includes(field)) {
+            field = `${field}_indexed`;
+          }
+          termField = 'match';
+          value = {
+            query: value.value,
+            boost: value.boost,
+          };
+        } else {
+          value = value.value;
+        }
+      }
+      node = {
+        [termField]: {
+          [field]: value,
+        },
+      };
+    } else if (query.exists) {
+      let field = query.exists.field;
+      if (SupportIndexedAttributes.includes(field)) {
+        // override the field to indexed field
+        field = `${field}_indexed`;
+      }
+      node = {
+        ...query,
+        exists: {
+          ...query.exists,
+          field,
+        },
+      };
+    } else {
+      node = {
+        ...query,
+      };
+    }
+    if (options?.parentNodes) {
+      options.parentNodes.push(node);
+    }
+    // this.logger.verbose(`parsed es query ${JSON.stringify(query, null, 2)} to ${JSON.stringify(node, null, 2)}`);
+    return node;
+  }
+
   /**
    * Format fields from source to match the expected format for ManticoreSearch
    */
@@ -207,9 +348,9 @@ export class ManticoresearchProvider extends ElasticsearchProvider {
       (acc, field) => {
         let value = source[field];
         if (value !== null && value !== undefined && value !== '') {
-          // special handle `ref_doc_id` and `ref` as string[]
+          // special handle `ref_doc_id`, `ref`, `blob` as string[]
           if (
-            (field === 'ref_doc_id' || field === 'ref') &&
+            (field === 'ref_doc_id' || field === 'ref' || field === 'blob') &&
             typeof value === 'string' &&
             value.startsWith('["')
           ) {
@@ -251,5 +392,15 @@ export class ManticoresearchProvider extends ElasticsearchProvider {
       },
       {} as Record<string, unknown>
     );
+  }
+
+  #formatArrayValue(value: unknown | unknown[]) {
+    if (Array.isArray(value)) {
+      if (value.length === 1) {
+        return value[0];
+      }
+      return JSON.stringify(value);
+    }
+    return value;
   }
 }

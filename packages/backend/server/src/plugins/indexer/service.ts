@@ -1,9 +1,9 @@
 import path from 'node:path';
 
 import { Injectable, Logger } from '@nestjs/common';
-import { camelCase, mapKeys, snakeCase } from 'lodash-es';
+import { camelCase, chunk, mapKeys, snakeCase } from 'lodash-es';
 
-import { InvalidIndexerInput } from '../../base';
+import { InvalidIndexerInput, SearchProviderNotFound } from '../../base';
 import { SearchProviderName } from './config';
 import { SearchProviderFactory } from './factory';
 import {
@@ -12,6 +12,7 @@ import {
   HighlightDSL,
   OperationOptions,
   SearchNode,
+  SearchProvider,
   SearchQueryDSL,
   TopHitsDSL,
 } from './providers';
@@ -25,19 +26,31 @@ import {
 } from './types';
 
 // always return these fields to check permission
-const DefaultSourceFields = ['workspace_id', 'doc_id'];
+const DefaultSourceFields = ['workspace_id', 'doc_id'] as const;
 
-export const SearchTableSort = {
-  [SearchTable.block]: ['_score', { updated_at: 'desc' }, 'doc_id', 'block_id'],
-  [SearchTable.doc]: ['_score', { updated_at: 'desc' }, 'doc_id'],
-};
+export const SearchTableSorts = {
+  [SearchProviderName.Elasticsearch]: {
+    [SearchTable.block]: [
+      '_score',
+      { updated_at: 'desc' },
+      'doc_id',
+      'block_id',
+    ],
+    [SearchTable.doc]: ['_score', { updated_at: 'desc' }, 'doc_id'],
+  },
+  // add id to sort and make sure scroll can work on manticoresearch
+  [SearchProviderName.Manticoresearch]: {
+    [SearchTable.block]: ['_score', { updated_at: 'desc' }, 'id'],
+    [SearchTable.doc]: ['_score', { updated_at: 'desc' }, 'id'],
+  },
+} as const;
 
 const TableDir = path.join(import.meta.dirname, 'tables');
 
 const SearchTableMappingFiles = {
   [SearchProviderName.Elasticsearch]: {
-    [SearchTable.block]: path.join(TableDir, 'block.sql'),
-    [SearchTable.doc]: path.join(TableDir, 'doc.sql'),
+    [SearchTable.block]: path.join(TableDir, 'block.json'),
+    [SearchTable.doc]: path.join(TableDir, 'doc.json'),
   },
   [SearchProviderName.Manticoresearch]: {
     [SearchTable.block]: path.join(TableDir, 'block.sql'),
@@ -49,6 +62,13 @@ const SearchTableSchema = {
   [SearchTable.block]: BlockSchema,
   [SearchTable.doc]: DocSchema,
 };
+
+const SupportFullTextSearchFields = {
+  [SearchTable.block]: ['content'],
+  [SearchTable.doc]: ['title'],
+};
+
+const AllowAggregateFields = new Set(['docId', 'flavour']);
 
 type SnakeToCamelCase<S extends string> =
   S extends `${infer Head}_${infer Tail}`
@@ -80,10 +100,15 @@ export class IndexerService {
   ) {}
 
   async createTables() {
-    const searchProvider = this.factory.get();
-    if (!searchProvider) {
-      this.logger.log('No search provider found, skip creating tables');
-      return;
+    let searchProvider: SearchProvider | undefined;
+    try {
+      searchProvider = this.factory.get();
+    } catch (err) {
+      if (err instanceof SearchProviderNotFound) {
+        this.logger.debug('No search provider found, skip creating tables');
+        return;
+      }
+      throw err;
     }
     const mappingFiles = SearchTableMappingFiles[searchProvider.provider];
     for (const table of Object.keys(mappingFiles) as SearchTable[]) {
@@ -98,21 +123,17 @@ export class IndexerService {
   ) {
     const searchProvider = this.factory.get();
     const schema = SearchTableSchema[table];
-    await searchProvider.write(
-      table,
-      documents.map(d => schema.parse(mapKeys(d, (_, key) => snakeCase(key)))),
-      options
-    );
-  }
-
-  async deleteByQuery<T extends SearchTable>(
-    table: T,
-    query: SearchQuery,
-    options?: OperationOptions
-  ) {
-    const searchProvider = this.factory.get();
-    const dsl = this.#parseQuery(query);
-    await searchProvider.deleteByQuery(table, dsl, options);
+    // slice documents to 1000 documents each time
+    const documentsChunks = chunk(documents, 1000);
+    for (const documentsChunk of documentsChunks) {
+      await searchProvider.write(
+        table,
+        documentsChunk.map(d =>
+          schema.parse(mapKeys(d, (_, key) => snakeCase(key)))
+        ),
+        options
+      );
+    }
   }
 
   async search(input: SearchInput) {
@@ -138,6 +159,16 @@ export class IndexerService {
     return result;
   }
 
+  async deleteByQuery<T extends SearchTable>(
+    table: T,
+    query: SearchQuery,
+    options?: OperationOptions
+  ) {
+    const searchProvider = this.factory.get();
+    const dsl = this.#parseQuery(table, query);
+    await searchProvider.deleteByQuery(table, dsl, options);
+  }
+
   #formatSearchNodes(nodes: SearchNode[]) {
     return nodes.map(node => ({
       ...node,
@@ -160,17 +191,18 @@ export class IndexerService {
     input: T
   ): T extends SearchInput ? SearchQueryDSL : AggregateQueryDSL {
     // common options
-    const query = this.#parseQuery(input.query);
+    const query = this.#parseQuery(input.table, input.query);
+    const searchProvider = this.factory.get();
     const dsl: BaseQueryDSL = {
-      _source: DefaultSourceFields,
-      sort: SearchTableSort[input.table],
+      _source: [...DefaultSourceFields],
+      sort: [...SearchTableSorts[searchProvider.provider][input.table]],
       query,
     };
     const pagination = input.options.pagination;
     if (pagination?.limit) {
-      if (pagination.limit > 1000) {
+      if (pagination.limit > 10000) {
         throw new InvalidIndexerInput({
-          reason: 'limit must be less than 1000',
+          reason: 'limit must be less than 10000',
         });
       }
       dsl.size = pagination.limit;
@@ -197,6 +229,12 @@ export class IndexerService {
 
     if ('field' in input) {
       // for aggregate input
+      if (!AllowAggregateFields.has(input.field)) {
+        throw new InvalidIndexerInput({
+          reason: `aggregate field "${input.field}" is not allowed`,
+        });
+      }
+
       // input: {
       //   field: 'docId',
       //   options: {
@@ -229,7 +267,7 @@ export class IndexerService {
       //   }
       // }
       const topHits: TopHitsDSL = {
-        _source: DefaultSourceFields,
+        _source: [...DefaultSourceFields],
         fields: input.options.hits.fields.map(snakeCase),
       };
       if (input.options.hits.pagination?.limit) {
@@ -264,6 +302,7 @@ export class IndexerService {
   }
 
   #parseQuery(
+    table: SearchTable,
     query: SearchQuery,
     parentNodes?: unknown[]
   ): Record<string, any> {
@@ -282,21 +321,42 @@ export class IndexerService {
 
       // {
       //   type: 'match',
+      //   field: 'content',
+      //   match: keyword,
+      // }
+      // to
+      // {
+      //   match: {
+      //     content: {
+      //       query: keyword
+      //     },
+      //   },
+      // }
+      //
+      // or
+      // {
+      //   type: 'match',
       //   field: 'refDocId',
       //   match: docId,
       // }
       // to
       // {
-      //   match: {
+      //   term: {
       //     ref_doc_id: {
-      //       query: docId
+      //       value: docId
       //     },
       //   },
       // }
+      const field = snakeCase(query.field);
+      const isFullTextField = SupportFullTextSearchFields[table].includes(
+        query.field
+      );
+      const op = isFullTextField ? 'match' : 'term';
+      const key = isFullTextField ? 'query' : 'value';
       const dsl = {
-        match: {
-          [snakeCase(query.field)]: {
-            query: query.match,
+        [op]: {
+          [field]: {
+            [key]: query.match,
             ...(typeof query.boost === 'number' && { boost: query.boost }),
           },
         },
@@ -349,7 +409,7 @@ export class IndexerService {
         },
       };
       for (const subQuery of query.queries) {
-        this.#parseQuery(subQuery, nodes);
+        this.#parseQuery(table, subQuery, nodes);
       }
       if (parentNodes) {
         parentNodes.push(dsl);
@@ -435,6 +495,7 @@ export class IndexerService {
       //   }
       // }
       return this.#parseQuery(
+        table,
         {
           ...query.query,
           boost: query.boost,

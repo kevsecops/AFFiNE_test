@@ -10,6 +10,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+      indexer:
+        condition: service_healthy
       affine_migration:
         condition: service_completed_successfully
     volumes:
@@ -41,6 +43,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      indexer:
+        condition: service_healthy
 
   redis:
     image: redis
@@ -68,6 +72,27 @@ services:
     healthcheck:
       test:
         ['CMD', 'pg_isready', '-U', "${DB_USERNAME}", '-d', "${DB_DATABASE:-affine}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  indexer:
+    image: manticoresearch/manticore:${MANTICORE_VERSION:-9.2.14}
+    container_name: affine_indexer
+    volumes:
+      - ${MANTICORE_DATA_LOCATION}:/var/lib/manticore
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        ['CMD', 'wget', '-O-', 'http://127.0.0.1:9308']
       interval: 10s
       timeout: 5s
       retries: 5

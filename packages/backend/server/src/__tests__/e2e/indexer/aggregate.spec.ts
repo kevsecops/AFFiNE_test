@@ -6,6 +6,9 @@ import { IndexerService } from '../../../plugins/indexer/service';
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';
 
+const isElasticsearch =
+  process.env.AFFINE_INDEXER_SEARCH_PROVIDER === 'elasticsearch';
+
 e2e('should aggregate by docId', async t => {
   const owner = await app.signup();
 
@@ -14,7 +17,13 @@ e2e('should aggregate by docId', async t => {
   });
 
   const docIds = [randomUUID(), randomUUID(), randomUUID()];
-  const blockIds = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
+  const blockIds = [
+    randomUUID(),
+    randomUUID(),
+    randomUUID(),
+    randomUUID(),
+    randomUUID(),
+  ];
   const indexerService = app.get(IndexerService);
 
   await indexerService.write(
@@ -23,7 +32,7 @@ e2e('should aggregate by docId', async t => {
       {
         docId: docIds[0],
         workspaceId: workspace.id,
-        content: 'test1 hello world',
+        content: 'test1 hello world top2',
         flavour: 'affine:text',
         blockId: blockIds[0],
         createdByUserId: owner.id,
@@ -34,7 +43,7 @@ e2e('should aggregate by docId', async t => {
       {
         docId: docIds[0],
         workspaceId: workspace.id,
-        content: 'test1 hello hello world',
+        content: 'test2 hello hello top3',
         flavour: 'affine:text',
         blockId: blockIds[1],
         createdByUserId: owner.id,
@@ -42,12 +51,12 @@ e2e('should aggregate by docId', async t => {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      // affine:page, blockId is null
       {
         docId: docIds[0],
         workspaceId: workspace.id,
-        content: 'test1 hello title',
+        content: 'test3 hello title top1',
         flavour: 'affine:page',
+        blockId: blockIds[2],
         createdByUserId: owner.id,
         updatedByUserId: owner.id,
         createdAt: new Date(),
@@ -56,9 +65,9 @@ e2e('should aggregate by docId', async t => {
       {
         docId: docIds[1],
         workspaceId: workspace.id,
-        content: 'test2 hello hello',
+        content: 'test4 hello world',
         flavour: 'affine:text',
-        blockId: blockIds[2],
+        blockId: blockIds[3],
         refDocId: docIds[0],
         ref: ['{"foo": "bar1"}'],
         createdByUserId: owner.id,
@@ -69,9 +78,9 @@ e2e('should aggregate by docId', async t => {
       {
         docId: docIds[2],
         workspaceId: workspace.id,
-        content: 'test3 hello world',
+        content: 'test5 hello',
         flavour: 'affine:text',
-        blockId: blockIds[3],
+        blockId: blockIds[4],
         refDocId: docIds[0],
         ref: ['{"foo": "bar2"}'],
         createdByUserId: owner.id,
@@ -101,7 +110,7 @@ e2e('should aggregate by docId', async t => {
               // @ts-expect-error allow to use string as enum
               type: 'match',
               field: 'content',
-              match: 'hello',
+              match: 'hello world',
             },
             {
               // @ts-expect-error allow to use string as enum
@@ -113,7 +122,7 @@ e2e('should aggregate by docId', async t => {
                   // @ts-expect-error allow to use string as enum
                   type: 'match',
                   field: 'content',
-                  match: 'hello',
+                  match: 'hello world',
                 },
                 {
                   // @ts-expect-error allow to use string as enum
@@ -168,18 +177,21 @@ e2e('should aggregate by docId', async t => {
           {
             fields: {
               flavour: ['affine:page'],
+              blockId: [blockIds[2]],
             },
             highlights: {
-              content: ['test1 <b>hello</b> title'],
+              content: ['test3 <b>hello</b> title top1'],
             },
           },
           {
             fields: {
-              blockId: [blockIds[1]],
+              blockId: [blockIds[0]],
               flavour: ['affine:text'],
             },
             highlights: {
-              content: ['test1 <b>hello hello</b> world'],
+              content: isElasticsearch
+                ? ['test1 <b>hello</b> <b>world</b> top2']
+                : ['test1 <b>hello world</b> top2'],
             },
           },
         ],
@@ -192,11 +204,13 @@ e2e('should aggregate by docId', async t => {
         nodes: [
           {
             fields: {
-              blockId: [blockIds[2]],
+              blockId: [blockIds[3]],
               flavour: ['affine:text'],
             },
             highlights: {
-              content: ['test2 <b>hello hello</b>'],
+              content: isElasticsearch
+                ? ['test4 <b>hello</b> <b>world</b>']
+                : ['test4 <b>hello world</b>'],
             },
           },
         ],
@@ -209,11 +223,11 @@ e2e('should aggregate by docId', async t => {
         nodes: [
           {
             fields: {
-              blockId: [blockIds[3]],
+              blockId: [blockIds[4]],
               flavour: ['affine:text'],
             },
             highlights: {
-              content: ['test3 <b>hello</b> world'],
+              content: ['test5 <b>hello</b>'],
             },
           },
         ],

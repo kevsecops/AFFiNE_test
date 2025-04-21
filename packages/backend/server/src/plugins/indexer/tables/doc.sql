@@ -1,11 +1,11 @@
 CREATE TABLE IF NOT EXISTS doc (
-  workspace_id string indexed stored,
-  doc_id string indexed stored,
+  workspace_id string attribute,
+  doc_id string attribute,
   title text,
   summary string stored,
-  journal string indexed stored,
-  created_by_user_id string indexed stored,
-  updated_by_user_id string indexed stored,
+  journal string stored,
+  created_by_user_id string attribute,
+  updated_by_user_id string attribute,
   created_at timestamp,
   updated_at timestamp
 )

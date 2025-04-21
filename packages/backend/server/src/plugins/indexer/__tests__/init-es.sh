@@ -892,6 +892,59 @@ curl -v -X POST "localhost:9200/block/_search?pretty" -H 'Content-Type: applicat
   }
 }'
 
+curl -v -X POST "localhost:9200/block/_search?pretty" -H 'Content-Type: application/json' -d '
+{
+  "_source": false,
+  "highlight": {
+    "pre_tags" : ["<b>"],
+    "post_tags" : ["</b>"],
+    "fields": {
+      "content": {}
+    }
+  },
+  "fields": ["block_id", "flavour"],
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "workspace_id": {
+              "value": "workspaceId1"
+            }
+          }
+        },
+        {
+          "match": {
+            "content": {
+              "query": "hello"
+            }
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "content": {
+                    "query": "hello"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "flavour": {
+                    "query": "affine:page",
+                    "boost": 1.5
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}'
 
 this.indexer
   .aggregate$(

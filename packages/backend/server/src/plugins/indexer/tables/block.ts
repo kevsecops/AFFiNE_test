@@ -3,10 +3,10 @@ import { z } from 'zod';
 export const BlockSchema = z.object({
   workspace_id: z.string(),
   doc_id: z.string(),
-  block_id: z.string().optional(),
-  content: z.string(),
+  block_id: z.string(),
+  content: z.union([z.string(), z.string().array()]),
   flavour: z.string(),
-  blob: z.string().optional(),
+  blob: z.union([z.string(), z.string().array()]).optional(),
   ref_doc_id: z.union([z.string(), z.string().array()]).optional(),
   ref: z.union([z.string(), z.string().array()]).optional(),
   parent_flavour: z.string().optional(),
@@ -22,5 +22,5 @@ export const BlockSchema = z.object({
 export type Block = z.input<typeof BlockSchema>;
 
 export function getBlockUniqueId(block: Block) {
-  return `${block.workspace_id}/${block.doc_id}/${block.flavour}/${block.block_id ?? ''}`;
+  return `${block.workspace_id}/${block.doc_id}/${block.block_id}`;
 }

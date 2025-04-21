@@ -6,17 +6,27 @@ import test from 'ava';
 
 import { createModule } from '../../../../__tests__/create-module';
 import { Mockers } from '../../../../__tests__/mocks';
+import { ConfigModule } from '../../../../base/config';
 import { IndexerModule } from '../../';
 import { SearchProviderName } from '../../config';
 import { ManticoresearchProvider } from '../../providers';
 import { SearchTable } from '../../tables';
 
 const module = await createModule({
-  imports: [IndexerModule],
+  imports: [
+    IndexerModule,
+    ConfigModule.override({
+      search: {
+        provider: SearchProviderName.Manticoresearch,
+        endpoint: 'http://localhost:9308',
+      },
+    }),
+  ],
   providers: [ManticoresearchProvider],
 });
 const searchProvider = module.get(ManticoresearchProvider);
 const user = await module.create(Mockers.User);
+const workspace = await module.create(Mockers.Workspace);
 
 test.before(async () => {
   const tablesDir = path.join(import.meta.dirname, '../../tables');
@@ -129,11 +139,633 @@ test.before(async () => {
 });
 
 test.after.always(async () => {
+  await searchProvider.deleteByQuery(
+    SearchTable.block,
+    {
+      term: { workspace_id: workspace.id },
+    },
+    {
+      refresh: true,
+    }
+  );
+  await searchProvider.deleteByQuery(
+    SearchTable.doc,
+    {
+      term: { workspace_id: workspace.id },
+    },
+    {
+      refresh: true,
+    }
+  );
   await module.close();
 });
 
 test('should provider is manticoresearch', t => {
   t.is(searchProvider.provider, SearchProviderName.Manticoresearch);
+});
+
+// #region write
+
+test('should write document work', async t => {
+  const docId = randomUUID();
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        content: 'hello world',
+        flavour: 'affine:page',
+        parent_flavour: 'affine:database',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  let result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    query: { match: { doc_id: docId } },
+    fields: [
+      'flavour',
+      'flavour_indexed',
+      'parent_flavour',
+      'parent_flavour_indexed',
+      'block_id',
+      'content',
+      'ref_doc_id',
+    ],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 1);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    flavour_indexed: ['affine:page'],
+    parent_flavour: ['affine:database'],
+    parent_flavour_indexed: ['affine:database'],
+    content: ['hello world'],
+  });
+  t.deepEqual(result.nodes[0]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+  });
+  // set ref_doc_id to a string
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        content: 'hello world',
+        flavour: 'affine:page',
+        ref_doc_id: 'docId2',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'block_id', 'content', 'ref_doc_id'],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 1);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    content: ['hello world'],
+    ref_doc_id: ['docId2'],
+  });
+  // not set ref_doc_id and replace the old value to null
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        content: 'hello world',
+        flavour: 'affine:page',
+        // ref_doc_id: 'docId2',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'block_id', 'content', 'ref_doc_id'],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 1);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    content: ['hello world'],
+  });
+});
+
+test('should handle ref_doc_id as string[]', async t => {
+  const docId = randomUUID();
+  const blockId1 = randomUUID();
+  const blockId2 = randomUUID();
+  // set ref_doc_id to a string
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId1,
+        content: 'hello world',
+        flavour: 'affine:page',
+        ref_doc_id: 'docId2',
+        ref: '{"foo": "bar"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId2,
+        content: 'hello world',
+        flavour: 'affine:text',
+        ref_doc_id: 'docId2',
+        ref: ['{"foo": "bar2"}'],
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date('2025-04-23T00:00:00.000Z'),
+        updated_at: new Date('2025-04-23T00:00:00.000Z'),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  let result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id', 'ref_doc_id', 'ref'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'content', 'ref_doc_id', 'ref'],
+    sort: ['_score', { created_at: 'desc' }],
+  });
+  t.is(result.nodes.length, 2);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    content: ['hello world'],
+    ref_doc_id: ['docId2'],
+    ref: ['{"foo": "bar"}'],
+  });
+  t.deepEqual(result.nodes[0]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    ref_doc_id: 'docId2',
+    ref: '{"foo": "bar"}',
+  });
+  t.deepEqual(result.nodes[1].fields, {
+    flavour: ['affine:text'],
+    content: ['hello world'],
+    ref_doc_id: ['docId2'],
+    ref: ['{"foo": "bar2"}'],
+  });
+  t.deepEqual(result.nodes[1]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    ref_doc_id: 'docId2',
+    ref: '{"foo": "bar2"}',
+  });
+
+  // set ref_doc_id to a string[]
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId1,
+        content: 'hello world',
+        flavour: 'affine:page',
+        ref_doc_id: ['docId2', 'docId3'],
+        ref: ['{"foo": "bar"}', '{"foo": "baz"}'],
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId2,
+        content: 'hello world',
+        flavour: 'affine:text',
+        ref_doc_id: ['docId2', 'docId3'],
+        ref: ['{"foo": "bar2"}', '{"foo": "baz2"}'],
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date('2025-04-23T00:00:00.000Z'),
+        updated_at: new Date('2025-04-23T00:00:00.000Z'),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id', 'ref_doc_id', 'ref'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'content', 'ref_doc_id', 'ref'],
+    sort: ['_score', { created_at: 'desc' }],
+  });
+  t.is(result.nodes.length, 2);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    content: ['hello world'],
+    ref_doc_id: ['docId2', 'docId3'],
+    ref: ['{"foo": "bar"}', '{"foo": "baz"}'],
+  });
+  t.deepEqual(result.nodes[0]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    ref_doc_id: '["docId2","docId3"]',
+    ref: '["{\\"foo\\": \\"bar\\"}","{\\"foo\\": \\"baz\\"}"]',
+  });
+  t.deepEqual(result.nodes[1].fields, {
+    flavour: ['affine:text'],
+    content: ['hello world'],
+    ref_doc_id: ['docId2', 'docId3'],
+    ref: ['{"foo": "bar2"}', '{"foo": "baz2"}'],
+  });
+  t.deepEqual(result.nodes[1]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    ref_doc_id: '["docId2","docId3"]',
+    ref: '["{\\"foo\\": \\"bar2\\"}","{\\"foo\\": \\"baz2\\"}"]',
+  });
+});
+
+test('should handle content as string[]', async t => {
+  const docId = randomUUID();
+  const blockId = randomUUID();
+  // set content to a string
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId,
+        content: 'hello world',
+        flavour: 'affine:page',
+        ref_doc_id: 'docId2',
+        ref: '{"foo": "bar"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  let result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id', 'ref_doc_id', 'ref'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'content', 'ref_doc_id', 'ref'],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 1);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    content: ['hello world'],
+    ref_doc_id: ['docId2'],
+    ref: ['{"foo": "bar"}'],
+  });
+  t.deepEqual(result.nodes[0]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    ref_doc_id: 'docId2',
+    ref: '{"foo": "bar"}',
+  });
+
+  // set content to a string[]
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId,
+        content: ['hello', 'world 2'],
+        flavour: 'affine:page',
+        ref_doc_id: 'docId2',
+        ref: '{"foo": "bar"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id', 'ref_doc_id', 'ref'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'content', 'ref_doc_id', 'ref'],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 1);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    content: ['hello world 2'],
+    ref_doc_id: ['docId2'],
+    ref: ['{"foo": "bar"}'],
+  });
+  t.deepEqual(result.nodes[0]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    ref_doc_id: 'docId2',
+    ref: '{"foo": "bar"}',
+  });
+});
+
+test('should handle blob as string[]', async t => {
+  const docId = randomUUID();
+  const blockId = randomUUID();
+  // set blob to a string
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId,
+        content: '',
+        flavour: 'affine:page',
+        blob: 'blob1',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  let result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id', 'blob'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'content', 'blob'],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 1);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    blob: ['blob1'],
+  });
+  t.deepEqual(result.nodes[0]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    blob: 'blob1',
+  });
+
+  // set blob to a string[]
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId,
+        content: '',
+        flavour: 'affine:page',
+        blob: ['blob1', 'blob2'],
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id', 'blob'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'content', 'blob'],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 1);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    blob: ['blob1', 'blob2'],
+  });
+  t.deepEqual(result.nodes[0]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    blob: '["blob1","blob2"]',
+  });
+
+  await searchProvider.write(
+    SearchTable.block,
+    [
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: blockId,
+        content: '',
+        flavour: 'affine:page',
+        blob: ['blob3'],
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id', 'blob'],
+    query: { match: { doc_id: docId } },
+    fields: ['flavour', 'content', 'blob'],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 1);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    blob: ['blob3'],
+  });
+  t.deepEqual(result.nodes[0]._source, {
+    doc_id: docId,
+    workspace_id: workspace.id,
+    blob: 'blob3',
+  });
+});
+
+// #endregion
+
+// #region search
+
+test('should search query all and get next cursor work', async t => {
+  const result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    sort: [
+      '_score',
+      {
+        updated_at: 'desc',
+      },
+      'id',
+    ],
+    query: {
+      match_all: {},
+    },
+    fields: ['flavour', 'workspace_id', 'doc_id', 'created_at', 'updated_at'],
+    size: 2,
+  });
+  // console.log(JSON.stringify(result, null, 2));
+  t.truthy(result.total);
+  t.is(result.timedOut, false);
+  t.truthy(result.nextCursor);
+  t.is(typeof result.nextCursor, 'string');
+  t.is(result.nodes.length, 2);
+  t.truthy(result.nodes[0]._id);
+  t.truthy(result.nodes[0]._score);
+  t.truthy(result.nodes[0].fields.flavour);
+  t.truthy(result.nodes[0].fields.doc_id);
+  t.truthy(result.nodes[0].fields.created_at);
+  t.truthy(result.nodes[0].fields.updated_at);
+  t.deepEqual(Object.keys(result.nodes[0]._source), ['workspace_id', 'doc_id']);
+
+  // test cursor
+  const result2 = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    sort: [
+      '_score',
+      {
+        updated_at: 'desc',
+      },
+      'id',
+    ],
+    query: {
+      match_all: {},
+    },
+    fields: ['flavour', 'doc_id', 'created_at', 'updated_at'],
+    size: 10000,
+    cursor: result.nextCursor,
+  });
+  t.is(result2.total, result.total - result.nodes.length);
+  t.is(result2.timedOut, false);
+  t.truthy(result2.nextCursor);
+  t.is(typeof result2.nextCursor, 'string');
+  t.true(result2.nodes.length < 10000);
+
+  // next cursor should be empty
+  const result3 = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    sort: [
+      '_score',
+      {
+        updated_at: 'desc',
+      },
+      'id',
+    ],
+    query: {
+      match_all: {},
+    },
+    fields: ['flavour', 'doc_id', 'created_at', 'updated_at'],
+    size: 10000,
+    cursor: result2.nextCursor,
+  });
+  t.is(result3.total, 0);
+  t.is(result3.timedOut, false);
+  t.falsy(result3.nextCursor);
+  t.is(result3.nodes.length, 0);
+});
+
+test('should filter by workspace_id work', async t => {
+  const docId = randomUUID();
+  await searchProvider.write(SearchTable.block, [
+    {
+      workspace_id: workspace.id,
+      doc_id: docId,
+      block_id: 'blockId1',
+      flavour: 'affine:page',
+      created_by_user_id: user.id,
+      updated_by_user_id: user.id,
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+    {
+      workspace_id: workspace.id,
+      doc_id: docId,
+      block_id: 'blockId2',
+      flavour: 'affine:database',
+      created_by_user_id: user.id,
+      updated_by_user_id: user.id,
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+  ]);
+  let result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    query: {
+      bool: {
+        must: [
+          {
+            match: {
+              workspace_id: workspace.id,
+            },
+          },
+          {
+            bool: {
+              must: [
+                {
+                  match: {
+                    doc_id: docId,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    fields: ['flavour', 'workspace_id', 'doc_id', 'block_id'],
+    sort: ['_score'],
+  });
+  t.is(result.nodes.length, 2);
+  t.deepEqual(result.nodes[0].fields, {
+    flavour: ['affine:page'],
+    workspace_id: [workspace.id],
+    doc_id: [docId],
+    block_id: ['blockId1'],
+  });
+  t.deepEqual(result.nodes[1].fields, {
+    flavour: ['affine:database'],
+    workspace_id: [workspace.id],
+    doc_id: [docId],
+    block_id: ['blockId2'],
+  });
 });
 
 test('should search query match url work', async t => {
@@ -187,17 +819,185 @@ test('should search query match url work', async t => {
   });
 });
 
-test('should write document work', async t => {
-  const workspaceId = randomUUID();
+test('should search query match ref_doc_id work', async t => {
   const docId = randomUUID();
+  const refDocId1 = randomUUID();
+  const refDocId2 = randomUUID();
+  const refDocId3 = randomUUID();
+  const refDocId4 = randomUUID();
+  const refDocId5 = randomUUID();
+  const refDocId6 = randomUUID();
+  const refDocId7 = randomUUID();
+  const refDocId8 = randomUUID();
+  const refDocId9 = randomUUID();
+  const refDocId10 = randomUUID();
+
   await searchProvider.write(
     SearchTable.block,
     [
       {
-        workspace_id: workspaceId,
+        workspace_id: workspace.id,
         doc_id: docId,
-        content: 'hello world',
+        block_id: 'blockId1',
+        content: 'hello world on search title, ' + randomUUID(),
         flavour: 'affine:page',
+        parent_flavour: 'affine:database',
+        parent_block_id: 'parentBlockId1',
+        ref_doc_id: refDocId1,
+        ref: '{"docId":"docId1","mode":"page"}',
+        additional: '{"foo": "bar0"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: 'blockId1-not-matched',
+        content: 'hello world on search title, ' + randomUUID(),
+        flavour: 'affine:page',
+        parent_flavour: 'affine:database1',
+        parent_block_id: 'parentBlockId1',
+        ref_doc_id: refDocId1,
+        ref: '{"docId":"docId1","mode":"page"}',
+        additional: '{"foo": "bar0"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: 'blockId-all',
+        content: 'hello world on search title, ' + randomUUID(),
+        flavour: 'affine:page',
+        parent_flavour: 'affine:database',
+        parent_block_id: 'parentBlockId2',
+        ref_doc_id: [
+          refDocId2,
+          refDocId3,
+          refDocId4,
+          refDocId5,
+          refDocId6,
+          refDocId7,
+          refDocId8,
+          refDocId9,
+          refDocId10,
+          refDocId1,
+        ],
+        ref: [
+          '{"docId":"docId1","mode":"page"}',
+          '{"docId":"docId2","mode":"page"}',
+        ],
+        additional: '{"foo": "bar1"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: 'blockId1-2',
+        content: 'hello world on search title, ' + randomUUID(),
+        flavour: 'affine:page',
+        parent_flavour: 'affine:database',
+        parent_block_id: 'parentBlockId2',
+        ref_doc_id: [refDocId1, refDocId2],
+        ref: [
+          '{"docId":"docId1","mode":"page"}',
+          '{"docId":"docId2","mode":"page"}',
+        ],
+        additional: '{"foo": "bar1"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: 'blockId2-1',
+        content: 'hello world on search title, ' + randomUUID(),
+        flavour: 'affine:page',
+        parent_flavour: 'affine:database',
+        parent_block_id: 'parentBlockId2',
+        ref_doc_id: [refDocId2, refDocId1],
+        ref: [
+          '{"docId":"docId1","mode":"page"}',
+          '{"docId":"docId2","mode":"page"}',
+        ],
+        additional: '{"foo": "bar1"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: 'blockId3-2-1-4',
+        content: 'hello world on search title, ' + randomUUID(),
+        flavour: 'affine:page',
+        parent_flavour: 'affine:database',
+        parent_block_id: 'parentBlockId2',
+        ref_doc_id: [refDocId3, refDocId2, refDocId1, refDocId4],
+        ref: [
+          '{"docId":"docId1","mode":"page"}',
+          '{"docId":"docId2","mode":"page"}',
+        ],
+        additional: '{"foo": "bar1"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      // a link to the `refDocId1` document
+      {
+        workspace_id: workspace.id,
+        doc_id: refDocId1,
+        block_id: 'blockId3',
+        content: 'hello world on search title, ' + randomUUID(),
+        flavour: 'affine:page',
+        parent_flavour: 'affine:database',
+        parent_block_id: 'parentBlockId3',
+        ref_doc_id: refDocId1,
+        ref: '{"docId":"docId1","mode":"page"}',
+        additional: '{"foo": "bar2"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: 'blockId4',
+        content: 'hello world on search title, ' + randomUUID(),
+        flavour: 'affine:page',
+        parent_flavour: 'affine:database',
+        parent_block_id: 'parentBlockId4',
+        ref_doc_id: refDocId10,
+        ref: '{"docId":"docId2","mode":"page"}',
+        additional: '{"foo": "bar3"}',
+        created_by_user_id: user.id,
+        updated_by_user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        workspace_id: workspace.id,
+        doc_id: docId,
+        block_id: 'blockId1-text',
+        content: 'hello world on search title, ' + randomUUID(),
+        flavour: 'affine:text',
+        parent_flavour: 'affine:text',
+        parent_block_id: 'parentBlockId1',
+        ref_doc_id: refDocId1,
+        ref: '{"docId":"docId1","mode":"page"}',
+        additional: '{"foo": "bar0"}',
         created_by_user_id: user.id,
         updated_by_user_id: user.id,
         created_at: new Date(),
@@ -208,272 +1008,192 @@ test('should write document work', async t => {
       refresh: true,
     }
   );
+
   let result = await searchProvider.search(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id'],
-    query: { match: { doc_id: docId } },
-    fields: ['flavour', 'block_id', 'content', 'ref_doc_id'],
-    sort: ['_score'],
-  });
-  t.is(result.nodes.length, 1);
-  t.deepEqual(result.nodes[0].fields, {
-    flavour: ['affine:page'],
-    content: ['hello world'],
-  });
-  t.deepEqual(result.nodes[0]._source, {
-    doc_id: docId,
-    workspace_id: workspaceId,
-  });
-  // set ref_doc_id to a string
-  await searchProvider.write(
-    SearchTable.block,
-    [
-      {
-        workspace_id: workspaceId,
-        doc_id: docId,
-        content: 'hello world',
-        flavour: 'affine:page',
-        ref_doc_id: 'docId2',
-        created_by_user_id: user.id,
-        updated_by_user_id: user.id,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ],
-    {
-      refresh: true,
-    }
-  );
-  result = await searchProvider.search(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id'],
-    query: { match: { doc_id: docId } },
-    fields: ['flavour', 'block_id', 'content', 'ref_doc_id'],
-    sort: ['_score'],
-  });
-  t.is(result.nodes.length, 1);
-  t.deepEqual(result.nodes[0].fields, {
-    flavour: ['affine:page'],
-    content: ['hello world'],
-    ref_doc_id: ['docId2'],
-  });
-  // not set ref_doc_id and replace the old value to null
-  await searchProvider.write(
-    SearchTable.block,
-    [
-      {
-        workspace_id: workspaceId,
-        doc_id: docId,
-        content: 'hello world',
-        flavour: 'affine:page',
-        // ref_doc_id: 'docId2',
-        created_by_user_id: user.id,
-        updated_by_user_id: user.id,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ],
-    {
-      refresh: true,
-    }
-  );
-  result = await searchProvider.search(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id'],
-    query: { match: { doc_id: docId } },
-    fields: ['flavour', 'block_id', 'content', 'ref_doc_id'],
-    sort: ['_score'],
-  });
-  t.is(result.nodes.length, 1);
-  t.deepEqual(result.nodes[0].fields, {
-    flavour: ['affine:page'],
-    content: ['hello world'],
-  });
-});
-
-test('should handle ref_doc_id as string[]', async t => {
-  const workspaceId = randomUUID();
-  const docId = randomUUID();
-  // set ref_doc_id to a string
-  await searchProvider.write(
-    SearchTable.block,
-    [
-      {
-        workspace_id: workspaceId,
-        doc_id: docId,
-        content: 'hello world',
-        flavour: 'affine:page',
-        ref_doc_id: 'docId2',
-        ref: '{"foo": "bar"}',
-        created_by_user_id: user.id,
-        updated_by_user_id: user.id,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ],
-    {
-      refresh: true,
-    }
-  );
-  let result = await searchProvider.search(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id', 'ref_doc_id', 'ref'],
-    query: { match: { doc_id: docId } },
-    fields: ['flavour', 'content', 'ref_doc_id', 'ref'],
-    sort: ['_score'],
-  });
-  t.is(result.nodes.length, 1);
-  t.deepEqual(result.nodes[0].fields, {
-    flavour: ['affine:page'],
-    content: ['hello world'],
-    ref_doc_id: ['docId2'],
-    ref: ['{"foo": "bar"}'],
-  });
-  t.deepEqual(result.nodes[0]._source, {
-    doc_id: docId,
-    workspace_id: workspaceId,
-    ref_doc_id: 'docId2',
-    ref: '{"foo": "bar"}',
-  });
-
-  // set ref_doc_id to a string[]
-  await searchProvider.write(
-    SearchTable.block,
-    [
-      {
-        workspace_id: workspaceId,
-        doc_id: docId,
-        content: 'hello world',
-        flavour: 'affine:page',
-        ref_doc_id: ['docId2', 'docId3'],
-        ref: ['{"foo": "bar"}', '{"foo": "baz"}'],
-        created_by_user_id: user.id,
-        updated_by_user_id: user.id,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ],
-    {
-      refresh: true,
-    }
-  );
-  result = await searchProvider.search(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id', 'ref_doc_id', 'ref'],
-    query: { match: { doc_id: docId } },
-    fields: ['flavour', 'content', 'ref_doc_id', 'ref'],
-    sort: ['_score'],
-  });
-  t.is(result.nodes.length, 1);
-  t.deepEqual(result.nodes[0].fields, {
-    flavour: ['affine:page'],
-    content: ['hello world'],
-    ref_doc_id: ['docId2', 'docId3'],
-    ref: ['{"foo": "bar"}', '{"foo": "baz"}'],
-  });
-  t.deepEqual(result.nodes[0]._source, {
-    doc_id: docId,
-    workspace_id: workspaceId,
-    ref_doc_id: '["docId2","docId3"]',
-    ref: '["{\\"foo\\": \\"bar\\"}","{\\"foo\\": \\"baz\\"}"]',
-  });
-});
-
-test('should search query all and get next cursor work', async t => {
-  const result = await searchProvider.search(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id'],
-    sort: [
-      '_score',
-      {
-        updated_at: 'desc',
-      },
-      {
-        created_at: 'desc',
-      },
-    ],
-    query: {
-      match_all: {},
-    },
-    fields: [
-      'flavour',
-      'workspace_id',
-      'doc_id',
-      'content',
-      'created_at',
-      'updated_at',
-    ],
-    size: 2,
-  });
-  t.truthy(result.total);
-  t.is(result.timedOut, false);
-  t.truthy(result.nextCursor);
-  t.is(typeof result.nextCursor, 'string');
-  t.is(result.nodes.length, 2);
-  t.truthy(result.nodes[0]._id);
-  t.truthy(result.nodes[0]._score);
-  t.truthy(result.nodes[0].fields.flavour);
-  t.truthy(result.nodes[0].fields.doc_id);
-  t.truthy(result.nodes[0].fields.content);
-  t.truthy(result.nodes[0].fields.created_at);
-  t.truthy(result.nodes[0].fields.updated_at);
-  t.deepEqual(Object.keys(result.nodes[0]._source), ['workspace_id', 'doc_id']);
-
-  // test cursor
-  const result2 = await searchProvider.search(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id'],
-    sort: [
-      '_score',
-      {
-        updated_at: 'desc',
-      },
-      {
-        created_at: 'desc',
-      },
-    ],
-    query: {
-      match_all: {},
-    },
-    fields: ['flavour', 'doc_id', 'content', 'created_at', 'updated_at'],
-    size: 10000,
-    cursor: result.nextCursor,
-  });
-  t.is(result2.total, result.total - result.nodes.length);
-  t.is(result2.timedOut, false);
-  t.truthy(result2.nextCursor);
-  t.is(typeof result2.nextCursor, 'string');
-  t.true(result2.nodes.length < 10000);
-
-  // next cursor should be empty
-  const result3 = await searchProvider.search(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id'],
-    sort: [
-      '_score',
-      {
-        updated_at: 'desc',
-      },
-      {
-        created_at: 'desc',
-      },
-    ],
-    query: {
-      match_all: {},
-    },
-    fields: ['flavour', 'doc_id', 'content', 'created_at', 'updated_at'],
-    size: 10000,
-    cursor: result2.nextCursor,
-  });
-  t.is(result3.total, 0);
-  t.is(result3.timedOut, false);
-  t.falsy(result3.nextCursor);
-  t.is(result3.nodes.length, 0);
-});
-
-test('should aggregate query work', async t => {
-  const result = await searchProvider.aggregate(SearchTable.block, {
-    _source: ['workspace_id', 'doc_id'],
-    sort: ['_score', { updated_at: 'desc' }, { created_at: 'desc' }],
+    _source: ['workspace_id', 'doc_id', 'parent_flavour'],
     query: {
       bool: {
         must: [
           {
-            match: {
+            term: { workspace_id: { value: workspace.id } },
+          },
+          {
+            bool: {
+              must: [
+                {
+                  term: { parent_flavour: { value: 'affine:database' } },
+                },
+                {
+                  // https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/array
+                  // match: { ref_doc_id: { query: refDocId1 } },
+                  term: { ref_doc_id: { value: refDocId1 } },
+                },
+                // Ignore if it is a link to the `refDocId1` document
+                {
+                  bool: {
+                    must_not: {
+                      // match: { doc_id: { query: refDocId1 } },
+                      term: { doc_id: { value: refDocId1 } },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    fields: [
+      'doc_id',
+      'block_id',
+      'ref_doc_id',
+      'parent_block_id',
+      'additional',
+      'parent_flavour',
+    ],
+    sort: ['_score'],
+  });
+  // console.log(JSON.stringify(result, null, 2));
+  t.is(result.total, 5);
+  t.deepEqual(result.nodes[0].fields, {
+    doc_id: [docId],
+    block_id: ['blockId1'],
+    ref_doc_id: [refDocId1],
+    parent_block_id: ['parentBlockId1'],
+    parent_flavour: ['affine:database'],
+    additional: ['{"foo": "bar0"}'],
+  });
+  t.deepEqual(result.nodes[1].fields, {
+    doc_id: [docId],
+    block_id: ['blockId-all'],
+    ref_doc_id: [
+      refDocId2,
+      refDocId3,
+      refDocId4,
+      refDocId5,
+      refDocId6,
+      refDocId7,
+      refDocId8,
+      refDocId9,
+      refDocId10,
+      refDocId1,
+    ],
+    parent_block_id: ['parentBlockId2'],
+    parent_flavour: ['affine:database'],
+    additional: ['{"foo": "bar1"}'],
+  });
+  t.deepEqual(result.nodes[2].fields, {
+    doc_id: [docId],
+    block_id: ['blockId1-2'],
+    ref_doc_id: [refDocId1, refDocId2],
+    parent_block_id: ['parentBlockId2'],
+    parent_flavour: ['affine:database'],
+    additional: ['{"foo": "bar1"}'],
+  });
+  t.deepEqual(result.nodes[3].fields, {
+    doc_id: [docId],
+    block_id: ['blockId2-1'],
+    ref_doc_id: [refDocId2, refDocId1],
+    parent_block_id: ['parentBlockId2'],
+    parent_flavour: ['affine:database'],
+    additional: ['{"foo": "bar1"}'],
+  });
+  t.deepEqual(result.nodes[4].fields, {
+    doc_id: [docId],
+    block_id: ['blockId3-2-1-4'],
+    ref_doc_id: [refDocId3, refDocId2, refDocId1, refDocId4],
+    parent_block_id: ['parentBlockId2'],
+    parent_flavour: ['affine:database'],
+    additional: ['{"foo": "bar1"}'],
+  });
+
+  result = await searchProvider.search(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    query: {
+      bool: {
+        must: [
+          {
+            term: { workspace_id: { value: workspace.id } },
+          },
+          {
+            bool: {
+              must: [
+                {
+                  term: { parent_flavour: { value: 'affine:database' } },
+                },
+                {
+                  term: { ref_doc_id: { value: refDocId10 } },
+                },
+                // Ignore if it is a link to the `refDocId1` document
+                {
+                  bool: {
+                    must_not: {
+                      term: { doc_id: { value: refDocId1 } },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    fields: [
+      'doc_id',
+      'block_id',
+      'ref_doc_id',
+      'parent_block_id',
+      'parent_flavour',
+      'additional',
+    ],
+    sort: ['_score'],
+  });
+  // console.log(JSON.stringify(result, null, 2));
+  t.is(result.total, 2);
+  t.deepEqual(result.nodes[0].fields, {
+    doc_id: [docId],
+    block_id: ['blockId-all'],
+    ref_doc_id: [
+      refDocId2,
+      refDocId3,
+      refDocId4,
+      refDocId5,
+      refDocId6,
+      refDocId7,
+      refDocId8,
+      refDocId9,
+      refDocId10,
+      refDocId1,
+    ],
+    parent_block_id: ['parentBlockId2'],
+    parent_flavour: ['affine:database'],
+    additional: ['{"foo": "bar1"}'],
+  });
+  t.deepEqual(result.nodes[1].fields, {
+    doc_id: [docId],
+    block_id: ['blockId4'],
+    ref_doc_id: [refDocId10],
+    parent_block_id: ['parentBlockId4'],
+    parent_flavour: ['affine:database'],
+    additional: ['{"foo": "bar3"}'],
+  });
+});
+
+// #endregion
+
+// #region aggregate
+
+test('should aggregate query work', async t => {
+  const result = await searchProvider.aggregate(SearchTable.block, {
+    _source: ['workspace_id', 'doc_id'],
+    sort: ['_score', { updated_at: 'desc' }, 'id'],
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
               workspace_id: {
-                query: 'workspaceId1',
+                value: 'workspaceId1',
               },
             },
           },
@@ -494,9 +1214,9 @@ test('should aggregate query work', async t => {
                         },
                       },
                       {
-                        match: {
+                        term: {
                           flavour: {
-                            query: 'affine:page',
+                            value: 'affine:page',
                             boost: 1.5,
                           },
                         },
@@ -554,14 +1274,17 @@ test('should aggregate query work', async t => {
   ]);
 });
 
+// #endregion
+
+// #region delete by query
+
 test('should delete by query work', async t => {
-  const workspaceId = randomUUID();
   const docId = randomUUID();
   await searchProvider.write(
     SearchTable.block,
     [
       {
-        workspace_id: workspaceId,
+        workspace_id: workspace.id,
         doc_id: docId,
         content: `hello world on search title, ${randomUUID()}`,
         flavour: 'affine:page',
@@ -571,7 +1294,7 @@ test('should delete by query work', async t => {
         updated_at: new Date(),
       },
       {
-        workspace_id: workspaceId,
+        workspace_id: workspace.id,
         doc_id: docId,
         block_id: randomUUID(),
         content: `hello world on search title, ${randomUUID()}`,
@@ -592,12 +1315,12 @@ test('should delete by query work', async t => {
       bool: {
         must: [
           {
-            match: {
-              workspace_id: workspaceId,
+            term: {
+              workspace_id: workspace.id,
             },
           },
           {
-            match: {
+            term: {
               doc_id: docId,
             },
           },
@@ -614,12 +1337,12 @@ test('should delete by query work', async t => {
       bool: {
         must: [
           {
-            match: {
-              workspace_id: workspaceId,
+            term: {
+              workspace_id: workspace.id,
             },
           },
           {
-            match: {
+            term: {
               doc_id: docId,
             },
           },
@@ -637,12 +1360,12 @@ test('should delete by query work', async t => {
       bool: {
         must: [
           {
-            match: {
-              workspace_id: workspaceId,
+            term: {
+              workspace_id: workspace.id,
             },
           },
           {
-            match: {
+            term: {
               doc_id: docId,
             },
           },
@@ -654,3 +1377,185 @@ test('should delete by query work', async t => {
   });
   t.is(result2.nodes.length, 0);
 });
+
+// #endregion
+
+// #region parse es query
+
+test('should parse es query term work', async t => {
+  const query = {
+    term: {
+      workspace_id: {
+        value: 'workspaceId1',
+      },
+    },
+  };
+  // @ts-expect-error use private method
+  const result = searchProvider.parseESQuery(query);
+  t.deepEqual(result, {
+    term: {
+      workspace_id: 'workspaceId1',
+    },
+  });
+  const query2 = {
+    term: {
+      workspace_id: 'workspaceId1',
+    },
+  };
+  // @ts-expect-error use private method
+  const result2 = searchProvider.parseESQuery(query2);
+  t.deepEqual(result2, {
+    term: {
+      workspace_id: 'workspaceId1',
+    },
+  });
+
+  const query3 = {
+    term: {
+      flavour: {
+        value: 'affine:page',
+        boost: 1.5,
+      },
+    },
+  };
+  // @ts-expect-error use private method
+  const result3 = searchProvider.parseESQuery(query3);
+  t.deepEqual(result3, {
+    match: {
+      flavour_indexed: {
+        query: 'affine:page',
+        boost: 1.5,
+      },
+    },
+  });
+
+  const query4 = {
+    term: {
+      doc_id: {
+        value: 'docId1',
+        boost: 1.5,
+      },
+    },
+  };
+  // @ts-expect-error use private method
+  const result4 = searchProvider.parseESQuery(query4);
+  t.deepEqual(result4, {
+    match: {
+      doc_id: {
+        query: 'docId1',
+        boost: 1.5,
+      },
+    },
+  });
+});
+
+test('should parse es query with custom term mapping field work', async t => {
+  const query = {
+    bool: {
+      must: [
+        {
+          term: {
+            workspace_id: {
+              value: 'workspaceId1',
+            },
+          },
+        },
+        {
+          term: {
+            doc_id: {
+              value: 'docId1',
+            },
+          },
+        },
+      ],
+    },
+  };
+  // @ts-expect-error use private method
+  const result = searchProvider.parseESQuery(query, {
+    termMappingField: 'equals',
+  });
+  t.deepEqual(result, {
+    bool: {
+      must: [
+        {
+          equals: {
+            workspace_id: 'workspaceId1',
+          },
+        },
+        {
+          equals: {
+            doc_id: 'docId1',
+          },
+        },
+      ],
+    },
+  });
+
+  const query2 = {
+    bool: {
+      must: {
+        term: {
+          workspace_id: 'workspaceId1',
+        },
+      },
+    },
+  };
+  // @ts-expect-error use private method
+  const result2 = searchProvider.parseESQuery(query2, {
+    termMappingField: 'equals',
+  });
+  t.deepEqual(result2, {
+    bool: {
+      must: {
+        equals: {
+          workspace_id: 'workspaceId1',
+        },
+      },
+    },
+  });
+
+  const query3 = {
+    term: {
+      workspace_id: 'workspaceId1',
+    },
+  };
+  // @ts-expect-error use private method
+  const result3 = searchProvider.parseESQuery(query3, {
+    termMappingField: 'equals',
+  });
+  t.deepEqual(result3, {
+    equals: {
+      workspace_id: 'workspaceId1',
+    },
+  });
+});
+
+test('should parse es query exists work', async t => {
+  const query = {
+    exists: {
+      field: 'parent_block_id',
+    },
+  };
+  // @ts-expect-error use private method
+  const result = searchProvider.parseESQuery(query);
+  t.deepEqual(result, {
+    exists: {
+      field: 'parent_block_id_indexed',
+    },
+  });
+
+  const query2 = {
+    exists: {
+      field: 'ref_doc_id',
+    },
+  };
+  // @ts-expect-error use private method
+  const result2 = searchProvider.parseESQuery(query2);
+  t.deepEqual(result2, {
+    exists: {
+      field: 'ref_doc_id',
+    },
+  });
+});
+
+// #endregion

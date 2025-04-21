@@ -9,50 +9,64 @@ curl -v -X POST http://127.0.0.1:9308/cli -H "content-type: application/plain" -
 curl -v -X POST http://127.0.0.1:9308/cli --data-binary @./packages/backend/server/src/plugins/indexer/tables/doc.sql
 curl -v -X POST "http://localhost:9308/cli" -d "DESC doc"
 
-+--------------------+-----------+----------------+
-| Field              | Type      | Properties     |
-+--------------------+-----------+----------------+
-| id                 | bigint    |                |
-| workspace_id       | text      | indexed stored |
-| doc_id             | text      | indexed stored |
-| title              | text      | indexed stored |
-| summary            | text      | stored         |
-| journal            | text      | indexed stored |
-| created_by_user_id | text      | indexed stored |
-| updated_by_user_id | text      | indexed stored |
-| created_at         | timestamp |                |
-| updated_at         | timestamp |                |
-+--------------------+-----------+----------------+
++--------------------+------------+----------------+
+| Field              | Type       | Properties     |
++--------------------+------------+----------------+
+| id                 | bigint     |                |
+| title              | text       | indexed stored |
+| summary            | text       | stored         |
+| journal            | text       | stored         |
+| workspace_id       | string     |                |
+| doc_id             | string     |                |
+| created_by_user_id | string     |                |
+| updated_by_user_id | string     |                |
+| created_at         | timestamp  |                |
+| updated_at         | timestamp  |                |
+| title_len          | tokencount |                |
+| summary_len        | tokencount |                |
+| journal_len        | tokencount |                |
++--------------------+------------+----------------+
 
 curl -v -X DELETE "http://localhost:9308/block" | json
 curl -v -X POST http://127.0.0.1:9308/cli -H "content-type: application/plain" --data-binary @./packages/backend/server/src/plugins/indexer/tables/block.sql
 curl -v -X POST "http://localhost:9308/cli" -d "DESC block"
 
-# curl -v -X PUT http://127.0.0.1:9308/block -H "content-type: application/json" --data-binary @./packages/backend/server/src/plugins/search/tables/block.json | json
+# curl -v -X PUT http://127.0.0.1:9308/block -H "content-type: application/json" --data-binary @./packages/backend/server/src/plugins/indexer/tables/block.json | json
 # curl -v -X GET "http://localhost:9308/block/_mappings" | json
 
-+--------------------+-----------+----------------+
-| Field              | Type      | Properties     |
-+--------------------+-----------+----------------+
-| id                 | bigint    |                |
-| workspace_id       | text      | indexed stored |
-| doc_id             | text      | indexed stored |
-| block_id           | text      | indexed stored |
-| content            | text      | indexed stored |
-| flavour            | text      | indexed stored |
-| blob               | text      | stored         |
-| ref_doc_id         | text      | indexed stored |
-| parent_flavour     | text      | indexed stored |
-| parent_block_id    | text      | indexed stored |
-| additional         | text      | stored         |
-| markdown_preview   | text      | stored         |
-| created_by_user_id | text      | indexed stored |
-| updated_by_user_id | text      | indexed stored |
-| ref                | json      |                |
-| created_at         | timestamp |                |
-| updated_at         | timestamp |                |
-+--------------------+-----------+----------------+
-
++-----------------------------+------------+-------------------+
+| Field                       | Type       | Properties        |
++-----------------------------+------------+-------------------+
+| id                          | bigint     |                   |
+| content                     | text       | indexed stored    |
+| flavour_indexed             | string     | indexed attribute |
+| blob                        | string     | indexed attribute |
+| ref_doc_id                  | string     | indexed attribute |
+| ref                         | text       | stored            |
+| parent_flavour_indexed      | string     | indexed attribute |
+| parent_block_id_indexed     | string     | indexed attribute |
+| additional                  | text       | stored            |
+| markdown_preview            | text       | stored            |
+| workspace_id                | string     |                   |
+| doc_id                      | string     |                   |
+| block_id                    | string     |                   |
+| flavour                     | string     |                   |
+| parent_flavour              | string     |                   |
+| parent_block_id             | string     |                   |
+| created_by_user_id          | string     |                   |
+| updated_by_user_id          | string     |                   |
+| created_at                  | timestamp  |                   |
+| updated_at                  | timestamp  |                   |
+| content_len                 | tokencount |                   |
+| flavour_indexed_len         | tokencount |                   |
+| blob_len                    | tokencount |                   |
+| ref_doc_id_len              | tokencount |                   |
+| ref_len                     | tokencount |                   |
+| parent_flavour_indexed_len  | tokencount |                   |
+| parent_block_id_indexed_len | tokencount |                   |
+| additional_len              | tokencount |                   |
+| markdown_preview_len        | tokencount |                   |
++-----------------------------+------------+-------------------+
 
 # error: HTTP/1.1 400 Bad Request
 # {
@@ -66,8 +80,8 @@ curl -v -X POST "http://localhost:9308/cli" -d "DESC block"
 
 ## Create or update a document in an index
 
-curl -v -X POST "localhost:9308/_bulk" -H 'Content-Type: application/json' --data-binary @./packages/backend/server/src/data/es/mappings/test-docs.json | json
-curl -v -X POST "localhost:9308/_bulk" -H 'Content-Type: application/json' --data-binary @./packages/backend/server/src/data/es/mappings/test-blocks.json | json
+curl -v -X POST "localhost:9308/_bulk" -H 'Content-Type: application/json' --data-binary @./packages/backend/server/src/plugins/indexer/__tests__/test-docs.json | json
+curl -v -X POST "localhost:9308/_bulk" -H 'Content-Type: application/json' --data-binary @./packages/backend/server/src/plugins/indexer/__tests__/test-blocks.json | json
 
 curl -sX POST http://localhost:9308/search -d '{
   "table":"docs",
@@ -972,6 +986,56 @@ curl -v -X POST "localhost:9308/block/_search" -H 'Content-Type: application/jso
           }
         },
         {
+          "match": {
+            "content": {
+              "query": "hello"
+            }
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "content": {
+                    "query": "hello"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "flavour_indexed": {
+                    "query": "affine:page",
+                    "boost": 1.5
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}' | json
+
+curl -v -X POST "localhost:9308/block/_search" -H 'Content-Type: application/json' -d '
+{
+  "highlight": {
+    "pre_tags" : ["<b>"],
+    "post_tags" : ["</b>"]
+  },
+  "sort": [ "_score", { "updated_at": "desc" }, "doc_id", "block_id" ],
+  "fields": ["block_id", "flavour"],
+  "_source": ["block_id", "flavour"],
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "workspace_id": "workspaceId1"
+          }
+        },
+        {
           "bool": {
             "must": [
               {
@@ -1227,3 +1291,75 @@ curl -v -X POST "localhost:9308/block/_search" -H 'Content-Type: application/jso
     }
   }
 }' | json
+
+
+curl -v -X POST "http://localhost:9308/cli" -d "
+select parent_flavour, ref_doc_id from block
+where MATCH('@parent_flavour affine:database')
+limit 100; SHOW META;
+"
+
+curl -v -X POST http://localhost:9308/block/_search -H 'Content-Type: application/json' -d '
+{
+  "_source":["workspace_id","doc_id","parent_flavour","block_id","ref_doc_id","parent_block_id","additional"],
+  "query":{
+    "bool":{
+      "must":[
+        {
+          "bool":{
+            "must":[
+              {
+                "match":{
+                  "parent_flavour":{"query":"affine:database"}
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "sort":["_score"],
+  "options":{"scroll":true}
+}
+' | json
+
+curl -v -X POST http://localhost:9308/block/_search -H 'Content-Type: application/json' -d '
+{
+  "_source":["workspace_id","doc_id","parent_flavour","block_id","ref_doc_id","parent_block_id","additional"],
+  "query":{
+    "bool":{
+      "must":[
+        {
+          "bool":{
+            "must":[
+              {
+                "match":{
+                  "workspace_id":{"query":"workspaceId1"}
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "sort":["_score"],
+  "options":{"scroll":true}
+}
+' | json
+
+
+
+curl -X POST http://localhost:9308/block/_search -H 'Content-Type: application/json' -d '{"_source":["workspace_id","doc_id","block_id","flavour"],"sort":["_score",{"updated_at":"desc"},"id"],"query":{"bool":{"must":[{"match":{"workspace_id":{"query":"workspaceId1"}}},{"bool":{"must":[{"match":{"content":"hello"}},{"bool":{"should":[{"match":{"content":"hello"}},{"match":{"flavour":{"query":"affine:page","boost":1.5}}}]}}]}}]}},"highlight":{"pre_tags":["<b>"],"post_tags":["</b>"]},"options":{"scroll":true}}'
+
+curl -X POST "http://localhost:9308/delete" -H "Content-Type: application/json" -d '{
+  "index": "block",
+  "query": {
+    "equals": {
+      "workspace_id": "workspaceId1"
+    }
+  }
+}'
+
+curl -X POST "http://localhost:9308/cli" -d "DELETE FROM block WHERE workspace_id = 'workspaceId1'"

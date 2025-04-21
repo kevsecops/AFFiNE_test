@@ -147,7 +147,8 @@ export function buildAppModule(env: Env) {
     // enable schedule module on graphql server and doc service
     .useIf(
       () => env.flavors.graphql || env.flavors.doc,
-      ScheduleModule.forRoot()
+      ScheduleModule.forRoot(),
+      IndexerModule
     )
 
     // auth
@@ -179,8 +180,7 @@ export function buildAppModule(env: Env) {
       CopilotModule,
       CaptchaModule,
       OAuthModule,
-      CustomerIoModule,
-      IndexerModule
+      CustomerIoModule
     )
     // doc service only
     .useIf(() => env.flavors.doc, DocServiceModule)
