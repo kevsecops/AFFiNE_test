@@ -1,3 +1,4 @@
+import { TextSelection } from '@blocksuite/std';
 import { describe, expect, it } from 'vitest';
 
 import { affine } from './affine-template';
@@ -78,5 +79,80 @@ describe('helpers/affine-template', () => {
         <unknown-tag></unknown-tag>
       `;
     }).toThrow();
+  });
+
+  it('should handle text selection with anchor and focus', () => {
+    const host = affine`
+      <affine-page id="page">
+        <affine-note id="note">
+          <affine-paragraph id="paragraph-1">Hel<anchor />lo</affine-paragraph>
+          <affine-paragraph id="paragraph-2">Wo<focus />rld</affine-paragraph>
+        </affine-note>
+      </affine-page>
+    `;
+
+    const selection = host.selection.value[0] as TextSelection;
+    expect(selection).toBeDefined();
+    expect(selection.is(TextSelection)).toBe(true);
+    expect(selection.from.blockId).toBe('paragraph-1');
+    expect(selection.from.index).toBe(3);
+    expect(selection.from.length).toBe(2);
+    expect(selection.to?.blockId).toBe('paragraph-2');
+    expect(selection.to?.index).toBe(0);
+    expect(selection.to?.length).toBe(2);
+  });
+
+  it('should handle cursor position', () => {
+    const host = affine`
+      <affine-page id="page">
+        <affine-note id="note">
+          <affine-paragraph id="paragraph-1">Hello<cursor />World</affine-paragraph>
+        </affine-note>
+      </affine-page>
+    `;
+
+    const selection = host.selection.value[0] as TextSelection;
+    expect(selection).toBeDefined();
+    expect(selection.is(TextSelection)).toBe(true);
+    expect(selection.from.blockId).toBe('paragraph-1');
+    expect(selection.from.index).toBe(5);
+    expect(selection.from.length).toBe(0);
+    expect(selection.to).toBeNull();
+  });
+
+  it('should handle selection in empty blocks', () => {
+    const host = affine`
+      <affine-page id="page">
+        <affine-note id="note">
+          <affine-paragraph id="paragraph-1"><cursor /></affine-paragraph>
+        </affine-note>
+      </affine-page>
+    `;
+
+    const selection = host.selection.value[0] as TextSelection;
+    expect(selection).toBeDefined();
+    expect(selection.is(TextSelection)).toBe(true);
+    expect(selection.from.blockId).toBe('paragraph-1');
+    expect(selection.from.index).toBe(0);
+    expect(selection.from.length).toBe(0);
+    expect(selection.to).toBeNull();
+  });
+
+  it('should handle single point selection', () => {
+    const host = affine`
+      <affine-page id="page">
+        <affine-note id="note">
+          <affine-paragraph id="paragraph-1">Hello<anchor></anchor>World<focus></focus>Affine</affine-paragraph>
+        </affine-note>
+      </affine-page>
+    `;
+
+    const selection = host.selection.value[0] as TextSelection;
+    expect(selection).toBeDefined();
+    expect(selection.is(TextSelection)).toBe(true);
+    expect(selection.from.blockId).toBe('paragraph-1');
+    expect(selection.from.index).toBe(5);
+    expect(selection.from.length).toBe(5);
+    expect(selection.to).toBeNull();
   });
 });

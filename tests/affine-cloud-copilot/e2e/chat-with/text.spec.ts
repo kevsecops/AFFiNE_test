@@ -62,13 +62,16 @@ test.describe('AIChatWith/Text', () => {
     loggedInPage: page,
     utils,
   }) => {
-    const { translate } = await utils.editor.askAIWithText(page, 'Apple');
-    const { answer } = await translate('German');
-    await expect(answer).toHaveText(/Apfel/, { timeout: 10000 });
+    const { fixSpelling } = await utils.editor.askAIWithText(
+      page,
+      'I Loev Apple'
+    );
+    const { answer } = await fixSpelling();
+    await expect(answer).toHaveText(/I Love Apple/, { timeout: 10000 });
     const replace = answer.getByTestId('answer-replace');
     await replace.click();
     const content = await utils.editor.getEditorContent(page);
-    expect(content).toBe('Apfel');
+    expect(content).toBe('I Love Apple');
   });
 
   test('should support continue in chat', async ({

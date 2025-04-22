@@ -1,5 +1,5 @@
-import { deleteTextCommand } from '@blocksuite/affine/inlines/preset';
 import { defaultImageProxyMiddleware } from '@blocksuite/affine/shared/adapters';
+import { replaceSelectedTextWithBlocksCommand } from '@blocksuite/affine/shared/commands';
 import { isInsideEdgelessEditor } from '@blocksuite/affine/shared/utils';
 import {
   type BlockComponent,
@@ -8,7 +8,11 @@ import {
   SurfaceSelection,
   type TextSelection,
 } from '@blocksuite/affine/std';
-import { type BlockModel, Slice } from '@blocksuite/affine/store';
+import {
+  type BlockModel,
+  type BlockSnapshot,
+  Slice,
+} from '@blocksuite/affine/store';
 
 import {
   insertFromMarkdown,
@@ -109,19 +113,47 @@ export const replace = async (
   );
 
   if (textSelection) {
-    host.std.command.exec(deleteTextCommand, { textSelection });
-    const { snapshot, transformer } = await markdownToSnapshot(
-      content,
-      host.doc,
-      host
-    );
-    if (snapshot) {
-      await transformer.snapshotToSlice(
-        snapshot,
-        host.doc,
-        firstBlockParent.model.id,
-        firstIndex + 1
+    const fragmentDoc = host.doc.workspace.createDoc();
+    try {
+      const fragment = fragmentDoc.getStore();
+      fragmentDoc.load();
+
+      const rootId = fragment.addBlock('affine:page');
+      fragment.addBlock('affine:surface', {}, rootId);
+      const noteId = fragment.addBlock('affine:note', {}, rootId);
+
+      const { snapshot, transformer } = await markdownToSnapshot(
+        content,
+        fragment,
+        host
       );
+
+      if (snapshot) {
+        const blockSnapshots = (
+          snapshot.content[0].flavour === 'affine:note'
+            ? snapshot.content[0].children
+            : snapshot.content
+        ) as BlockSnapshot[];
+
+        const blocks = (
+          await Promise.all(
+            blockSnapshots.map(async blockSnapshot => {
+              return await transformer.snapshotToBlock(
+                blockSnapshot,
+                fragment,
+                noteId,
+                0
+              );
+            })
+          )
+        ).filter(block => block) as BlockModel[];
+        host.std.command.exec(replaceSelectedTextWithBlocksCommand, {
+          textSelection,
+          blocks,
+        });
+      }
+    } finally {
+      host.std.workspace.removeDoc(fragmentDoc.id);
     }
   } else {
     selectedModels.forEach(model => {
