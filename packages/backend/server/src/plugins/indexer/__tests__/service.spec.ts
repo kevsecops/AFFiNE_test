@@ -1714,3 +1714,429 @@ test('should throw error when field is not allowed in aggregate input', async t 
 });
 
 // #endregion
+
+// #region deleteWorkspace()
+
+test('should delete workspace work', async t => {
+  const workspaceId = randomUUID();
+  const docId1 = randomUUID();
+  const docId2 = randomUUID();
+  await indexerService.write(
+    SearchTable.doc,
+    [
+      {
+        workspaceId,
+        docId: docId1,
+        title: 'hello world',
+        summary: 'this is a test',
+        createdByUserId: user.id,
+        updatedByUserId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        workspaceId,
+        docId: docId2,
+        title: 'hello world',
+        summary: 'this is a test',
+        createdByUserId: user.id,
+        updatedByUserId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  await indexerService.write(
+    SearchTable.block,
+    [
+      {
+        workspaceId,
+        docId: docId1,
+        blockId: randomUUID(),
+        content: 'hello world',
+        flavour: 'affine:text',
+        createdByUserId: user.id,
+        updatedByUserId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+
+  let result = await indexerService.search({
+    table: SearchTable.doc,
+    query: {
+      type: SearchQueryType.match,
+      field: 'workspaceId',
+      match: workspaceId,
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'title', 'summary'],
+    },
+  });
+  t.is(result.total, 2);
+  t.is(result.nodes.length, 2);
+  let result2 = await indexerService.search({
+    table: SearchTable.block,
+    query: {
+      type: SearchQueryType.match,
+      field: 'workspaceId',
+      match: workspaceId,
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'blockId', 'content', 'flavour'],
+    },
+  });
+  t.is(result2.total, 1);
+  t.is(result2.nodes.length, 1);
+
+  await indexerService.deleteWorkspace(workspaceId, {
+    refresh: true,
+  });
+  result = await indexerService.search({
+    table: SearchTable.doc,
+    query: {
+      type: SearchQueryType.match,
+      field: 'workspaceId',
+      match: workspaceId,
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'title', 'summary'],
+    },
+  });
+  t.is(result.total, 0);
+  t.is(result.nodes.length, 0);
+  result2 = await indexerService.search({
+    table: SearchTable.block,
+    query: {
+      type: SearchQueryType.match,
+      field: 'workspaceId',
+      match: workspaceId,
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'blockId', 'content', 'flavour'],
+    },
+  });
+  t.is(result2.total, 0);
+  t.is(result2.nodes.length, 0);
+});
+
+// #endregion
+
+// #region deleteDoc()
+
+test('should delete doc work', async t => {
+  const workspaceId = randomUUID();
+  const docId1 = randomUUID();
+  const docId2 = randomUUID();
+  await indexerService.write(
+    SearchTable.doc,
+    [
+      {
+        workspaceId,
+        docId: docId1,
+        title: 'hello world',
+        summary: 'this is a test',
+        createdByUserId: user.id,
+        updatedByUserId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        workspaceId,
+        docId: docId2,
+        title: 'hello world',
+        summary: 'this is a test',
+        createdByUserId: user.id,
+        updatedByUserId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+  await indexerService.write(
+    SearchTable.block,
+    [
+      {
+        workspaceId,
+        docId: docId1,
+        blockId: randomUUID(),
+        content: 'hello world',
+        flavour: 'affine:text',
+        createdByUserId: user.id,
+        updatedByUserId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        workspaceId,
+        docId: docId2,
+        blockId: randomUUID(),
+        content: 'hello world',
+        flavour: 'affine:text',
+        createdByUserId: user.id,
+        updatedByUserId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+    {
+      refresh: true,
+    }
+  );
+
+  let result1 = await indexerService.search({
+    table: SearchTable.doc,
+    query: {
+      type: SearchQueryType.boolean,
+      occur: SearchQueryOccur.must,
+      queries: [
+        {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        {
+          type: SearchQueryType.match,
+          field: 'docId',
+          match: docId1,
+        },
+      ],
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'title', 'summary'],
+    },
+  });
+  t.is(result1.total, 1);
+  t.is(result1.nodes.length, 1);
+  t.deepEqual(result1.nodes[0].fields.docId, [docId1]);
+  let result2 = await indexerService.search({
+    table: SearchTable.doc,
+    query: {
+      type: SearchQueryType.boolean,
+      occur: SearchQueryOccur.must,
+      queries: [
+        {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        {
+          type: SearchQueryType.match,
+          field: 'docId',
+          match: docId2,
+        },
+      ],
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'title', 'summary'],
+    },
+  });
+  t.is(result2.total, 1);
+  t.is(result2.nodes.length, 1);
+  t.deepEqual(result2.nodes[0].fields.docId, [docId2]);
+  let result3 = await indexerService.search({
+    table: SearchTable.block,
+    query: {
+      type: SearchQueryType.boolean,
+      occur: SearchQueryOccur.must,
+      queries: [
+        {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        {
+          type: SearchQueryType.match,
+          field: 'docId',
+          match: docId1,
+        },
+      ],
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'blockId', 'content', 'flavour'],
+    },
+  });
+  t.is(result3.total, 1);
+  t.is(result3.nodes.length, 1);
+  t.deepEqual(result3.nodes[0].fields.docId, [docId1]);
+
+  let result4 = await indexerService.search({
+    table: SearchTable.block,
+    query: {
+      type: SearchQueryType.boolean,
+      occur: SearchQueryOccur.must,
+      queries: [
+        {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        {
+          type: SearchQueryType.match,
+          field: 'docId',
+          match: docId2,
+        },
+      ],
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'blockId', 'content', 'flavour'],
+    },
+  });
+  t.is(result4.total, 1);
+  t.is(result4.nodes.length, 1);
+  t.deepEqual(result4.nodes[0].fields.docId, [docId2]);
+
+  await indexerService.deleteDoc(workspaceId, docId1, {
+    refresh: true,
+  });
+
+  // make sure the docId1 is deleted
+  result1 = await indexerService.search({
+    table: SearchTable.doc,
+    query: {
+      type: SearchQueryType.boolean,
+      occur: SearchQueryOccur.must,
+      queries: [
+        {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        {
+          type: SearchQueryType.match,
+          field: 'docId',
+          match: docId1,
+        },
+      ],
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'title', 'summary'],
+    },
+  });
+  t.is(result1.total, 0);
+  t.is(result1.nodes.length, 0);
+
+  // make sure the docId2 is not deleted
+  result2 = await indexerService.search({
+    table: SearchTable.doc,
+    query: {
+      type: SearchQueryType.boolean,
+      occur: SearchQueryOccur.must,
+      queries: [
+        {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        {
+          type: SearchQueryType.match,
+          field: 'docId',
+          match: docId2,
+        },
+      ],
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'title', 'summary'],
+    },
+  });
+  t.is(result2.total, 1);
+  t.is(result2.nodes.length, 1);
+  t.deepEqual(result2.nodes[0].fields.docId, [docId2]);
+
+  // make sure the docId1 block is deleted
+  result3 = await indexerService.search({
+    table: SearchTable.block,
+    query: {
+      type: SearchQueryType.boolean,
+      occur: SearchQueryOccur.must,
+      queries: [
+        {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        {
+          type: SearchQueryType.match,
+          field: 'docId',
+          match: docId1,
+        },
+      ],
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'blockId', 'content', 'flavour'],
+    },
+  });
+  t.is(result3.total, 0);
+  t.is(result3.nodes.length, 0);
+  // docId2 block should not be deleted
+  result4 = await indexerService.search({
+    table: SearchTable.block,
+    query: {
+      type: SearchQueryType.boolean,
+      occur: SearchQueryOccur.must,
+      queries: [
+        {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        {
+          type: SearchQueryType.match,
+          field: 'docId',
+          match: docId2,
+        },
+      ],
+    },
+    options: {
+      fields: ['workspaceId', 'docId', 'blockId', 'content', 'flavour'],
+    },
+  });
+  t.is(result4.total, 1);
+  t.is(result4.nodes.length, 1);
+  t.deepEqual(result4.nodes[0].fields.docId, [docId2]);
+});
+
+// #endregion
+
+// #region listDocIds()
+
+test('should list doc ids work', async t => {
+  const workspaceId = randomUUID();
+  const docs = [];
+  const docCount = 20011;
+  for (let i = 0; i < docCount; i++) {
+    docs.push({
+      workspaceId,
+      docId: randomUUID(),
+      title: `hello world ${i} ${randomUUID()}`,
+      summary: `this is a test ${i} ${randomUUID()}`,
+      createdByUserId: user.id,
+      updatedByUserId: user.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+  await indexerService.write(SearchTable.doc, docs, {
+    refresh: true,
+  });
+  const docIds = await indexerService.listDocIds(workspaceId);
+  t.is(docIds.length, docCount);
+  t.deepEqual(docIds.sort(), docs.map(doc => doc.docId).sort());
+  await indexerService.deleteWorkspace(workspaceId, {
+    refresh: true,
+  });
+  const docIds2 = await indexerService.listDocIds(workspaceId);
+  t.is(docIds2.length, 0);
+});
+
+// #endregion

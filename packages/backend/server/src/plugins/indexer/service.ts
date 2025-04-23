@@ -4,6 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { camelCase, chunk, mapKeys, snakeCase } from 'lodash-es';
 
 import { InvalidIndexerInput, SearchProviderNotFound } from '../../base';
+import { Models } from '../../models';
 import { SearchProviderName } from './config';
 import { SearchProviderFactory } from './factory';
 import {
@@ -22,6 +23,7 @@ import {
   SearchHighlight,
   SearchInput,
   SearchQuery,
+  SearchQueryOccur,
   SearchQueryType,
 } from './types';
 
@@ -95,7 +97,7 @@ export class IndexerService {
   private readonly logger = new Logger(IndexerService.name);
 
   constructor(
-    // private readonly models: Models,
+    private readonly models: Models,
     private readonly factory: SearchProviderFactory
   ) {}
 
@@ -157,6 +159,129 @@ export class IndexerService {
       };
     }
     return result;
+  }
+
+  async listDocIds(workspaceId: string) {
+    const docIds: string[] = [];
+    let cursor: string | undefined;
+    do {
+      const result = await this.search({
+        table: SearchTable.doc,
+        query: {
+          type: SearchQueryType.match,
+          field: 'workspaceId',
+          match: workspaceId,
+        },
+        options: {
+          fields: ['docId'],
+          pagination: {
+            limit: 10000,
+            cursor,
+          },
+        },
+      });
+      docIds.push(...result.nodes.map(node => node.fields.docId[0] as string));
+      cursor = result.nextCursor;
+      this.logger.debug(
+        `get ${result.nodes.length} new / ${docIds.length} total doc ids for workspace ${workspaceId}, nextCursor: ${cursor}`
+      );
+    } while (cursor);
+    return docIds;
+  }
+
+  async syncDoc(workspaceId: string, docId: string) {
+    const snapshot = await this.models.doc.getSnapshot(workspaceId, docId);
+    if (!snapshot) {
+      this.logger.debug(`doc ${workspaceId}/${docId} not found`);
+      return;
+    }
+    // TODO(@fengmk2): get title, summary and journal from snapshot blob
+    await this.write(SearchTable.doc, [
+      {
+        workspaceId,
+        docId,
+        title: snapshot.title,
+        summary: snapshot.summary,
+        journal: snapshot.journal,
+        createdByUserId: snapshot.createdBy ?? '',
+        updatedByUserId: snapshot.updatedBy ?? '',
+        createdAt: snapshot.createdAt,
+        updatedAt: snapshot.updatedAt,
+      },
+    ]);
+    this.logger.debug(`synced doc ${workspaceId}/${docId}`);
+  }
+
+  async deleteDoc(
+    workspaceId: string,
+    docId: string,
+    options?: OperationOptions
+  ) {
+    await this.deleteByQuery(
+      SearchTable.doc,
+      {
+        type: SearchQueryType.boolean,
+        occur: SearchQueryOccur.must,
+        queries: [
+          {
+            type: SearchQueryType.match,
+            field: 'workspaceId',
+            match: workspaceId,
+          },
+          {
+            type: SearchQueryType.match,
+            field: 'docId',
+            match: docId,
+          },
+        ],
+      },
+      options
+    );
+    this.logger.debug(`deleted doc ${workspaceId}/${docId}`);
+    await this.deleteByQuery(
+      SearchTable.block,
+      {
+        type: SearchQueryType.boolean,
+        occur: SearchQueryOccur.must,
+        queries: [
+          {
+            type: SearchQueryType.match,
+            field: 'workspaceId',
+            match: workspaceId,
+          },
+          {
+            type: SearchQueryType.match,
+            field: 'docId',
+            match: docId,
+          },
+        ],
+      },
+      options
+    );
+    this.logger.debug(`deleted all blocks in doc ${workspaceId}/${docId}`);
+  }
+
+  async deleteWorkspace(workspaceId: string, options?: OperationOptions) {
+    await this.deleteByQuery(
+      SearchTable.doc,
+      {
+        type: SearchQueryType.match,
+        field: 'workspaceId',
+        match: workspaceId,
+      },
+      options
+    );
+    this.logger.debug(`deleted all docs in workspace ${workspaceId}`);
+    await this.deleteByQuery(
+      SearchTable.block,
+      {
+        type: SearchQueryType.match,
+        field: 'workspaceId',
+        match: workspaceId,
+      },
+      options
+    );
+    this.logger.debug(`deleted all blocks in workspace ${workspaceId}`);
   }
 
   async deleteByQuery<T extends SearchTable>(

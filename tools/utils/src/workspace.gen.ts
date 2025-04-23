@@ -963,6 +963,7 @@ export const PackageList = [
     location: 'packages/backend/server',
     name: '@affine/server',
     workspaceDependencies: [
+      'packages/common/reader',
       'packages/backend/native',
       'tools/cli',
       'tools/utils',

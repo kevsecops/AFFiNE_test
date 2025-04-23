@@ -1,12 +1,15 @@
 // TODO(@forehalo):
 //   Because of the `@affine/server` package can't import directly from workspace packages,
-//   this is a temprory solution to get the block suite data(title, description) from given yjs binary or yjs doc.
+//   this is a temporary solution to get the block suite data(title, description) from given yjs binary or yjs doc.
 //   The logic is mainly copied from
 //     - packages/frontend/core/src/modules/docs-search/worker/in-worker.ts
 //     - packages/frontend/core/src/components/page-list/use-block-suite-page-preview.ts
 //   and it's better to be provided by blocksuite
 
-import { Array, Doc, Map } from 'yjs';
+import {
+  readAllDocIdsFromRootDoc,
+} from '@affine/reader';
+import { applyUpdate, Array, Doc, Map } from 'yjs';
 
 export interface PageDocContent {
   title: string;
@@ -156,4 +159,12 @@ export function parsePageDoc(
   }
 
   return content;
+}
+
+export function readAllDocIdsFromWorkspaceSnapshot(snapshot: Uint8Array) {
+  const rootDoc = new Doc();
+  applyUpdate(rootDoc, snapshot);
+  return readAllDocIdsFromRootDoc(rootDoc, {
+    includeTrash: true,
+  });
 }

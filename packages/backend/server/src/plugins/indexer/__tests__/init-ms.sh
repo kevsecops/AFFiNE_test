@@ -1363,3 +1363,4 @@ curl -X POST "http://localhost:9308/delete" -H "Content-Type: application/json" 
 }'
 
 curl -X POST "http://localhost:9308/cli" -d "DELETE FROM block WHERE workspace_id = 'workspaceId1'"
+curl -X POST http://localhost:9308/doc/_search -H 'Content-Type: application/json' -d '{"_source":["workspace_id","doc_id"],"sort":["_score",{"updated_at":"desc"},{"doc_id":"desc"},"id"],"query":{"match":{"workspace_id":{"query":"91484e67-3a05-45d0-bb07-fb01d5446c16"}}},"size":7,"options":{"scroll":true}}' | json
