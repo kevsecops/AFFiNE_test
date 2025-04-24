@@ -1,5 +1,7 @@
 import { File } from 'node:buffer';
 
+import { z } from 'zod';
+
 import { CopilotContextFileNotSupported } from '../../../base';
 import type { PageDocContent } from '../../../core/utils/blocksuite';
 import { ChunkSimilarity, Embedding } from '../../../models';
@@ -124,12 +126,14 @@ export abstract class EmbeddingClient {
   }
 
   async reRank<Chunk extends ChunkSimilarity = ChunkSimilarity>(
-    embeddings: Chunk[]
+    _query: string,
+    embeddings: Chunk[],
+    topK: number
   ): Promise<Chunk[]> {
     // sort by distance with ascending order
-    return embeddings.sort(
-      (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)
-    );
+    return embeddings
+      .toSorted((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+      .slice(0, topK);
   }
 
   abstract getEmbeddings(
@@ -137,3 +141,29 @@ export abstract class EmbeddingClient {
     signal?: AbortSignal
   ): Promise<Embedding[]>;
 }
+
+const ReRankItemSchema = z.object({
+  scores: z.object({
+    reason: z
+      .string()
+      .describe(
+        'Think step by step, describe in 20 words the reason for giving this score.'
+      ),
+    chunk: z.string().describe('The chunk index of the search result.'),
+    targetId: z.string().describe('The id of the target.'),
+    score: z
+      .number()
+      .describe(
+        'The relevance score of the results should be 0-10, with 0 being the least relevant and 10 being the most relevant.'
+      ),
+  }),
+});
+
+export const getReRankSchema = (size: number) =>
+  z.object({
+    ranks: ReRankItemSchema.array().describe(
+      `A array of scores. Make sure to score all ${size} results.`
+    ),
+  });
+
+export type ReRankResult = z.infer<ReturnType<typeof getReRankSchema>>['ranks'];
