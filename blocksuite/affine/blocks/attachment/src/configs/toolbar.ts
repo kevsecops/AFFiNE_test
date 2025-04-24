@@ -94,17 +94,31 @@ export const attachmentViewDropdownMenu = {
     },
   ],
   content(ctx) {
-    const model = ctx.getCurrentModelByType(AttachmentBlockModel);
-    if (!model) return null;
+    const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
+    if (!block) return null;
 
+    const model = block.model;
     const embedProvider = ctx.std.get(AttachmentEmbedProvider);
     const actions = this.actions.map(action => ({ ...action }));
     const viewType$ = computed(() => {
       const [cardAction, embedAction] = actions;
+      const blobState = block.blobState$.value;
+      const success = !(
+        blobState.uploading ||
+        blobState.downloading ||
+        blobState.overSize ||
+        blobState.errorMessage
+      );
+      const sourceId = Boolean(model.props.sourceId$.value);
       const embed = model.props.embed$.value ?? false;
+      // 1. Check whether `sourceId` exists.
+      // 2. Check if `embedded` is allowed.
+      // 3. Check `blobState$`
+      const allowed =
+        success && sourceId && embedProvider.embedded(model) && !embed;
 
       cardAction.disabled = !embed;
-      embedAction.disabled = embed && embedProvider.embedded(model);
+      embedAction.disabled = !allowed;
 
       return embed ? embedAction.label : cardAction.label;
     });
