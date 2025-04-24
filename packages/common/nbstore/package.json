@@ -18,6 +18,7 @@
     "./frontend": "./src/frontend/index.ts"
   },
   "dependencies": {
+    "@affine/reader": "workspace:*",
     "@toeverything/infra": "workspace:*",
     "eventemitter2": "^6.4.9",
     "graphemer": "^1.4.0",

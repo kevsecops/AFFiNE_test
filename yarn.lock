@@ -818,6 +818,7 @@ __metadata:
   dependencies:
     "@affine/error": "workspace:*"
     "@affine/graphql": "workspace:*"
+    "@affine/reader": "workspace:*"
     "@blocksuite/affine": "workspace:*"
     "@toeverything/infra": "workspace:*"
     eventemitter2: "npm:^6.4.9"
@@ -851,6 +852,19 @@ __metadata:
     "@googleapis/androidpublisher": "npm:^26.0.0"
     "@types/node": "npm:^22.0.0"
     typescript: "npm:^5.7.2"
+  languageName: unknown
+  linkType: soft
+
+"@affine/reader@workspace:*, @affine/reader@workspace:packages/common/reader":
+  version: 0.0.0-use.local
+  resolution: "@affine/reader@workspace:packages/common/reader"
+  dependencies:
+    "@blocksuite/affine": "workspace:*"
+    lodash-es: "npm:^4.17.21"
+    vitest: "npm:3.1.1"
+    yjs: "npm:^13.6.21"
+  peerDependencies:
+    "@blocksuite/affine": "workspace:*"
   languageName: unknown
   linkType: soft
 

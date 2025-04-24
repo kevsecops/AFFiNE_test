@@ -1,0 +1,21 @@
+{
+  "name": "@affine/reader",
+  "type": "module",
+  "version": "0.21.0",
+  "private": true,
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.21",
+    "yjs": "^13.6.21"
+  },
+  "devDependencies": {
+    "@blocksuite/affine": "workspace:*",
+    "vitest": "3.1.1"
+  },
+  "peerDependencies": {
+    "@blocksuite/affine": "workspace:*"
+  }
+}

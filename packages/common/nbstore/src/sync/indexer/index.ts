@@ -1,3 +1,4 @@
+import { readAllDocsFromRootDoc } from '@affine/reader';
 import {
   filter,
   first,
@@ -7,12 +8,7 @@ import {
   Subject,
   throttleTime,
 } from 'rxjs';
-import {
-  applyUpdate,
-  type Array as YArray,
-  Doc as YDoc,
-  type Map as YMap,
-} from 'yjs';
+import { applyUpdate, Doc as YDoc } from 'yjs';
 
 import {
   type DocStorage,
@@ -432,29 +428,9 @@ export class IndexerSyncImpl implements IndexerSync {
    * Get all docs from the root doc, without deleted docs
    */
   private getAllDocsFromRootDoc() {
-    const docs = this.status.rootDoc.getMap('meta').get('pages') as
-      | YArray<YMap<any>>
-      | undefined;
-    const availableDocs = new Map<string, { title: string | undefined }>();
-
-    if (docs) {
-      for (const page of docs) {
-        const docId = page.get('id');
-
-        if (typeof docId !== 'string') {
-          continue;
-        }
-
-        const inTrash = page.get('trash') ?? false;
-        const title = page.get('title');
-
-        if (!inTrash) {
-          availableDocs.set(docId, { title });
-        }
-      }
-    }
-
-    return availableDocs;
+    return readAllDocsFromRootDoc(this.status.rootDoc, {
+      includeTrash: false,
+    });
   }
 
   private async getAllDocsFromIndexer() {

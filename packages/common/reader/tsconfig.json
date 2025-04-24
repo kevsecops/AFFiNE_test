@@ -6,11 +6,5 @@
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
-  "references": [
-    { "path": "../reader" },
-    { "path": "../infra" },
-    { "path": "../error" },
-    { "path": "../graphql" },
-    { "path": "../../../blocksuite/affine/all" }
-  ]
+  "references": [{ "path": "../../../blocksuite/affine/all" }]
 }
