@@ -176,7 +176,7 @@ export class ContextSession implements AsyncDisposable {
     content: string,
     topK: number = 5,
     signal?: AbortSignal,
-    threshold: number = 0.7
+    threshold: number = 0.85
   ): Promise<FileChunkSimilarity[]> {
     const embedding = await this.client
       .getEmbeddings([content], signal)
@@ -187,18 +187,18 @@ export class ContextSession implements AsyncDisposable {
       this.models.copilotContext.matchFileEmbedding(
         embedding,
         this.id,
-        topK,
+        topK * 2,
         threshold
       ),
       this.models.copilotWorkspace.matchFileEmbedding(
         this.workspaceId,
         embedding,
-        topK,
+        topK * 2,
         threshold
       ),
     ]);
 
-    return this.client.reRank([...context, ...workspace]);
+    return this.client.reRank(content, [...context, ...workspace], topK);
   }
 
   /**
@@ -213,19 +213,21 @@ export class ContextSession implements AsyncDisposable {
     content: string,
     topK: number = 5,
     signal?: AbortSignal,
-    threshold: number = 0.7
+    threshold: number = 0.5
   ) {
     const embedding = await this.client
       .getEmbeddings([content], signal)
       .then(r => r?.[0]?.embedding);
     if (!embedding) return [];
 
-    return this.models.copilotContext.matchWorkspaceEmbedding(
+    const workspace = await this.models.copilotContext.matchWorkspaceEmbedding(
       embedding,
       this.workspaceId,
-      topK,
+      topK * 2,
       threshold
     );
+
+    return this.client.reRank(content, workspace, topK);
   }
 
   async saveDocRecord(
