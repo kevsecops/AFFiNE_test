@@ -1,32 +1,10 @@
-import type { app, dialog, shell } from 'electron';
+export type MainEventRegister = (...args: any[]) => () => void;
 
-export interface ExposedMeta {
-  handlers: [string, string[]][];
-  events: [string, string[]][];
-}
+export type IsomorphicHandler = (
+  e: Electron.IpcMainInvokeEvent,
+  ...args: any[]
+) => Promise<any>;
 
-// render <-> helper
-export interface RendererToHelper {
-  postEvent: (channel: string, ...args: any[]) => void;
-}
-
-export interface HelperToRenderer {
-  [key: string]: (...args: any[]) => Promise<any>;
-}
-
-// helper <-> main
-export interface HelperToMain {
-  getMeta: () => ExposedMeta;
-}
-
-export type MainToHelper = Pick<
-  typeof dialog & typeof shell & typeof app,
-  | 'showOpenDialog'
-  | 'showSaveDialog'
-  | 'openExternal'
-  | 'showItemInFolder'
-  | 'getPath'
->;
-
-export const AFFINE_API_CHANNEL_NAME = 'affine-ipc-api';
-export const AFFINE_EVENT_CHANNEL_NAME = 'affine-ipc-event';
+export type NamespaceHandlers = {
+  [key: string]: IsomorphicHandler;
+};

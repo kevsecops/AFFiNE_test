@@ -1,7 +1,7 @@
 import type {
   SpellCheckStateKey,
   SpellCheckStateSchema,
-} from '@affine/electron/main/shared-state-schema';
+} from '../../../../../apps/electron/src-old/main/shared-state-schema';
 import type { Language } from '@affine/i18n';
 import { LiveData, Service } from '@toeverything/infra';
 

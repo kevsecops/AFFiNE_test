@@ -1,7 +1,7 @@
 import type {
   MeetingSettingsKey,
   MeetingSettingsSchema,
-} from '@affine/electron/main/shared-state-schema';
+} from '../../../../../apps/electron/src-old/main/shared-state-schema';
 import { LiveData, Service } from '@toeverything/infra';
 import { defaults } from 'lodash-es';
 
