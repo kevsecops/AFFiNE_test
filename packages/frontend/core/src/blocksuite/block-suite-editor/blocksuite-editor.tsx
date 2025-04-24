@@ -317,22 +317,16 @@ export const BlockSuiteEditor = (props: EditorProps) => {
   useEffect(() => {
     if (props.page.root) {
       setIsLoading(false);
+      track.doc.$.$.loadDoc({
+        workspaceId: props.page.workspace.id,
+        docId: props.page.id,
+        // time cost in ms
+        time: Date.now() - loadStartTime,
+        success: true,
+      });
       return;
     }
-    const timer = setTimeout(() => {
-      setLongerLoading(true);
-    }, 20 * 1000);
-    const reportErrorTimer = setTimeout(() => {
-      if (isLoading) {
-        track.doc.$.$.loadDoc({
-          workspaceId: props.page.workspace.id,
-          docId: props.page.id,
-          // time cost in ms
-          time: Date.now() - loadStartTime,
-          success: false,
-        });
-      }
-    }, 60 * 1000);
+
     const disposable = props.page.slots.rootAdded.subscribe(() => {
       disposable.unsubscribe();
       track.doc.$.$.loadDoc({
@@ -346,6 +340,26 @@ export const BlockSuiteEditor = (props: EditorProps) => {
     });
     return () => {
       disposable.unsubscribe();
+    };
+  }, [loadStartTime, props.page]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        setLongerLoading(true);
+      }
+    }, 20 * 1000);
+    const reportErrorTimer = setTimeout(() => {
+      if (isLoading) {
+        track.doc.$.$.loadDoc({
+          workspaceId: props.page.workspace.id,
+          docId: props.page.id,
+          time: Date.now() - loadStartTime,
+          success: false,
+        });
+      }
+    }, 60 * 1000);
+    return () => {
       clearTimeout(timer);
       clearTimeout(reportErrorTimer);
     };
