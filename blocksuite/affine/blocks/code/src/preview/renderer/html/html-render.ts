@@ -1,6 +1,6 @@
 import type { CodeBlockModel } from '@blocksuite/affine-model';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher } from '@blocksuite/global/lit';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -14,7 +14,7 @@ export const CodeBlockHtmlPreview = CodeBlockPreviewExtension(
   model => html`<html-preview .model=${model}></html-preview>`
 );
 
-export class HTMLPreview extends SignalWatcher(LitElement) {
+export class HTMLPreview extends SignalWatcher(WithDisposable(LitElement)) {
   static override styles = css`
     .html-preview-loading {
       color: ${unsafeCSSVarV2('text/placeholder')};
@@ -57,6 +57,19 @@ export class HTMLPreview extends SignalWatcher(LitElement) {
   override firstUpdated(_changedProperties: PropertyValues): void {
     const result = super.firstUpdated(_changedProperties);
 
+    this._link();
+
+    this.disposables.add(
+      this.model.props.text$.subscribe(() => {
+        this._link();
+      })
+    );
+
+    return result;
+  }
+
+  private _link() {
+    this.state = 'loading';
     linkWebContainer(this.iframe, this.model)
       .then(() => {
         this.state = 'finish';
@@ -65,8 +78,6 @@ export class HTMLPreview extends SignalWatcher(LitElement) {
         console.error('Failed to link WebContainer:', error);
         this.state = 'error';
       });
-
-    return result;
   }
 
   override render() {
