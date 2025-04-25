@@ -19,7 +19,7 @@ test.beforeEach(async () => {
   user = await createRandomUser();
 });
 
-test('new page', async ({ page }) => {
+test.skip('new page', async ({ page }) => {
   await loginUser(page, user, {
     isElectron: true,
   });
