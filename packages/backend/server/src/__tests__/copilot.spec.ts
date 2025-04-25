@@ -774,7 +774,7 @@ test('should be able to get provider', async t => {
 
   {
     const p = await factory.getProviderByOutputType(
-      ModelOutputType.Text,
+      ModelOutputType.Image,
       ModelInputType.Image,
       { prefer: CopilotProviderType.FAL }
     );

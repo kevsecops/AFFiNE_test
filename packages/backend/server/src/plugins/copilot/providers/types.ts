@@ -14,6 +14,9 @@ export const CopilotProviderSchema = z.object({
 });
 
 export const PromptConfigStrictSchema = z.object({
+  // params requirements
+  requireContent: z.boolean().nullable().optional(),
+  requireAttachment: z.boolean().nullable().optional(),
   // openai
   jsonMode: z.boolean().nullable().optional(),
   frequencyPenalty: z.number().nullable().optional(),

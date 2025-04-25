@@ -207,9 +207,10 @@ export abstract class CopilotProvider<C = any> {
         c.input.includes(ModelInputType.Image) ||
         c.input.includes(ModelInputType.Audio)
     );
+    const requireContent = options?.requireContent ?? true;
+    const requireAttachment = options?.requireAttachment ?? false;
 
     if (Array.isArray(messages) && messages.length > 0) {
-      // 验证消息内容
       if (
         messages.some(
           m =>
@@ -217,12 +218,17 @@ export abstract class CopilotProvider<C = any> {
             typeof m !== 'object' ||
             !m ||
             // check content
-            typeof m.content !== 'string' ||
-            !m.content ||
-            !m.content.trim() ||
+            (requireContent &&
+              (typeof m.content !== 'string' ||
+                !m.content ||
+                !m.content.trim())) ||
             // check attachment
             (multimodal &&
-              (!Array.isArray(m.attachments) || !m.attachments.length))
+              m.attachments &&
+              (!Array.isArray(m.attachments) ||
+                (!!requireAttachment &&
+                  m.role === 'user' &&
+                  !m.attachments.length)))
         )
       ) {
         throw new CopilotPromptInvalid('Empty message content');
