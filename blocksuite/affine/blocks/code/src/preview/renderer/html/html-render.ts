@@ -1,0 +1,102 @@
+import type { CodeBlockModel } from '@blocksuite/affine-model';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { SignalWatcher } from '@blocksuite/global/lit';
+import { css, html, LitElement, type PropertyValues } from 'lit';
+import { property, query, state } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import { CodeBlockPreviewExtension } from '../../code-preview-extension';
+import { linkWebContainer } from './web-container';
+
+export const CodeBlockHtmlPreview = CodeBlockPreviewExtension(
+  'html',
+  model => html`<html-preview .model=${model}></html-preview>`
+);
+
+export class HTMLPreview extends SignalWatcher(LitElement) {
+  static override styles = css`
+    .html-preview-loading {
+      color: ${unsafeCSSVarV2('text/placeholder')};
+      font-feature-settings:
+        'liga' off,
+        'clig' off;
+
+      /* light/code/base */
+      font-family: 'IBM Plex Mono';
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .html-preview-error {
+      color: ${unsafeCSSVarV2('button/error')};
+      font-feature-settings:
+        'liga' off,
+        'clig' off;
+
+      /* light/code/base */
+      font-family: 'IBM Plex Mono';
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+  `;
+
+  @property({ attribute: false })
+  accessor model!: CodeBlockModel;
+
+  @state()
+  accessor state: 'loading' | 'error' | 'finish' = 'loading';
+
+  @query('iframe')
+  accessor iframe!: HTMLIFrameElement;
+
+  override firstUpdated(_changedProperties: PropertyValues): void {
+    const result = super.firstUpdated(_changedProperties);
+
+    linkWebContainer(this.iframe, this.model)
+      .then(() => {
+        this.state = 'finish';
+      })
+      .catch(error => {
+        console.error('Failed to link WebContainer:', error);
+        this.state = 'error';
+      });
+
+    return result;
+  }
+
+  override render() {
+    return html`
+      <div class="html-preview-container">
+        ${choose(this.state, [
+          [
+            'loading',
+            () =>
+              html`<div class="html-preview-loading">
+                Rendering the code...
+              </div>`,
+          ],
+          [
+            'error',
+            () =>
+              html`<div class="html-preview-error">
+                Failed to render the preview. Please check your HTML code for
+                errors.
+              </div>`,
+          ],
+        ])}
+        <iframe
+          class="html-preview-iframe"
+          title="HTML Preview"
+          style=${styleMap({
+            display: this.state === 'finish' ? undefined : 'none',
+          })}
+        ></iframe>
+      </div>
+    `;
+  }
+}

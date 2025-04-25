@@ -26,6 +26,7 @@ import { computed, effect, type Signal, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { bundledLanguagesInfo, type ThemedToken } from 'shiki';
 
 import { CodeBlockConfigExtension } from './code-block-config.js';
@@ -389,6 +390,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
     const previewContext = this.std.getOptional(
       CodeBlockPreviewIdentifier(this.model.props.language ?? '')
     );
+    const shouldRenderPreview = preview && previewContext;
 
     return html`
       <div
@@ -398,37 +400,42 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
           wrap: this.model.props.wrap,
         })}
       >
-        ${preview && previewContext
-          ? html`<div contenteditable="false" class="affine-code-block-preview">
-              ${previewContext.renderer(this.model)}
-            </div>`
-          : html`
-              <rich-text
-                .yText=${this.model.props.text.yText}
-                .inlineEventSource=${this.topContenteditableElement ?? nothing}
-                .undoManager=${this.doc.history}
-                .attributesSchema=${this.inlineManager.getSchema()}
-                .attributeRenderer=${this.inlineManager.getRenderer()}
-                .readonly=${this.doc.readonly}
-                .inlineRangeProvider=${this._inlineRangeProvider}
-                .enableClipboard=${false}
-                .enableUndoRedo=${false}
-                .wrapText=${this.model.props.wrap}
-                .verticalScrollContainerGetter=${() =>
-                  getViewportElement(this.host)}
-                .vLineRenderer=${showLineNumbers
-                  ? (vLine: VLine) => {
-                      return html`
-                        <span contenteditable="false" class="line-number"
-                          >${vLine.index + 1}</span
-                        >
-                        ${vLine.renderVElements()}
-                      `;
-                    }
-                  : undefined}
-              >
-              </rich-text>
-            `}
+        <rich-text
+          style=${styleMap({
+            display: shouldRenderPreview ? 'none' : undefined,
+          })}
+          .yText=${this.model.props.text.yText}
+          .inlineEventSource=${this.topContenteditableElement ?? nothing}
+          .undoManager=${this.doc.history}
+          .attributesSchema=${this.inlineManager.getSchema()}
+          .attributeRenderer=${this.inlineManager.getRenderer()}
+          .readonly=${this.doc.readonly}
+          .inlineRangeProvider=${this._inlineRangeProvider}
+          .enableClipboard=${false}
+          .enableUndoRedo=${false}
+          .wrapText=${this.model.props.wrap}
+          .verticalScrollContainerGetter=${() => getViewportElement(this.host)}
+          .vLineRenderer=${showLineNumbers
+            ? (vLine: VLine) => {
+                return html`
+                  <span contenteditable="false" class="line-number"
+                    >${vLine.index + 1}</span
+                  >
+                  ${vLine.renderVElements()}
+                `;
+              }
+            : undefined}
+        >
+        </rich-text>
+        <div
+          style=${styleMap({
+            display: shouldRenderPreview ? undefined : 'none',
+          })}
+          contenteditable="false"
+          class="affine-code-block-preview"
+        >
+          ${previewContext?.renderer(this.model)}
+        </div>
         ${this.renderChildren(this.model)} ${Object.values(this.widgets)}
       </div>
     `;

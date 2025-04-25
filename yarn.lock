@@ -2473,6 +2473,7 @@ __metadata:
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
     "@types/mdast": "npm:^4.0.4"
+    "@webcontainer/api": "npm:^1.6.0"
     lit: "npm:^3.2.0"
     minimatch: "npm:^10.0.1"
     rxjs: "npm:^7.8.1"
@@ -16229,6 +16230,13 @@ __metadata:
     "@webassemblyjs/ast": "npm:1.14.1"
     "@xtuc/long": "npm:4.2.2"
   checksum: 10/cef09aad2fcd291bfcf9efdae2ea1e961a1ba0f925d1d9dcdd8c746d32fbaf431b6d26a0241699c0e39f82139018aa720b4ceb84ac6f4c78f13072747480db69
+  languageName: node
+  linkType: hard
+
+"@webcontainer/api@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "@webcontainer/api@npm:1.6.0"
+  checksum: 10/0a328235089b1c9a94e175451caa84020d3b899334c04324d0fac82d94b634c0fa70d05407eedba9af330abc2373455c58ff9b6af8c3b005982c10f92a01ecce
   languageName: node
   linkType: hard
 

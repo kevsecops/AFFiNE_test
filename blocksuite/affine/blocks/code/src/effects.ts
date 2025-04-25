@@ -7,6 +7,7 @@ import { AffineCodeToolbar } from './code-toolbar/components/code-toolbar';
 import { LanguageListButton } from './code-toolbar/components/lang-button';
 import { PreviewButton } from './code-toolbar/components/preview-button';
 import { AffineCodeUnit } from './highlight/affine-code-unit';
+import { HTMLPreview } from './preview/renderer/html/html-render';
 
 export function effects() {
   customElements.define('language-list-button', LanguageListButton);
@@ -15,6 +16,7 @@ export function effects() {
   customElements.define('affine-code-unit', AffineCodeUnit);
   customElements.define('affine-code', CodeBlockComponent);
   customElements.define('preview-button', PreviewButton);
+  customElements.define('html-preview', HTMLPreview);
 }
 
 declare global {
@@ -23,5 +25,6 @@ declare global {
     'affine-code-toolbar': AffineCodeToolbar;
     'preview-button': PreviewButton;
     [AFFINE_CODE_TOOLBAR_WIDGET]: AffineCodeToolbarWidget;
+    'html-preview': HTMLPreview;
   }
 }
