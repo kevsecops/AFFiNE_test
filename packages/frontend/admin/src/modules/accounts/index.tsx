@@ -34,6 +34,7 @@ export function AccountPage() {
         pagination={pagination}
         onPaginationChange={setPagination}
         selectedUsers={selectedUsers}
+        setMemoUsers={setMemoUsers}
       />
     </div>
   );

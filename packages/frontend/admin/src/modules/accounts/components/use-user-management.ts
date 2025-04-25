@@ -61,6 +61,7 @@ export const useCreateUser = () => {
           features,
         });
         await revalidate(listUsersQuery);
+        await revalidate(getUsersCountQuery);
         toast('Account updated successfully');
       } catch (e) {
         toast.error('Failed to update account: ' + (e as Error).message);
@@ -162,6 +163,7 @@ export const useDeleteUser = () => {
       await deleteUserById({ id })
         .then(async () => {
           await revalidate(listUsersQuery);
+          await revalidate(getUsersCountQuery);
           toast('User deleted successfully');
           callback?.();
         })
@@ -247,6 +249,7 @@ export const useImportUsers = () => {
       await importUsers({ input })
         .then(async ({ importUsers }) => {
           await revalidate(listUsersQuery);
+          await revalidate(getUsersCountQuery);
           callback?.(importUsers);
         })
         .catch(e => {

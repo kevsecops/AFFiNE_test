@@ -28,6 +28,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   pagination: PaginationState;
   selectedUsers: UserType[];
+  setMemoUsers: Dispatch<SetStateAction<UserType[]>>;
   onPaginationChange: Dispatch<
     SetStateAction<{
       pageIndex: number;
@@ -41,6 +42,7 @@ export function DataTable<TData extends { id: string }, TValue>({
   data,
   pagination,
   selectedUsers,
+  setMemoUsers,
   onPaginationChange,
 }: DataTableProps<TData, TValue>) {
   const usersCount = useUserCount();
@@ -49,13 +51,14 @@ export function DataTable<TData extends { id: string }, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const [tableData, setTableData] = useState(data);
+  const [rowCount, setRowCount] = useState(usersCount);
   const table = useReactTable({
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: row => row.id,
     manualPagination: true,
-    rowCount: usersCount,
+    rowCount: rowCount,
     enableFilters: true,
     onPaginationChange: onPaginationChange,
     enableRowSelection: true,
@@ -72,13 +75,20 @@ export function DataTable<TData extends { id: string }, TValue>({
     setTableData(data);
   }, [data]);
 
+  useEffect(() => {
+    setRowCount(usersCount);
+  }, [usersCount]);
+
   return (
     <div className="flex flex-col gap-4 py-5 px-6 h-full overflow-auto">
       <DataTableToolbar
         setDataTable={setTableData}
         data={data}
+        usersCount={usersCount}
         table={table}
         selectedUsers={selectedUsers}
+        setRowCount={setRowCount}
+        setMemoUsers={setMemoUsers}
       />
       <div className="rounded-md border h-full flex flex-col overflow-auto">
         <Table>
