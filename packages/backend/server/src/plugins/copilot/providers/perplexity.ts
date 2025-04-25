@@ -5,14 +5,9 @@ import {
 import { generateText, streamText } from 'ai';
 import { z } from 'zod';
 
-import {
-  CopilotPromptInvalid,
-  CopilotProviderSideError,
-  metrics,
-} from '../../../base';
+import { CopilotProviderSideError, metrics } from '../../../base';
 import { CopilotProvider } from './provider';
 import {
-  ChatMessageRole,
   CopilotChatOptions,
   CopilotProviderType,
   ModelConditions,
@@ -210,45 +205,6 @@ export class PerplexityProvider extends CopilotProvider<PerplexityConfig> {
     } catch (e) {
       metrics.ai.counter('chat_text_stream_errors').add(1, { model: model.id });
       throw e;
-    }
-  }
-
-  protected async checkParams({
-    messages,
-    cond,
-  }: {
-    messages?: PromptMessage[];
-    cond: ModelConditions;
-  }) {
-    if (!(await this.isModelAvailable(cond))) {
-      throw new CopilotPromptInvalid(`Model not available: ${cond}`);
-    }
-    if (Array.isArray(messages) && messages.length > 0) {
-      if (
-        messages.some(
-          m =>
-            // check non-object
-            typeof m !== 'object' ||
-            !m ||
-            // check content
-            typeof m.content !== 'string' ||
-            // content and attachments must exist at least one
-            ((!m.content || !m.content.trim()) &&
-              (!Array.isArray(m.attachments) || !m.attachments.length))
-        )
-      ) {
-        throw new CopilotPromptInvalid('Empty message content');
-      }
-      if (
-        messages.some(
-          m =>
-            typeof m.role !== 'string' ||
-            !m.role ||
-            !ChatMessageRole.includes(m.role)
-        )
-      ) {
-        throw new CopilotPromptInvalid('Invalid message role');
-      }
     }
   }
 

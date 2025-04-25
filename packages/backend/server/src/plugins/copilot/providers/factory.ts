@@ -46,7 +46,10 @@ export class CopilotProviderFactory {
         continue;
       }
 
-      if (!filter.model) {
+      if (
+        !filter.model &&
+        (await provider.isModelAvailable({ inputType, outputType }))
+      ) {
         candidate = provider;
         this.logger.debug(`Copilot provider candidate found: ${type}`);
         break;

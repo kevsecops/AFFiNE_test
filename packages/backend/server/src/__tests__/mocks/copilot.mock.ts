@@ -22,9 +22,9 @@ export class MockCopilotProvider extends OpenAIProvider {
       id: 'test',
       capabilities: [
         {
-          output: [ModelOutputType.Text],
           input: [ModelInputType.Text],
-          defaultForCapability: true,
+          output: [ModelOutputType.Text],
+          defaultForOutputType: true,
         },
       ],
     },
@@ -33,9 +33,9 @@ export class MockCopilotProvider extends OpenAIProvider {
       id: 'test-image',
       capabilities: [
         {
-          output: [ModelOutputType.Image],
           input: [ModelInputType.Text],
-          defaultForCapability: true,
+          output: [ModelOutputType.Image],
+          defaultForOutputType: true,
         },
       ],
     },
@@ -44,8 +44,8 @@ export class MockCopilotProvider extends OpenAIProvider {
       id: 'gpt-4o',
       capabilities: [
         {
-          output: [ModelOutputType.Text],
           input: [ModelInputType.Text, ModelInputType.Image],
+          output: [ModelOutputType.Text],
         },
       ],
     },
@@ -54,8 +54,8 @@ export class MockCopilotProvider extends OpenAIProvider {
       id: 'gpt-4o-2024-08-06',
       capabilities: [
         {
-          output: [ModelOutputType.Text],
           input: [ModelInputType.Text, ModelInputType.Image],
+          output: [ModelOutputType.Text],
         },
       ],
     },
@@ -64,8 +64,8 @@ export class MockCopilotProvider extends OpenAIProvider {
       id: 'gpt-4.1',
       capabilities: [
         {
-          output: [ModelOutputType.Text],
           input: [ModelInputType.Text, ModelInputType.Image],
+          output: [ModelOutputType.Text],
         },
       ],
     },
@@ -74,8 +74,8 @@ export class MockCopilotProvider extends OpenAIProvider {
       id: 'gpt-4.1-2025-04-14',
       capabilities: [
         {
-          output: [ModelOutputType.Text],
           input: [ModelInputType.Text, ModelInputType.Image],
+          output: [ModelOutputType.Text],
         },
       ],
     },
@@ -84,8 +84,8 @@ export class MockCopilotProvider extends OpenAIProvider {
       id: 'gpt-4.1-mini',
       capabilities: [
         {
-          output: [ModelOutputType.Text],
           input: [ModelInputType.Text, ModelInputType.Image],
+          output: [ModelOutputType.Text],
         },
       ],
     },

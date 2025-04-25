@@ -11,14 +11,12 @@ import {
 } from 'ai';
 
 import {
-  CopilotPromptInvalid,
   CopilotProviderSideError,
   metrics,
   UserFriendlyError,
 } from '../../../base';
 import { CopilotProvider } from './provider';
 import {
-  ChatMessageRole,
   CopilotChatOptions,
   CopilotEmbeddingOptions,
   CopilotImageOptions,
@@ -46,12 +44,12 @@ export class GeminiProvider extends CopilotProvider<GeminiConfig> {
       id: 'gemini-2.0-flash-001',
       capabilities: [
         {
-          output: [ModelOutputType.Text],
           input: [
             ModelInputType.Text,
             ModelInputType.Image,
             ModelInputType.Audio,
           ],
+          output: [ModelOutputType.Text],
           defaultForOutputType: true,
         },
       ],
@@ -96,52 +94,6 @@ export class GeminiProvider extends CopilotProvider<GeminiConfig> {
     });
   }
 
-  protected async checkParams({
-    messages,
-    embeddings,
-    cond,
-  }: {
-    messages?: PromptMessage[];
-    embeddings?: string[];
-    cond: ModelConditions;
-  }) {
-    if (!(await this.isModelAvailable(cond))) {
-      throw new CopilotPromptInvalid(`Model not available: ${cond}`);
-    }
-    if (Array.isArray(messages) && messages.length > 0) {
-      if (
-        messages.some(
-          m =>
-            // check non-object
-            typeof m !== 'object' ||
-            !m ||
-            // check content
-            typeof m.content !== 'string' ||
-            // content and attachments must exist at least one
-            ((!m.content || !m.content.trim()) &&
-              (!Array.isArray(m.attachments) || !m.attachments.length))
-        )
-      ) {
-        throw new CopilotPromptInvalid('Empty message content');
-      }
-      if (
-        messages.some(
-          m =>
-            typeof m.role !== 'string' ||
-            !m.role ||
-            !ChatMessageRole.includes(m.role)
-        )
-      ) {
-        throw new CopilotPromptInvalid('Invalid message role');
-      }
-    } else if (
-      Array.isArray(embeddings) &&
-      embeddings.some(e => typeof e !== 'string' || !e || !e.trim())
-    ) {
-      throw new CopilotPromptInvalid('Invalid embedding');
-    }
-  }
-
   private handleError(e: any) {
     if (e instanceof UserFriendlyError) {
       return e;
@@ -169,7 +121,7 @@ export class GeminiProvider extends CopilotProvider<GeminiConfig> {
       | CopilotEmbeddingOptions
       | CopilotImageOptions = {}
   ): Promise<string> {
-    await this.checkParams({ messages, cond });
+    await this.checkParams({ cond, messages, options });
     const model = this.selectModel(cond);
 
     try {
@@ -224,7 +176,7 @@ export class GeminiProvider extends CopilotProvider<GeminiConfig> {
     messages: PromptMessage[],
     options: CopilotChatOptions | CopilotImageOptions = {}
   ): AsyncIterable<string> {
-    await this.checkParams({ messages, cond });
+    await this.checkParams({ cond, messages });
     const model = this.selectModel(cond);
 
     try {

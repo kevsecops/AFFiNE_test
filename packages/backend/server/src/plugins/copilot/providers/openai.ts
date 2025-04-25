@@ -20,7 +20,6 @@ import {
 } from '../../../base';
 import { CopilotProvider } from './provider';
 import {
-  ChatMessageRole,
   CopilotChatOptions,
   CopilotEmbeddingOptions,
   CopilotImageOptions,
@@ -74,7 +73,6 @@ export class OpenAIProvider extends CopilotProvider<OpenAIConfig> {
     },
     // FIXME(@darkskygit): deprecated
     {
-      name: 'GPT-4o-mini-07-17',
       id: 'gpt-4o-mini-2024-07-18',
       capabilities: [
         {
@@ -103,7 +101,6 @@ export class OpenAIProvider extends CopilotProvider<OpenAIConfig> {
       ],
     },
     {
-      name: 'Gpt-4.1-mini',
       id: 'gpt-4.1-mini',
       capabilities: [
         {
@@ -186,64 +183,6 @@ export class OpenAIProvider extends CopilotProvider<OpenAIConfig> {
     });
   }
 
-  protected async checkParams({
-    cond,
-    messages,
-    embeddings,
-    options = {},
-  }: {
-    cond: ModelConditions;
-    messages?: PromptMessage[];
-    embeddings?: string[];
-    options?: CopilotChatOptions;
-  }) {
-    if (!(await this.isModelAvailable(cond))) {
-      throw new CopilotPromptInvalid(
-        `Model not available: ${JSON.stringify(cond)}`
-      );
-    }
-    if (Array.isArray(messages) && messages.length > 0) {
-      if (
-        messages.some(
-          m =>
-            // check non-object
-            typeof m !== 'object' ||
-            !m ||
-            // check content
-            typeof m.content !== 'string' ||
-            // content and attachments must exist at least one
-            ((!m.content || !m.content.trim()) &&
-              (!Array.isArray(m.attachments) || !m.attachments.length))
-        )
-      ) {
-        throw new CopilotPromptInvalid('Empty message content');
-      }
-      if (
-        messages.some(
-          m =>
-            typeof m.role !== 'string' ||
-            !m.role ||
-            !ChatMessageRole.includes(m.role)
-        )
-      ) {
-        throw new CopilotPromptInvalid('Invalid message role');
-      }
-      // json mode need 'json' keyword in content
-      // ref: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
-      if (
-        options?.jsonMode &&
-        !messages.some(m => m.content.toLowerCase().includes('json'))
-      ) {
-        throw new CopilotPromptInvalid('Prompt not support json mode');
-      }
-    } else if (
-      Array.isArray(embeddings) &&
-      embeddings.some(e => typeof e !== 'string' || !e || !e.trim())
-    ) {
-      throw new CopilotPromptInvalid('Invalid embedding');
-    }
-  }
-
   private handleError(
     e: any,
     model: string,
@@ -289,7 +228,7 @@ export class OpenAIProvider extends CopilotProvider<OpenAIConfig> {
       | CopilotEmbeddingOptions
       | CopilotImageOptions = {}
   ): Promise<string> {
-    await this.checkParams({ messages, cond, options });
+    await this.checkParams({ cond, messages, options });
     const model = this.selectModel(cond);
 
     try {
@@ -339,7 +278,7 @@ export class OpenAIProvider extends CopilotProvider<OpenAIConfig> {
     messages: PromptMessage[],
     options: CopilotChatOptions | CopilotImageOptions = {}
   ): AsyncIterable<string> {
-    await this.checkParams({ messages, cond });
+    await this.checkParams({ cond, messages });
     const model = this.selectModel(cond);
 
     if (cond.outputType === ModelOutputType.Image) {
@@ -434,7 +373,7 @@ export class OpenAIProvider extends CopilotProvider<OpenAIConfig> {
     options: CopilotEmbeddingOptions = { dimensions: DEFAULT_DIMENSIONS }
   ): Promise<number[][]> {
     messages = Array.isArray(messages) ? messages : [messages];
-    await this.checkParams({ embeddings: messages, cond, options });
+    await this.checkParams({ cond, embeddings: messages });
     const model = this.selectModel(cond);
 
     try {
