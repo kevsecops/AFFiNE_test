@@ -35,7 +35,7 @@ import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import { NOTE_SLICER_WIDGET } from './components/note-slicer/index.js';
 import { EDGELESS_DRAGGING_AREA_WIDGET } from './components/rects/edgeless-dragging-area-rect.js';
 import { EDGELESS_SELECTED_RECT_WIDGET } from './components/rects/edgeless-selected-rect.js';
-import { quickTools, seniorTools } from './components/toolbar/tools.js';
+import { quickTools } from './components/toolbar/tools.js';
 import { EdgelessRootService } from './edgeless-root-service.js';
 
 export const edgelessZoomToolbarWidget = WidgetViewExtension(
@@ -91,7 +91,6 @@ const EdgelessCommonExtension: ExtensionType[] = [
   EdgelessRootService,
   ViewportElementExtension('.affine-edgeless-viewport'),
   ...quickTools,
-  ...seniorTools,
   ...EdgelessClipboardConfigs,
 ].flat();
 

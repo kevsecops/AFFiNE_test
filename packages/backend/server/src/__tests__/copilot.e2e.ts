@@ -181,7 +181,7 @@ test('should create session correctly', async t => {
       );
     });
 
-    app.switchUser(u1);
+    await app.switchUser(u1);
     const inviteId = await inviteUser(app, id, u2.email);
     await app.login(u2);
     await acceptInviteById(app, id, inviteId, false);
@@ -329,9 +329,9 @@ test('should fork session correctly', async t => {
       );
     });
 
-    app.switchUser(u1);
+    await app.switchUser(u1);
     const inviteId = await inviteUser(app, id, u2.email);
-    app.switchUser(u2);
+    await app.switchUser(u2);
     await acceptInviteById(app, id, inviteId, false);
     await assertForkSession(id, sessionId, randomUUID(), '', async x => {
       await t.throwsAsync(
@@ -341,14 +341,14 @@ test('should fork session correctly', async t => {
       );
     });
 
-    app.switchUser(u1);
+    await app.switchUser(u1);
     const histories = await getHistories(app, { workspaceId: id });
     const latestMessageId = histories
       .find(h => h.sessionId === forkedSessionId)
       ?.messages.findLast(m => m.role === 'assistant')?.id;
     t.truthy(latestMessageId, 'should find latest message id');
 
-    app.switchUser(u2);
+    await app.switchUser(u2);
     await assertForkSession(
       id,
       forkedSessionId,
@@ -383,6 +383,45 @@ test('should create message correctly', async t => {
     );
     const messageId = await createCopilotMessage(app, sessionId);
     t.truthy(messageId, 'should be able to create message with valid session');
+  }
+
+  {
+    // with attachment url
+    {
+      const { id } = await createWorkspace(app);
+      const sessionId = await createCopilotSession(
+        app,
+        id,
+        randomUUID(),
+        promptName
+      );
+      const messageId = await createCopilotMessage(app, sessionId, undefined, [
+        'http://example.com/cat.jpg',
+      ]);
+      t.truthy(messageId, 'should be able to create message with url link');
+    }
+
+    // with attachment
+    {
+      const { id } = await createWorkspace(app);
+      const sessionId = await createCopilotSession(
+        app,
+        id,
+        randomUUID(),
+        promptName
+      );
+      const smallestPng =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII';
+      const pngData = await fetch(smallestPng).then(res => res.arrayBuffer());
+      const messageId = await createCopilotMessage(
+        app,
+        sessionId,
+        undefined,
+        undefined,
+        [new File([new Uint8Array(pngData)], '1.png', { type: 'image/png' })]
+      );
+      t.truthy(messageId, 'should be able to create message with blobs');
+    }
   }
 
   {
@@ -615,10 +654,10 @@ test('should reject request from different user', async t => {
 
   // should reject chat from different user
   {
-    app.switchUser(u1);
+    await app.switchUser(u1);
     const messageId = await createCopilotMessage(app, sessionId);
     {
-      app.switchUser(u2);
+      await app.switchUser(u2);
       await t.throwsAsync(
         chatWithText(app, sessionId, messageId),
         { instanceOf: Error },
@@ -684,9 +723,9 @@ test('should reject request that user have not permission', async t => {
 
   // should able to list history after user have permission
   {
-    app.switchUser(u1);
+    await app.switchUser(u1);
     const inviteId = await inviteUser(app, workspaceId, u2.email);
-    app.switchUser(u2);
+    await app.switchUser(u2);
     await acceptInviteById(app, workspaceId, inviteId, false);
 
     t.deepEqual(
@@ -714,7 +753,7 @@ test('should reject request that user have not permission', async t => {
       'should able to list history'
     );
 
-    app.switchUser(u1);
+    await app.switchUser(u1);
     t.deepEqual(
       await getHistories(app, { workspaceId }),
       [],

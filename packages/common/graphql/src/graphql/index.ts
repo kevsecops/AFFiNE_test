@@ -624,6 +624,7 @@ export const claimAudioTranscriptionMutation = {
     status
     title
     summary
+    actions
     transcription {
       speaker
       start
@@ -737,6 +738,111 @@ export const getCopilotSessionsQuery = {
       }
     }
   }
+}`,
+};
+
+export const addWorkspaceEmbeddingFilesMutation = {
+  id: 'addWorkspaceEmbeddingFilesMutation' as const,
+  op: 'addWorkspaceEmbeddingFiles',
+  query: `mutation addWorkspaceEmbeddingFiles($workspaceId: String!, $blob: Upload!) {
+  addWorkspaceEmbeddingFiles(workspaceId: $workspaceId, blob: $blob) {
+    fileId
+    fileName
+    mimeType
+    size
+    createdAt
+  }
+}`,
+  file: true,
+};
+
+export const getWorkspaceEmbeddingFilesQuery = {
+  id: 'getWorkspaceEmbeddingFilesQuery' as const,
+  op: 'getWorkspaceEmbeddingFiles',
+  query: `query getWorkspaceEmbeddingFiles($workspaceId: String!, $pagination: PaginationInput!) {
+  workspace(id: $workspaceId) {
+    embedding {
+      files(pagination: $pagination) {
+        totalCount
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        edges {
+          node {
+            fileId
+            fileName
+            mimeType
+            size
+            createdAt
+          }
+        }
+      }
+    }
+  }
+}`,
+};
+
+export const removeWorkspaceEmbeddingFilesMutation = {
+  id: 'removeWorkspaceEmbeddingFilesMutation' as const,
+  op: 'removeWorkspaceEmbeddingFiles',
+  query: `mutation removeWorkspaceEmbeddingFiles($workspaceId: String!, $fileId: String!) {
+  removeWorkspaceEmbeddingFiles(workspaceId: $workspaceId, fileId: $fileId)
+}`,
+};
+
+export const addWorkspaceEmbeddingIgnoredDocsMutation = {
+  id: 'addWorkspaceEmbeddingIgnoredDocsMutation' as const,
+  op: 'addWorkspaceEmbeddingIgnoredDocs',
+  query: `mutation addWorkspaceEmbeddingIgnoredDocs($workspaceId: String!, $add: [String!]!) {
+  updateWorkspaceEmbeddingIgnoredDocs(workspaceId: $workspaceId, add: $add)
+}`,
+};
+
+export const getAllWorkspaceEmbeddingIgnoredDocsQuery = {
+  id: 'getAllWorkspaceEmbeddingIgnoredDocsQuery' as const,
+  op: 'getAllWorkspaceEmbeddingIgnoredDocs',
+  query: `query getAllWorkspaceEmbeddingIgnoredDocs($workspaceId: String!) {
+  workspace(id: $workspaceId) {
+    embedding {
+      allIgnoredDocs {
+        docId
+        createdAt
+      }
+    }
+  }
+}`,
+};
+
+export const getWorkspaceEmbeddingIgnoredDocsQuery = {
+  id: 'getWorkspaceEmbeddingIgnoredDocsQuery' as const,
+  op: 'getWorkspaceEmbeddingIgnoredDocs',
+  query: `query getWorkspaceEmbeddingIgnoredDocs($workspaceId: String!, $pagination: PaginationInput!) {
+  workspace(id: $workspaceId) {
+    embedding {
+      ignoredDocs(pagination: $pagination) {
+        totalCount
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        edges {
+          node {
+            docId
+            createdAt
+          }
+        }
+      }
+    }
+  }
+}`,
+};
+
+export const removeWorkspaceEmbeddingIgnoredDocsMutation = {
+  id: 'removeWorkspaceEmbeddingIgnoredDocsMutation' as const,
+  op: 'removeWorkspaceEmbeddingIgnoredDocs',
+  query: `mutation removeWorkspaceEmbeddingIgnoredDocs($workspaceId: String!, $remove: [String!]!) {
+  updateWorkspaceEmbeddingIgnoredDocs(workspaceId: $workspaceId, remove: $remove)
 }`,
 };
 

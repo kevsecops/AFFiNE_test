@@ -303,7 +303,7 @@ export class UserModel extends BaseModel {
     const account = await this.db.connectedAccount.create({
       data,
     });
-    this.logger.log(
+    this.logger.debug(
       `Connected account ${account.provider}:${account.id} created`
     );
     return account;

@@ -30,9 +30,3 @@ export const notesButtonIcon = style({
 export const error = style({
   color: cssVarV2('aI/errorText'),
 });
-
-export const publicUserLabel = style({
-  fontSize: cssVar('fontXs'),
-  fontWeight: 500,
-  userSelect: 'none',
-});

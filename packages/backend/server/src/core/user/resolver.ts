@@ -201,6 +201,9 @@ class CreateUserInput {
 
   @Field(() => String, { nullable: true })
   name?: string;
+
+  @Field(() => String, { nullable: true })
+  password?: string;
 }
 
 @InputType()
@@ -292,7 +295,7 @@ export class UserManagementResolver {
     @Args({ name: 'input', type: () => CreateUserInput }) input: CreateUserInput
   ) {
     const { id } = await this.models.user.create({
-      email: input.email,
+      ...input,
       registered: true,
     });
 

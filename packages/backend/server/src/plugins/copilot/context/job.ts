@@ -13,9 +13,9 @@ import {
 import { DocReader } from '../../../core/doc';
 import { Models } from '../../../models';
 import { CopilotStorage } from '../storage';
+import { readStream } from '../utils';
 import { OpenAIEmbeddingClient } from './embedding';
 import { EmbeddingClient } from './types';
-import { readStream } from './utils';
 
 @Injectable()
 export class CopilotContextDocJob {

@@ -27,7 +27,7 @@ export async function initEmbedSyncedDocState(
   }
 
   return await page.evaluate(
-    ({ data, option }) => {
+    async ({ data, option }) => {
       const createDoc = async (
         docId: string,
         title: string,
@@ -69,11 +69,13 @@ export async function initEmbedSyncedDocState(
         return note ?? null;
       };
 
-      const docIds = data.map(({ title, content }, index) => {
-        const id = index === 0 ? window.doc.id : `embed-doc-${index}`;
-        createDoc(id, title, content);
-        return id;
-      });
+      const docIds = await Promise.all(
+        data.map(async ({ title, content }, index) => {
+          const id = index === 0 ? window.doc.id : `embed-doc-${index}`;
+          await createDoc(id, title, content);
+          return id;
+        })
+      );
 
       const { NoteBlockModel, NoteDisplayMode } =
         window.$blocksuite.affineModel;

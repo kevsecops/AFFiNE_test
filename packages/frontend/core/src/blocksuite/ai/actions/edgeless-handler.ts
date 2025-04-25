@@ -196,7 +196,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
             host,
             docId: host.doc.id,
             workspaceId: host.doc.workspace.id,
-            networkSearch: visible?.value && enabled?.value,
+            mustSearch: visible?.value && enabled?.value,
           } as Parameters<typeof action>[0];
 
           const content = ctx.get().content;

@@ -19,6 +19,7 @@ export type TextToTextOptions = {
   workflow?: boolean;
   isRootSession?: boolean;
   postfix?: (text: string) => string;
+  reasoning?: boolean;
 };
 
 export type ToImageOptions = TextToTextOptions & {
@@ -113,6 +114,7 @@ export function textToText({
   retry = false,
   workflow = false,
   postfix,
+  reasoning,
 }: TextToTextOptions) {
   let messageId: string | undefined;
 
@@ -132,6 +134,7 @@ export function textToText({
           {
             sessionId,
             messageId,
+            reasoning,
           },
           workflow ? 'workflow' : undefined
         );
@@ -191,6 +194,7 @@ export function textToText({
         return client.chatText({
           sessionId,
           messageId,
+          reasoning,
         });
       })(),
     ]);

@@ -1,4 +1,3 @@
-import { PeekViewService } from '@affine/core/modules/peek-view/services/peek-view';
 import { AppThemeService } from '@affine/core/modules/theme';
 import type { Container } from '@blocksuite/affine/global/di';
 import { ColorScheme } from '@blocksuite/affine/model';
@@ -9,25 +8,16 @@ import {
 import {
   createSignalFromObservable,
   type Signal,
-  SpecProvider,
 } from '@blocksuite/affine/shared/utils';
 import {
   type BlockStdScope,
   LifeCycleWatcher,
   StdIdentifier,
 } from '@blocksuite/affine/std';
-import type { ExtensionType } from '@blocksuite/affine/store';
 import type { FrameworkProvider } from '@toeverything/infra';
 import type { Observable } from 'rxjs';
 
-import { AIChatBlockSpec } from '../../ai/blocks';
-import { AITranscriptionBlockSpec } from '../../ai/blocks/ai-chat-block/ai-transcription-block';
-import { buildDocDisplayMetaExtension } from '../display-meta';
-import { getFontConfigExtension } from '../font-config';
-import { patchPeekViewService } from '../peek-view-service';
-import { getThemeExtension } from '../theme';
-
-function getPagePreviewThemeExtension(framework: FrameworkProvider) {
+export function getPagePreviewThemeExtension(framework: FrameworkProvider) {
   class AffinePagePreviewThemeExtension
     extends LifeCycleWatcher
     implements ThemeExtension
@@ -80,39 +70,4 @@ function getPagePreviewThemeExtension(framework: FrameworkProvider) {
   }
 
   return AffinePagePreviewThemeExtension;
-}
-
-const fontConfig = getFontConfigExtension();
-
-let _framework: FrameworkProvider;
-let _previewExtensions: ExtensionType[];
-export function enablePreviewExtension(framework: FrameworkProvider): void {
-  if (_framework === framework && _previewExtensions) {
-    return;
-  }
-
-  const specProvider = SpecProvider._;
-
-  if (_previewExtensions) {
-    _previewExtensions.forEach(extension => {
-      specProvider.omitSpec('preview:page', extension);
-      specProvider.omitSpec('preview:edgeless', extension);
-    });
-  }
-
-  _framework = framework;
-  const peekViewService = framework.get(PeekViewService);
-
-  _previewExtensions = [
-    ...AIChatBlockSpec,
-    ...AITranscriptionBlockSpec,
-    fontConfig,
-    getThemeExtension(framework),
-    getPagePreviewThemeExtension(framework),
-    buildDocDisplayMetaExtension(framework),
-    patchPeekViewService(peekViewService),
-  ];
-
-  specProvider.extendSpec('preview:page', _previewExtensions);
-  specProvider.extendSpec('preview:edgeless', _previewExtensions);
 }

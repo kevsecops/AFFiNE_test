@@ -459,45 +459,49 @@ export class AtMenuConfigService extends Service {
                     ]({
                       username,
                     }),
-                    action: {
-                      label: 'Invite',
-                      onClick: async () => {
-                        track.$.sharePanel.$.inviteUserDocRole({
-                          control: 'member list',
-                          role: 'reader',
-                        });
-
-                        try {
-                          await this.docGrantedUsersService.updateUserRole(
-                            id,
-                            DocRole.Reader
-                          );
-
-                          await notificationService.mentionUser(
-                            id,
-                            workspaceId,
-                            {
-                              id: docId,
-                              title:
-                                this.docDisplayMetaService.title$(docId).value,
-                              blockId: block.blockId,
-                              mode: mode as GraphqlDocMode,
-                            }
-                          );
-
-                          notify.success({
-                            title: I18n.t(
-                              'com.affine.editor.at-menu.invited-and-notified'
-                            ),
+                    actions: [
+                      {
+                        key: 'invite',
+                        label: 'Invite',
+                        onClick: async () => {
+                          track.$.sharePanel.$.inviteUserDocRole({
+                            control: 'member list',
+                            role: 'reader',
                           });
-                        } catch (error) {
-                          const err = UserFriendlyError.fromAny(error);
-                          notify.error({
-                            title: I18n[`error.${err.name}`](err.data),
-                          });
-                        }
+
+                          try {
+                            await this.docGrantedUsersService.updateUserRole(
+                              id,
+                              DocRole.Reader
+                            );
+
+                            await notificationService.mentionUser(
+                              id,
+                              workspaceId,
+                              {
+                                id: docId,
+                                title:
+                                  this.docDisplayMetaService.title$(docId)
+                                    .value,
+                                blockId: block.blockId,
+                                mode: mode as GraphqlDocMode,
+                              }
+                            );
+
+                            notify.success({
+                              title: I18n.t(
+                                'com.affine.editor.at-menu.invited-and-notified'
+                              ),
+                            });
+                          } catch (error) {
+                            const err = UserFriendlyError.fromAny(error);
+                            notify.error({
+                              title: I18n[`error.${err.name}`](err.data),
+                            });
+                          }
+                        },
                       },
-                    },
+                    ],
                   });
                 } else {
                   notify.error({

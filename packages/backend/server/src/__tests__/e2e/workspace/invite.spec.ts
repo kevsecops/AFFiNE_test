@@ -77,7 +77,7 @@ e2e('should leave a workspace', async t => {
     userId: u2.id,
   });
 
-  app.switchUser(u2.id);
+  await app.switchUser(u2.id);
   const { leaveWorkspace } = await app.gql({
     query: leaveWorkspaceMutation,
     variables: {
@@ -182,7 +182,7 @@ e2e('should invite a user by link', async t => {
     },
   });
 
-  app.switchUser(u2);
+  await app.switchUser(u2);
   const accept = await app.gql({
     query: acceptInviteByInviteIdMutation,
     variables: {
@@ -192,7 +192,7 @@ e2e('should invite a user by link', async t => {
   });
   t.true(accept.acceptInviteById, 'failed to accept invite');
 
-  app.switchUser(owner);
+  await app.switchUser(owner);
   const invite2 = await app.gql({
     query: inviteByEmailMutation,
     variables: {
@@ -233,7 +233,7 @@ e2e('should send invitation notification and leave email', async t => {
   t.is(invitationNotification.payload.inviterId, owner.id);
   t.is(invitationNotification.payload.inviteId, invite.invite);
 
-  app.switchUser(u2);
+  await app.switchUser(u2);
   const accept = await app.gql({
     query: acceptInviteByInviteIdMutation,
     variables: {

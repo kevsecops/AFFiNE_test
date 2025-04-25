@@ -45,7 +45,7 @@ import {
   Service,
 } from '@toeverything/infra';
 import { isEqual } from 'lodash-es';
-import { EMPTY, map, mergeMap, Observable, switchMap } from 'rxjs';
+import { map, Observable, switchMap, tap } from 'rxjs';
 import { type Doc as YDoc, encodeStateAsUpdate } from 'yjs';
 
 import type { Server, ServersService } from '../../cloud';
@@ -254,7 +254,7 @@ class CloudWorkspaceFlavourProvider implements WorkspaceFlavourProvider {
             })),
           };
         }).pipe(
-          mergeMap(data => {
+          tap(data => {
             if (data) {
               const { accountId, workspaces } = data;
               const sorted = workspaces.sort((a, b) => {
@@ -270,7 +270,6 @@ class CloudWorkspaceFlavourProvider implements WorkspaceFlavourProvider {
             } else {
               this.workspaces$.next([]);
             }
-            return EMPTY;
           }),
           catchErrorInto(this.error$, err => {
             logger.error('error to revalidate cloud workspaces', err);

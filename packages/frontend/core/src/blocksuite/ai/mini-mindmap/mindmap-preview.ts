@@ -132,7 +132,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
   }
 
   private _toMindmapNode(answer: string, doc: Store) {
-    return markdownToMindmap(answer, doc, this.host.std.provider);
+    return markdownToMindmap(answer, doc, this.host.std.store.provider);
   }
 
   override connectedCallback(): void {

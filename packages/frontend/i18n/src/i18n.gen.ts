@@ -7416,6 +7416,14 @@ export function useAFFiNEI18N(): {
       */
     ["com.affine.integration.integrations"](): string;
     /**
+      * `Web Clipper`
+      */
+    ["com.affine.integration.web-clipper.name"](): string;
+    /**
+      * `Import web pages to AFFiNE`
+      */
+    ["com.affine.integration.web-clipper.desc"](): string;
+    /**
       * `Elevate your AFFiNE experience with diverse add-ons and seamless integrations.`
       */
     ["com.affine.integration.setting.description"](): string;
@@ -7617,6 +7625,60 @@ export function useAFFiNEI18N(): {
       * `Integration properties`
       */
     ["com.affine.integration.properties"](): string;
+    /**
+      * `Calendar`
+      */
+    ["com.affine.integration.calendar.name"](): string;
+    /**
+      * `New events will be scheduled in AFFiNE’s journal`
+      */
+    ["com.affine.integration.calendar.desc"](): string;
+    /**
+      * `Subscribe`
+      */
+    ["com.affine.integration.calendar.new-subscription"](): string;
+    /**
+      * `Unsubscribe`
+      */
+    ["com.affine.integration.calendar.unsubscribe"](): string;
+    /**
+      * `Add a calendar by URL`
+      */
+    ["com.affine.integration.calendar.new-title"](): string;
+    /**
+      * `Calendar URL`
+      */
+    ["com.affine.integration.calendar.new-url-label"](): string;
+    /**
+      * `An error occurred while adding the calendar`
+      */
+    ["com.affine.integration.calendar.new-error"](): string;
+    /**
+      * `All day`
+      */
+    ["com.affine.integration.calendar.all-day"](): string;
+    /**
+      * `New doc`
+      */
+    ["com.affine.integration.calendar.new-doc"](): string;
+    /**
+      * `Show calendar events`
+      */
+    ["com.affine.integration.calendar.show-events"](): string;
+    /**
+      * `Enabling this setting allows you to connect your calendar events to your Journal in AFFiNE`
+      */
+    ["com.affine.integration.calendar.show-events-desc"](): string;
+    /**
+      * `Show all day event`
+      */
+    ["com.affine.integration.calendar.show-all-day-events"](): string;
+    /**
+      * `Are you sure you want to unsubscribe "{{name}}"? Unsubscribing this account will remove its data from Journal.`
+      */
+    ["com.affine.integration.calendar.unsubscribe-content"](options: {
+        readonly name: string;
+    }): string;
     /**
       * `Notes`
       */
@@ -8165,6 +8227,12 @@ export function useAFFiNEI18N(): {
       * `Audio not provided.`
       */
     ["error.COPILOT_TRANSCRIPTION_AUDIO_NOT_PROVIDED"](): string;
+    /**
+      * `Failed to add workspace file embedding: {{message}}`
+      */
+    ["error.COPILOT_FAILED_TO_ADD_WORKSPACE_FILE_EMBEDDING"](options: {
+        readonly message: string;
+    }): string;
     /**
       * `You have exceeded your blob size quota.`
       */

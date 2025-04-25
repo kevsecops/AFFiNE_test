@@ -473,7 +473,7 @@ export async function createEdgelessNoteBlock(
 ) {
   await setEdgelessTool(page, 'note', undefined, editorIndex);
   if (position.length === 4) {
-    dragView(
+    await dragView(
       page,
       [position[0], position[1]],
       [position[0] + position[2], position[1] + position[3]]

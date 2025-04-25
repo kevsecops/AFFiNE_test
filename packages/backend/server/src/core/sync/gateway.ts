@@ -152,13 +152,15 @@ export class SpaceSyncGateway
 
   handleConnection() {
     this.connectionCount++;
-    this.logger.log(`New connection, total: ${this.connectionCount}`);
+    this.logger.debug(`New connection, total: ${this.connectionCount}`);
     metrics.socketio.gauge('connections').record(this.connectionCount);
   }
 
   handleDisconnect() {
     this.connectionCount--;
-    this.logger.log(`Connection disconnected, total: ${this.connectionCount}`);
+    this.logger.debug(
+      `Connection disconnected, total: ${this.connectionCount}`
+    );
     metrics.socketio.gauge('connections').record(this.connectionCount);
   }
 

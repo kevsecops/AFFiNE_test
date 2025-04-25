@@ -5,6 +5,7 @@ import {
 import { BlockViewExtension } from '@blocksuite/std';
 import { literal } from 'lit/static-html.js';
 
+import { edgelessTextToolbarExtension } from './edgeless-toolbar';
 import { effects } from './effects';
 
 export class EdgelessTextViewExtension extends ViewExtensionProvider {
@@ -17,8 +18,16 @@ export class EdgelessTextViewExtension extends ViewExtensionProvider {
 
   override setup(context: ViewExtensionContext) {
     super.setup(context);
-    context.register([
-      BlockViewExtension('affine:edgeless-text', literal`affine-edgeless-text`),
-    ]);
+    const isEdgeless = this.isEdgeless(context.scope);
+
+    if (isEdgeless) {
+      context.register([
+        BlockViewExtension(
+          'affine:edgeless-text',
+          literal`affine-edgeless-text`
+        ),
+      ]);
+      context.register(edgelessTextToolbarExtension);
+    }
   }
 }

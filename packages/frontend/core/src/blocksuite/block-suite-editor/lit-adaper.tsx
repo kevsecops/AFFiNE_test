@@ -62,7 +62,6 @@ import { EdgelessClipboardAIChatConfig } from '../extensions/edgeless-clipboard'
 import { patchForClipboardInElectron } from '../extensions/electron-clipboard';
 import { enableEditorExtension } from '../extensions/entry/enable-editor';
 import { enableMobileExtension } from '../extensions/entry/enable-mobile';
-import { enablePreviewExtension } from '../extensions/entry/enable-preview';
 import { patchForEdgelessNoteConfig } from '../extensions/note-config';
 import { patchNotificationService } from '../extensions/notification-service';
 import { patchOpenDocExtension } from '../extensions/open-doc';
@@ -140,10 +139,6 @@ const usePatchSpecs = (mode: DocMode) => {
     };
   }, [workspaceService]);
 
-  useMemo(() => {
-    enablePreviewExtension(framework);
-  }, [framework]);
-
   const confirmModal = useConfirmModal();
 
   const enableAI = useEnableAI();
@@ -161,9 +156,9 @@ const usePatchSpecs = (mode: DocMode) => {
   );
 
   const patchedSpecs = useMemo(() => {
-    const builder = enableEditorExtension(framework, mode, enableAI);
+    let extensions = enableEditorExtension(framework, mode, enableAI);
 
-    builder.extend(
+    extensions = extensions.concat(
       [
         patchReferenceRenderer(reactToLit, referenceRenderer),
         patchForEdgelessNoteConfig(framework, reactToLit, insidePeekView),
@@ -190,17 +185,20 @@ const usePatchSpecs = (mode: DocMode) => {
     );
 
     if (enablePDFEmbedPreview) {
-      builder.extend([patchForPDFEmbedView(reactToLit)]);
+      extensions = extensions.concat([patchForPDFEmbedView(reactToLit)]);
     }
 
     if (BUILD_CONFIG.isMobileEdition) {
-      enableMobileExtension(builder, framework);
-    }
-    if (BUILD_CONFIG.isElectron) {
-      builder.extend([patchForClipboardInElectron(framework)].flat());
+      extensions = enableMobileExtension(extensions, framework);
     }
 
-    return builder.value;
+    if (BUILD_CONFIG.isElectron) {
+      extensions = extensions.concat(
+        [patchForClipboardInElectron(framework)].flat()
+      );
+    }
+
+    return extensions;
   }, [
     framework,
     mode,

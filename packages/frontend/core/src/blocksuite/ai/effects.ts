@@ -1,5 +1,3 @@
-import { SpecProvider } from '@blocksuite/affine/shared/utils';
-
 import { AIChatBlockComponent } from './blocks/ai-chat-block/ai-chat-block';
 import { EdgelessAIChatBlockComponent } from './blocks/ai-chat-block/ai-chat-edgeless-block';
 import { LitTranscriptionBlock } from './blocks/ai-chat-block/ai-transcription-block';
@@ -13,7 +11,6 @@ import {
 } from './blocks/ai-chat-block/components/chat-images';
 import { ImagePlaceholder } from './blocks/ai-chat-block/components/image-placeholder';
 import { UserInfo } from './blocks/ai-chat-block/components/user-info';
-import { AIChatBlockSchemaExtension } from './blocks/ai-chat-block/model';
 import { ChatPanel } from './chat-panel';
 import { ActionWrapper } from './chat-panel/actions/action-wrapper';
 import { ActionImage } from './chat-panel/actions/image';
@@ -40,7 +37,8 @@ import { ChatPanelDocChip } from './components/ai-chat-chips/doc-chip';
 import { ChatPanelFileChip } from './components/ai-chat-chips/file-chip';
 import { ChatPanelTagChip } from './components/ai-chat-chips/tag-chip';
 import { AIChatComposer } from './components/ai-chat-composer';
-import { AIChatInput } from './components/ai-chat-input/ai-chat-input';
+import { AIChatInput } from './components/ai-chat-input';
+import { AIHistoryClear } from './components/ai-history-clear';
 import { effects as componentAiItemEffects } from './components/ai-item';
 import { AIScrollableTextRenderer } from './components/ai-scrollable-text-renderer';
 import { AskAIButton } from './components/ask-ai-button';
@@ -101,6 +99,7 @@ export function registerAIEffects() {
   customElements.define('ai-chat-input', AIChatInput);
   customElements.define('ai-chat-composer', AIChatComposer);
   customElements.define('chat-panel-chips', ChatPanelChips);
+  customElements.define('ai-history-clear', AIHistoryClear);
   customElements.define('chat-panel-add-popover', ChatPanelAddPopover);
   customElements.define(
     'chat-panel-candidates-popover',
@@ -158,6 +157,4 @@ export function registerAIEffects() {
   );
 
   customElements.define('transcription-block', LitTranscriptionBlock);
-
-  SpecProvider._.extendSpec('store', [AIChatBlockSchemaExtension]);
 }

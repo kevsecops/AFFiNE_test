@@ -92,6 +92,9 @@ export class ChatPanelChips extends SignalWatcher(
   accessor updateChips!: (chips: ChatChip[]) => void;
 
   @property({ attribute: false })
+  accessor addImages!: (images: File[]) => void;
+
+  @property({ attribute: false })
   accessor pollContextDocsAndFiles!: () => void;
 
   @property({ attribute: false })
@@ -262,6 +265,7 @@ export class ChatPanelChips extends SignalWatcher(
       template: html`
         <chat-panel-add-popover
           .addChip=${this._addChip}
+          .addImages=${this.addImages}
           .searchMenuConfig=${this.searchMenuConfig}
           .docDisplayConfig=${this.docDisplayConfig}
           .abortController=${this._abortController}

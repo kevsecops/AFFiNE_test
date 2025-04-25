@@ -5,8 +5,10 @@ import { css, html, nothing, unsafeCSS } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { DefaultTool } from '../../gfx-tool/default-tool.js';
-import { DefaultModeDragType } from '../../gfx-tool/default-tool-ext/ext.js';
+import {
+  DefaultModeDragType,
+  DefaultTool,
+} from '../../gfx-tool/default-tool.js';
 
 export const EDGELESS_DRAGGING_AREA_WIDGET = 'edgeless-dragging-area-rect';
 

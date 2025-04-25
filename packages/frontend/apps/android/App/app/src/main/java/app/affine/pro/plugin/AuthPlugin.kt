@@ -1,12 +1,9 @@
 package app.affine.pro.plugin
 
 import android.annotation.SuppressLint
-import app.affine.pro.AffineApp
 import app.affine.pro.CapacitorConfig
 import app.affine.pro.service.CookieStore
 import app.affine.pro.service.OkHttp
-import app.affine.pro.utils.clear
-import app.affine.pro.utils.dataStore
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall

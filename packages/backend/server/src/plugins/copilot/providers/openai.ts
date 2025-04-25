@@ -1,5 +1,6 @@
 import {
   createOpenAI,
+  openai,
   type OpenAIProvider as VercelOpenAIProvider,
 } from '@ai-sdk/openai';
 import {
@@ -31,7 +32,7 @@ import {
   CopilotTextToTextProvider,
   PromptMessage,
 } from './types';
-import { chatToGPTMessage } from './utils';
+import { chatToGPTMessage, CitationParser } from './utils';
 
 export const DEFAULT_DIMENSIONS = 256;
 
@@ -76,6 +77,7 @@ export class OpenAIProvider
     'text-moderation-stable',
     // text to image
     'dall-e-3',
+    'gpt-image-1',
   ];
 
   #instance!: VercelOpenAIProvider;
@@ -176,6 +178,15 @@ export class OpenAIProvider
     }
   }
 
+  private getToolUse(options: CopilotChatOptions = {}) {
+    if (options.webSearch) {
+      return {
+        web_search_preview: openai.tools.webSearchPreview(),
+      };
+    }
+    return undefined;
+  }
+
   // ====== text to text ======
   async generateText(
     messages: PromptMessage[],
@@ -234,15 +245,18 @@ export class OpenAIProvider
 
       const [system, msgs] = await chatToGPTMessage(messages);
 
-      const modelInstance = this.#instance(model, {
-        structuredOutputs: Boolean(options.jsonMode),
-        user: options.user,
-      });
+      const modelInstance = options.webSearch
+        ? this.#instance.responses(model)
+        : this.#instance(model, {
+            structuredOutputs: Boolean(options.jsonMode),
+            user: options.user,
+          });
 
-      const { textStream } = streamText({
+      const { fullStream } = streamText({
         model: modelInstance,
         system,
         messages: msgs,
+        tools: this.getToolUse(options),
         frequencyPenalty: options.frequencyPenalty || 0,
         presencePenalty: options.presencePenalty || 0,
         temperature: options.temperature || 0,
@@ -250,11 +264,24 @@ export class OpenAIProvider
         abortSignal: options.signal,
       });
 
-      for await (const message of textStream) {
-        if (message) {
-          yield message;
+      const parser = new CitationParser();
+      for await (const chunk of fullStream) {
+        if (chunk) {
+          switch (chunk.type) {
+            case 'text-delta': {
+              const result = parser.parse(chunk.textDelta);
+              yield result;
+              break;
+            }
+            case 'step-finish': {
+              const result = parser.end();
+              yield result;
+              break;
+            }
+          }
+
           if (options.signal?.aborted) {
-            await textStream.cancel();
+            await fullStream.cancel();
             break;
           }
         }

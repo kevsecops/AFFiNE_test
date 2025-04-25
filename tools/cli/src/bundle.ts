@@ -10,12 +10,16 @@ import WebpackDevServer, {
 } from 'webpack-dev-server';
 
 import { Option, PackageCommand } from './command';
-import { createHTMLTargetConfig, createWorkerTargetConfig } from './webpack';
+import {
+  createHTMLTargetConfig,
+  createNodeTargetConfig,
+  createWorkerTargetConfig,
+} from './webpack';
 
-function getBundleConfigs(pkg: Package) {
+function getBaseWorkerConfigs(pkg: Package) {
   const core = new Package('@affine/core');
 
-  const workerConfigs = [
+  return [
     createWorkerTargetConfig(
       pkg,
       core.srcPath.join(
@@ -31,7 +35,9 @@ function getBundleConfigs(pkg: Package) {
       core.srcPath.join('blocksuite/extensions/turbo-painter.worker.ts').value
     ),
   ];
+}
 
+function getBundleConfigs(pkg: Package) {
   switch (pkg.name) {
     case '@affine/admin': {
       return [createHTMLTargetConfig(pkg, pkg.srcPath.join('index.tsx').value)];
@@ -40,6 +46,7 @@ function getBundleConfigs(pkg: Package) {
     case '@affine/mobile':
     case '@affine/ios':
     case '@affine/android': {
+      const workerConfigs = getBaseWorkerConfigs(pkg);
       workerConfigs.push(
         createWorkerTargetConfig(
           pkg,
@@ -58,6 +65,8 @@ function getBundleConfigs(pkg: Package) {
       ];
     }
     case '@affine/electron-renderer': {
+      const workerConfigs = getBaseWorkerConfigs(pkg);
+
       return [
         createHTMLTargetConfig(
           pkg,
@@ -78,18 +87,23 @@ function getBundleConfigs(pkg: Package) {
         ...workerConfigs,
       ];
     }
+    case '@affine/server': {
+      return [createNodeTargetConfig(pkg, pkg.srcPath.join('index.ts').value)];
+    }
   }
 
   throw new Error(`Unsupported package: ${pkg.name}`);
 }
+
 const IN_CI = !!process.env.CI;
 const httpProxyMiddlewareLogLevel = IN_CI ? 'silent' : 'error';
 
-const defaultDevServerConfig = {
+const defaultDevServerConfig: DevServerConfiguration = {
   host: '0.0.0.0',
   allowedHosts: 'all',
   hot: false,
   liveReload: true,
+  compress: !process.env.CI,
   client: {
     overlay: process.env.DISABLE_DEV_OVERLAY === 'true' ? false : undefined,
     logging: process.env.CI ? 'none' : 'error',
@@ -128,7 +142,7 @@ const defaultDevServerConfig = {
       logLevel: httpProxyMiddlewareLogLevel,
     },
   ],
-} as DevServerConfiguration;
+};
 
 export class BundleCommand extends PackageCommand {
   static override paths = [['bundle'], ['webpack'], ['pack'], ['bun']];

@@ -1,3 +1,4 @@
+import { getStoreManager } from '@affine/core/blocksuite/manager/migrating-store';
 import { MarkdownTransformer } from '@blocksuite/affine/widgets/linked-doc';
 import { Service } from '@toeverything/infra';
 
@@ -34,6 +35,7 @@ export class ImportClipperService extends Service {
       collection: workspace.docCollection,
       schema: getAFFiNEWorkspaceSchema(),
       markdown: clipperInput.contentMarkdown,
+      extensions: getStoreManager().get('store'),
     });
     const docsService = workspace.scope.get(DocsService);
     if (docId) {
@@ -67,6 +69,7 @@ export class ImportClipperService extends Service {
           collection: docCollection,
           schema: getAFFiNEWorkspaceSchema(),
           markdown: clipperInput.contentMarkdown,
+          extensions: getStoreManager().get('store'),
         });
       }
     );

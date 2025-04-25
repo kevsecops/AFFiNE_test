@@ -1,38 +1,27 @@
-import {
-  type FrameOverlay,
-  isFrameBlock,
-} from '@blocksuite/affine-block-frame';
-import {
-  ConnectorUtils,
-  OverlayIdentifier,
-} from '@blocksuite/affine-block-surface';
-import {
-  type ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
-  NoteBlockModel,
-  NoteDisplayMode,
-} from '@blocksuite/affine-model';
 import { resetNativeSelection } from '@blocksuite/affine-shared/utils';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import type { IVec } from '@blocksuite/global/gfx';
-import { Bound, getCommonBoundWithRotation, Vec } from '@blocksuite/global/gfx';
-import type { BlockComponent, PointerEventState } from '@blocksuite/std';
+import type { PointerEventState } from '@blocksuite/std';
 import {
   BaseTool,
-  getTopElements,
   type GfxModel,
+  InteractivityIdentifier,
   isGfxGroupCompatibleModel,
-  type PointTestOptions,
-  TransformManagerIdentifier,
 } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 
-import { createElementsFromClipboardDataCommand } from '../clipboard/command.js';
-import { prepareCloneData } from '../utils/clone-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
-import { isCanvasElement } from '../utils/query.js';
-import { DefaultModeDragType } from './default-tool-ext/ext.js';
+
+export enum DefaultModeDragType {
+  /** Moving selected contents */
+  ContentMoving = 'content-moving',
+  /** Native range dragging inside active note block */
+  NativeEditing = 'native-editing',
+  /** Default void state */
+  None = 'none',
+  /** Expanding the dragging area, select the content covered inside */
+  Selecting = 'selecting',
+}
 
 export class DefaultTool extends BaseTool {
   static override toolName: string = 'default';
@@ -55,16 +44,11 @@ export class DefaultTool extends BaseTool {
 
   private _disposables: DisposableGroup | null = null;
 
-  private readonly _panViewport = (delta: IVec) => {
+  private _panViewport(delta: IVec) {
     this._accumulateDelta[0] += delta[0];
     this._accumulateDelta[1] += delta[1];
     this.gfx.viewport.applyDeltaCenter(delta[0], delta[1]);
-  };
-
-  // For moving the connector label
-  private _selectedConnector: ConnectorElementModel | null = null;
-
-  private _selectedConnectorLabelBounds: Bound | null = null;
+  }
 
   private _selectionRectTransition: null | {
     w: number;
@@ -133,46 +117,21 @@ export class DefaultTool extends BaseTool {
       };
     }
 
-    const { x, y, w, h } = this.controller.draggingArea$.peek();
-    const bound = new Bound(x, y, w, h);
-
-    let elements = gfx.getElementsByBound(bound).filter(el => {
-      if (isFrameBlock(el)) {
-        return el.childElements.length === 0 || bound.contains(el.elementBound);
-      }
-      if (el instanceof MindmapElementModel) {
-        return bound.contains(el.elementBound);
-      }
-      if (
-        el instanceof NoteBlockModel &&
-        el.props.displayMode === NoteDisplayMode.DocOnly
-      ) {
-        return false;
-      }
-      return true;
+    const elements = this.interactivity?.handleBoxSelection({
+      box: this.controller.draggingArea$.peek(),
     });
 
-    elements = getTopElements(elements).filter(el => !el.isLocked());
+    if (!elements) return;
 
-    const set = new Set(
-      gfx.keyboard.shiftKey$.peek()
-        ? [...elements, ...gfx.selection.selectedElements]
-        : elements
-    );
-
-    this.edgelessSelectionManager.set({
-      elements: Array.from(set).map(element => element.id),
+    this.selection.set({
+      elements: elements.map(el => el.id),
       editing: false,
     });
   };
 
   dragType = DefaultModeDragType.None;
 
-  enableHover = true;
-
-  private get _edgeless(): BlockComponent | null {
-    return this.std.view.getBlock(this.doc.root!.id);
-  }
+  movementDragging = false;
 
   /**
    * Get the end position of the dragging area in the model coordinate
@@ -192,102 +151,64 @@ export class DefaultTool extends BaseTool {
     return [startX, startY] as IVec;
   }
 
-  get edgelessSelectionManager() {
+  get selection() {
     return this.gfx.selection;
   }
 
-  get elementTransformMgr() {
-    return this.std.getOptional(TransformManagerIdentifier);
-  }
-
-  private get frameOverlay() {
-    return this.std.get(OverlayIdentifier('frame')) as FrameOverlay;
+  get interactivity() {
+    return this.std.getOptional(InteractivityIdentifier);
   }
 
   private async _cloneContent() {
-    if (!this._edgeless) return;
+    const clonedResult = await this.interactivity?.requestElementClone({
+      elements: this._toBeMoved,
+    });
 
-    const snapshot = prepareCloneData(this._toBeMoved, this.std);
+    if (!clonedResult) return;
 
-    const bound = getCommonBoundWithRotation(this._toBeMoved);
-    const [_, { createdElementsPromise }] = this.std.command.exec(
-      createElementsFromClipboardDataCommand,
-      {
-        elementsRawData: snapshot,
-        pasteCenter: bound.center,
-      }
-    );
-    if (!createdElementsPromise) return;
-    const { canvasElements, blockModels } = await createdElementsPromise;
-
-    this._toBeMoved = [...canvasElements, ...blockModels];
-    this.edgelessSelectionManager.set({
+    this._toBeMoved = clonedResult.elements;
+    this.selection.set({
       elements: this._toBeMoved.map(e => e.id),
       editing: false,
     });
   }
 
-  private _determineDragType(e: PointerEventState): DefaultModeDragType {
-    const { x, y } = e;
-    // Is dragging started from current selected rect
-    if (this.edgelessSelectionManager.isInSelectedRect(x, y)) {
-      if (this.edgelessSelectionManager.selectedElements.length === 1) {
-        let selected = this.edgelessSelectionManager.selectedElements[0];
-        // double check
-        const currentSelected = this._pick(x, y);
-        if (
-          !isFrameBlock(selected) &&
-          !(selected instanceof GroupElementModel) &&
-          currentSelected &&
-          currentSelected !== selected
-        ) {
-          selected = currentSelected;
-          this.edgelessSelectionManager.set({
-            elements: [selected.id],
+  private _determineDragType(evt: PointerEventState): DefaultModeDragType {
+    const { x, y } = this.controller.lastMouseModelPos$.peek();
+    if (this.selection.isInSelectedRect(x, y)) {
+      if (this.selection.selectedElements.length === 1) {
+        const currentHoveredElem = this._getElementInGroup(x, y);
+        let curSelected = this.selection.selectedElements[0];
+
+        // If one of the following condition is true, keep the selection:
+        // 1. if group is currently selected
+        // 2. if the selected element is descendant of the hovered element
+        // 3. not hovering any element or hovering the same element
+        //
+        // Otherwise, we update the selection to the current hovered element
+        const shouldKeepSelection =
+          isGfxGroupCompatibleModel(curSelected) ||
+          (isGfxGroupCompatibleModel(currentHoveredElem) &&
+            currentHoveredElem.hasDescendant(curSelected)) ||
+          !currentHoveredElem ||
+          currentHoveredElem === curSelected;
+
+        if (!shouldKeepSelection) {
+          curSelected = currentHoveredElem;
+          this.selection.set({
+            elements: [curSelected.id],
             editing: false,
           });
         }
-
-        if (
-          isCanvasElement(selected) &&
-          ConnectorUtils.isConnectorWithLabel(selected) &&
-          (selected as ConnectorElementModel).labelIncludesPoint(
-            this.gfx.viewport.toModelCoord(x, y)
-          )
-        ) {
-          this._selectedConnector = selected as ConnectorElementModel;
-          this._selectedConnectorLabelBounds = Bound.fromXYWH(
-            this._selectedConnector.labelXYWH!
-          );
-          return DefaultModeDragType.ConnectorLabelMoving;
-        }
       }
 
-      return this.edgelessSelectionManager.editing
+      return this.selection.editing
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
-      const selected = this._pick(x, y);
-      if (selected) {
-        this.edgelessSelectionManager.set({
-          elements: [selected.id],
-          editing: false,
-        });
+      const checked = this.interactivity?.handleElementSelection(evt);
 
-        if (
-          isCanvasElement(selected) &&
-          ConnectorUtils.isConnectorWithLabel(selected) &&
-          (selected as ConnectorElementModel).labelIncludesPoint(
-            this.gfx.viewport.toModelCoord(x, y)
-          )
-        ) {
-          this._selectedConnector = selected as ConnectorElementModel;
-          this._selectedConnectorLabelBounds = Bound.fromXYWH(
-            this._selectedConnector.labelXYWH!
-          );
-          return DefaultModeDragType.ConnectorLabelMoving;
-        }
-
+      if (checked) {
         return DefaultModeDragType.ContentMoving;
       } else {
         return DefaultModeDragType.Selecting;
@@ -295,27 +216,7 @@ export class DefaultTool extends BaseTool {
     }
   }
 
-  private _moveLabel(delta: IVec) {
-    const connector = this._selectedConnector;
-    let bounds = this._selectedConnectorLabelBounds;
-    if (!connector || !bounds) return;
-    bounds = bounds.clone();
-    const center = connector.getNearestPoint(
-      Vec.add(bounds.center, delta) as IVec
-    );
-    const distance = connector.getOffsetDistanceByPoint(center as IVec);
-    bounds.center = center;
-    this.gfx.updateElement(connector, {
-      labelXYWH: bounds.toXYWH(),
-      labelOffset: {
-        distance,
-      },
-    });
-  }
-
-  private _pick(x: number, y: number, options?: PointTestOptions) {
-    const modelPos = this.gfx.viewport.toModelCoord(x, y);
-
+  private _getElementInGroup(modelX: number, modelY: number) {
     const tryGetLockedAncestor = (e: GfxModel | null) => {
       if (e?.isLockedByAncestor()) {
         return e.groups.findLast(group => group.isLocked());
@@ -323,34 +224,7 @@ export class DefaultTool extends BaseTool {
       return e;
     };
 
-    const result = this.gfx.getElementInGroup(
-      modelPos[0],
-      modelPos[1],
-      options
-    );
-
-    if (result instanceof MindmapElementModel) {
-      const picked = this.gfx.getElementByPoint(modelPos[0], modelPos[1], {
-        ...((options ?? {}) as PointTestOptions),
-        all: true,
-      });
-
-      let pickedIdx = picked.length - 1;
-
-      while (pickedIdx >= 0) {
-        const element = picked[pickedIdx];
-        if (element === result) {
-          pickedIdx -= 1;
-          continue;
-        }
-
-        break;
-      }
-
-      return tryGetLockedAncestor(picked[pickedIdx]) ?? null;
-    }
-
-    return tryGetLockedAncestor(result);
+    return tryGetLockedAncestor(this.gfx.getElementInGroup(modelX, modelY));
   }
 
   private initializeDragState(
@@ -380,9 +254,9 @@ export class DefaultTool extends BaseTool {
     }
 
     if (this.dragType === DefaultModeDragType.ContentMoving) {
-      if (this.elementTransformMgr) {
+      if (this.interactivity) {
         this.doc.captureSync();
-        this.elementTransformMgr.initializeDrag({
+        this.interactivity.handleElementMove({
           movingElements: this._toBeMoved,
           event: event.raw,
           onDragEnd: () => {
@@ -397,12 +271,12 @@ export class DefaultTool extends BaseTool {
   override click(e: PointerEventState) {
     if (this.doc.readonly) return;
 
-    if (!this.elementTransformMgr?.dispatchOnSelected(e)) {
-      this.edgelessSelectionManager.clear();
+    if (!this.interactivity?.handleElementSelection(e)) {
+      this.selection.clear();
       resetNativeSelection(null);
     }
 
-    this.elementTransformMgr?.dispatch('click', e);
+    this.interactivity?.dispatchEvent('click', e);
   }
 
   override deactivate() {
@@ -424,21 +298,27 @@ export class DefaultTool extends BaseTool {
       return;
     }
 
-    this.elementTransformMgr?.dispatch('dblclick', e);
+    this.interactivity?.dispatchEvent('dblclick', e);
   }
 
-  override dragEnd() {
-    if (this.edgelessSelectionManager.editing) return;
+  override dragEnd(e: PointerEventState) {
+    this.interactivity?.dispatchEvent('dragend', e);
 
-    this.frameOverlay.clear();
+    if (this.selection.editing || !this.movementDragging) return;
+
+    this.movementDragging = false;
     this._toBeMoved = [];
-    this._selectedConnector = null;
-    this._selectedConnectorLabelBounds = null;
     this._clearSelectingState();
     this.dragType = DefaultModeDragType.None;
   }
 
   override dragMove(e: PointerEventState) {
+    this.interactivity?.dispatchEvent('dragmove', e);
+
+    if (!this.movementDragging) {
+      return;
+    }
+
     const { viewport } = this.gfx;
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
@@ -456,12 +336,6 @@ export class DefaultTool extends BaseTool {
       case DefaultModeDragType.ContentMoving: {
         break;
       }
-      case DefaultModeDragType.ConnectorLabelMoving: {
-        const dx = this.dragLastPos[0] - this.dragStartPos[0];
-        const dy = this.dragLastPos[1] - this.dragStartPos[1];
-        this._moveLabel([dx, dy]);
-        break;
-      }
       case DefaultModeDragType.NativeEditing: {
         // TODO reset if drag out of note
         break;
@@ -471,11 +345,17 @@ export class DefaultTool extends BaseTool {
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   override async dragStart(e: PointerEventState) {
-    if (this.edgelessSelectionManager.editing) return;
+    const { preventDefaultState, handledByView } =
+      this.interactivity?.dispatchEvent('dragstart', e) ?? {};
+
+    if (this.selection.editing || preventDefaultState || handledByView) return;
+
+    this.movementDragging = true;
+
     // Determine the drag type based on the current state and event
     let dragType = this._determineDragType(e);
 
-    const elements = this.edgelessSelectionManager.selectedElements;
+    const elements = this.selection.selectedElements;
     if (elements.some(e => e.isLocked())) return;
 
     const toBeMoved = new Set(elements);
@@ -523,33 +403,16 @@ export class DefaultTool extends BaseTool {
   }
 
   override pointerDown(e: PointerEventState): void {
-    this.elementTransformMgr?.dispatch('pointerdown', e);
+    this.interactivity?.dispatchEvent('pointerdown', e);
   }
 
   override pointerMove(e: PointerEventState) {
-    const hovered = this._pick(e.x, e.y, {
-      hitThreshold: 10,
-    });
-
-    if (
-      isFrameBlock(hovered) &&
-      hovered.externalBound?.isPointInBound(
-        this.gfx.viewport.toModelCoord(e.x, e.y)
-      )
-    ) {
-      this.frameOverlay.highlight(hovered);
-    } else {
-      this.frameOverlay.clear();
-    }
-
-    this.elementTransformMgr?.dispatch('pointermove', e);
+    this.interactivity?.dispatchEvent('pointermove', e);
   }
 
   override pointerUp(e: PointerEventState) {
-    this.elementTransformMgr?.dispatch('pointerup', e);
+    this.interactivity?.dispatchEvent('pointerup', e);
   }
-
-  override tripleClick() {}
 
   override unmounted(): void {}
 }

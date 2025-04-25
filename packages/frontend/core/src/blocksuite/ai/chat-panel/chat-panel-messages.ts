@@ -3,10 +3,9 @@ import {
   DocModeProvider,
   FeatureFlagService,
 } from '@blocksuite/affine/shared/services';
-import { type SpecBuilder } from '@blocksuite/affine/shared/utils';
 import type { EditorHost } from '@blocksuite/affine/std';
 import { ShadowlessElement } from '@blocksuite/affine/std';
-import type { BaseSelection } from '@blocksuite/affine/store';
+import type { BaseSelection, ExtensionType } from '@blocksuite/affine/store';
 import { ArrowDownBigIcon as ArrowDownIcon } from '@blocksuite/icons/lit';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -157,7 +156,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   accessor updateContext!: (context: Partial<ChatContextValue>) => void;
 
   @property({ attribute: false })
-  accessor previewSpecBuilder!: SpecBuilder;
+  accessor extensions!: ExtensionType[];
 
   @query('.chat-panel-messages-container')
   accessor messagesContainer: HTMLDivElement | null = null;
@@ -271,7 +270,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
                     .isLast=${isLast}
                     .status=${isLast ? status : 'idle'}
                     .error=${isLast ? error : null}
-                    .previewSpecBuilder=${this.previewSpecBuilder}
+                    .extensions=${this.extensions}
                     .getSessionId=${this.getSessionId}
                     .retry=${() => this.retry()}
                   ></chat-message-assistant>`;

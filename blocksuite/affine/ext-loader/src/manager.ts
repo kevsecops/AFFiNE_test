@@ -84,16 +84,17 @@ export class ExtensionManager<Scope extends string> {
 
   /**
    * Retrieves all extensions registered for a specific scope.
-   * If the scope hasn't been built yet, it triggers the build process.
+   * It triggers the build process.
    *
    * @param scope - The scope to retrieve extensions for
    * @returns An array of extensions registered for the specified scope
    * @throws {BlockSuiteError} If the scope is not found
    */
   get(scope: Scope) {
-    if (!this._extensions.has(scope)) {
-      this._build(scope);
+    if (this._extensions.has(scope)) {
+      this._extensions.delete(scope);
     }
+    this._build(scope);
     const extensionSet = this._extensions.get(scope);
     if (!extensionSet) {
       throw new BlockSuiteError(
@@ -117,12 +118,17 @@ export class ExtensionManager<Scope extends string> {
     provider: typeof BaseExtensionProvider<Scope, T>,
     options: ((prev: T | undefined) => T | undefined) | T | undefined
   ) {
+    const prev = this._providerOptions.get(provider);
+
     let config: T | undefined;
     if (typeof options === 'function') {
-      const prev = this._providerOptions.get(provider);
       config = (options as (prev: unknown) => T)(prev);
     } else {
       config = options;
+    }
+
+    if (prev === config) {
+      return;
     }
 
     if (config === undefined) {

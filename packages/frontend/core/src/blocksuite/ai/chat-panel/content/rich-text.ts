@@ -1,7 +1,7 @@
 import { WithDisposable } from '@blocksuite/affine/global/lit';
-import type { SpecBuilder } from '@blocksuite/affine/shared/utils';
 import type { EditorHost } from '@blocksuite/affine/std';
 import { ShadowlessElement } from '@blocksuite/affine/std';
+import type { ExtensionType } from '@blocksuite/affine/store';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -18,13 +18,13 @@ export class ChatContentRichText extends WithDisposable(ShadowlessElement) {
   accessor state: 'finished' | 'generating' = 'finished';
 
   @property({ attribute: false })
-  accessor previewSpecBuilder!: SpecBuilder;
+  accessor extensions!: ExtensionType[];
 
   protected override render() {
     const { text, host } = this;
     return html`${createTextRenderer(host, {
       customHeading: true,
-      extensions: this.previewSpecBuilder.value,
+      extensions: this.extensions,
     })(text, this.state)}`;
   }
 }

@@ -1,4 +1,4 @@
-import { SpecProvider } from '@blocksuite/affine/shared/utils';
+import { getStoreManager } from '@affine/core/blocksuite/manager/migrating-store';
 import {
   AwarenessStore,
   type Doc,
@@ -294,11 +294,9 @@ export class DocImpl implements Doc {
       return this._storeMap.get(key) as Store;
     }
 
-    const storeExtensions = SpecProvider._.getSpec('store');
+    const storeExtensions = getStoreManager().get('store');
     const extensionSet = new Set(
-      storeExtensions.value
-        .concat(extensions ?? [])
-        .concat(this.storeExtensions)
+      storeExtensions.concat(extensions ?? []).concat(this.storeExtensions)
     );
 
     const doc = new Store({

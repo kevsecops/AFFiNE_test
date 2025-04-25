@@ -1,5 +1,5 @@
+import { getViewManager } from '@affine/core/blocksuite/manager/migrating-view';
 import { DebugLogger } from '@affine/debug';
-import { PageEditorBlockSpecs } from '@blocksuite/affine/extensions';
 import { BlockStdScope } from '@blocksuite/affine/std';
 import type { Store } from '@blocksuite/affine/store';
 import { useEffect, useMemo, useState } from 'react';
@@ -44,7 +44,7 @@ export function createBlockStdScope(doc: Store) {
   logger.debug('createBlockStdScope', doc.id);
   const std = new BlockStdScope({
     store: doc,
-    extensions: PageEditorBlockSpecs,
+    extensions: getViewManager().get('page'),
   });
   return std;
 }

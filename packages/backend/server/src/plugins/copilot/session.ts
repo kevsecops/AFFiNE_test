@@ -166,7 +166,11 @@ export class ChatSession implements AsyncDisposable {
         firstMessage.attachments || [],
       ]
         .flat()
-        .filter(v => !!v?.trim());
+        .filter(v =>
+          typeof v === 'string'
+            ? !!v.trim()
+            : v && v.attachment.trim() && v.mimeType
+        );
 
       return finished;
     }
@@ -553,7 +557,12 @@ export class ChatSessionService {
                     action: prompt.action || null,
                     tokens: tokenCost,
                     createdAt,
-                    messages: preload.concat(ret.data),
+                    messages: preload.concat(ret.data).map(m => ({
+                      ...m,
+                      attachments: m.attachments
+                        ?.map(a => (typeof a === 'string' ? a : a.attachment))
+                        .filter(a => !!a),
+                    })),
                   };
                 } else {
                   this.logger.error(

@@ -8,6 +8,7 @@ import app.affine.pro.utils.dataStore
 import app.affine.pro.utils.get
 import app.affine.pro.utils.logger.AffineDebugTree
 import app.affine.pro.utils.logger.CrashlyticsTree
+import app.affine.pro.utils.logger.FileTree
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.ktx.Firebase
@@ -26,7 +27,12 @@ class AffineApp : Application() {
         super.onCreate()
         _context = applicationContext
         // init logger
-        Timber.plant(if (BuildConfig.DEBUG) AffineDebugTree() else CrashlyticsTree())
+        if (BuildConfig.DEBUG) {
+            Timber.plant(AffineDebugTree())
+        } else {
+            Timber.plant(CrashlyticsTree(), FileTree(applicationContext))
+        }
+        Timber.i("Application started.")
         // init capacitor config
         CapacitorConfig.init(baseContext)
         // init crashlytics
@@ -50,6 +56,7 @@ class AffineApp : Application() {
                         ?: error("Parse user id cookie fail:[ cookie = $userIdCookieStr ]"),
                 )
                 CookieStore.saveCookies(BuildConfig.BASE_URL.toHttpUrl().host, cookies)
+                FileTree.get()?.checkAndUploadOldLogs()
             } catch (e: Exception) {
                 Timber.w(e, "[init] load persistent cookies fail.")
             }

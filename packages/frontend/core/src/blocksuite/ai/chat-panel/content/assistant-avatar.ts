@@ -1,6 +1,10 @@
+import { AIStarIconWithAnimation } from '@blocksuite/affine/components/icons';
 import { ShadowlessElement } from '@blocksuite/affine/std';
 import { AiIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
+import { property } from 'lit/decorators.js';
+
+import type { ChatStatus } from '../../components/ai-chat-messages';
 
 const AffineAvatarIcon = AiIcon({
   width: '20px',
@@ -9,17 +13,22 @@ const AffineAvatarIcon = AiIcon({
 });
 
 export class AssistantAvatar extends ShadowlessElement {
+  @property({ attribute: 'data-status', reflect: true })
+  accessor status: ChatStatus = 'idle';
+
   static override styles = css`
-    .assistant-avatar {
+    chat-assistant-avatar {
       display: inline-flex;
       align-items: center;
       gap: 8px;
     }
   `;
+
   protected override render() {
-    return html`<span class="assistant-avatar"
-      >${AffineAvatarIcon} AFFiNE AI</span
-    >`;
+    return html`${this.status === 'transmitting'
+      ? AIStarIconWithAnimation
+      : AffineAvatarIcon}
+    AFFiNE AI`;
   }
 }
 

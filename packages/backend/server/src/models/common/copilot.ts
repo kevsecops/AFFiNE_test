@@ -112,9 +112,10 @@ export const CopilotWorkspaceFileSchema = z.object({
   size: z.number(),
 });
 
-export type CopilotWorkspaceFile = z.infer<
+export type CopilotWorkspaceFileMetadata = z.infer<
   typeof CopilotWorkspaceFileSchema
-> & {
+>;
+export type CopilotWorkspaceFile = CopilotWorkspaceFileMetadata & {
   workspaceId: string;
   fileId: string;
   createdAt: Date;

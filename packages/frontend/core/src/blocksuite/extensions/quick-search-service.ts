@@ -37,12 +37,12 @@ export function patchQuickSearchService(framework: FrameworkProvider) {
       searchResult = await new Promise((resolve, reject) =>
         framework.get(QuickSearchService).quickSearch.show(
           [
-            framework.get(RecentDocsQuickSearchSession),
-            framework.get(CreationQuickSearchSession),
-            framework.get(DocsQuickSearchSession),
-            framework.get(LinksQuickSearchSession),
-            framework.get(ExternalLinksQuickSearchSession),
-            framework.get(JournalsQuickSearchSession),
+            framework.createEntity(RecentDocsQuickSearchSession),
+            framework.createEntity(CreationQuickSearchSession),
+            framework.createEntity(DocsQuickSearchSession),
+            framework.createEntity(LinksQuickSearchSession),
+            framework.createEntity(ExternalLinksQuickSearchSession),
+            framework.createEntity(JournalsQuickSearchSession),
           ],
           result => {
             if (result === null) {

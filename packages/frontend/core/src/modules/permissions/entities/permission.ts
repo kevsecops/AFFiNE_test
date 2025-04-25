@@ -8,7 +8,7 @@ import {
   onComplete,
   onStart,
 } from '@toeverything/infra';
-import { EMPTY, mergeMap } from 'rxjs';
+import { tap } from 'rxjs';
 
 import type { WorkspaceService } from '../../workspace';
 import type { WorkspacePermissionStore } from '../stores/permission';
@@ -51,13 +51,12 @@ export class WorkspacePermission extends Entity {
         backoffRetry({
           count: Infinity,
         }),
-        mergeMap(({ isOwner, isAdmin, isTeam }) => {
+        tap(({ isOwner, isAdmin, isTeam }) => {
           this.store.setWorkspacePermissionCache({
             isOwner,
             isAdmin,
             isTeam,
           });
-          return EMPTY;
         }),
         onStart(() => this.isRevalidating$.setValue(true)),
         onComplete(() => this.isRevalidating$.setValue(false))

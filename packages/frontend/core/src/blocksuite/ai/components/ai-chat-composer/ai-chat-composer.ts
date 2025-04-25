@@ -5,7 +5,6 @@ import type {
   CopilotDocType,
 } from '@affine/graphql';
 import { SignalWatcher, WithDisposable } from '@blocksuite/affine/global/lit';
-import { NotificationProvider } from '@blocksuite/affine/shared/services';
 import type { EditorHost } from '@blocksuite/affine/std';
 import { ShadowlessElement } from '@blocksuite/affine/std';
 import type { Store } from '@blocksuite/affine/store';
@@ -28,7 +27,9 @@ import { isCollectionChip, isDocChip, isTagChip } from '../ai-chat-chips';
 import type {
   AIChatInputContext,
   AINetworkSearchConfig,
+  AIReasoningConfig,
 } from '../ai-chat-input';
+import { MAX_IMAGE_COUNT } from '../ai-chat-input/const';
 
 export class AIChatComposer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -65,9 +66,6 @@ export class AIChatComposer extends SignalWatcher(
   accessor updateContext!: (context: Partial<AIChatInputContext>) => void;
 
   @property({ attribute: false })
-  accessor onHistoryCleared: (() => void) | undefined;
-
-  @property({ attribute: false })
   accessor isVisible: Signal<boolean | undefined> = signal(false);
 
   @property({ attribute: false })
@@ -82,6 +80,9 @@ export class AIChatComposer extends SignalWatcher(
   accessor networkSearchConfig!: AINetworkSearchConfig;
 
   @property({ attribute: false })
+  accessor reasoningConfig!: AIReasoningConfig;
+
+  @property({ attribute: false })
   accessor searchMenuConfig!: SearchMenuConfig;
 
   @property({ attribute: false })
@@ -92,6 +93,9 @@ export class AIChatComposer extends SignalWatcher(
 
   @property({ attribute: false })
   accessor portalContainer: HTMLElement | null = null;
+
+  @property({ attribute: false })
+  accessor sideBarWidth: Signal<number | undefined> = signal(undefined);
 
   @state()
   accessor chips: ChatChip[] = [];
@@ -115,6 +119,7 @@ export class AIChatComposer extends SignalWatcher(
         .docDisplayConfig=${this.docDisplayConfig}
         .searchMenuConfig=${this.searchMenuConfig}
         .portalContainer=${this.portalContainer}
+        .addImages=${this.addImages}
       ></chat-panel-chips>
       <ai-chat-input
         .host=${this.host}
@@ -125,10 +130,12 @@ export class AIChatComposer extends SignalWatcher(
         .chatContextValue=${this.chatContextValue}
         .updateContext=${this.updateContext}
         .networkSearchConfig=${this.networkSearchConfig}
+        .reasoningConfig=${this.reasoningConfig}
         .docDisplayConfig=${this.docDisplayConfig}
-        .cleanupHistories=${this._cleanupHistories}
         .onChatSuccess=${this.onChatSuccess}
         .trackOptions=${this.trackOptions}
+        .sideBarWidth=${this.sideBarWidth}
+        .addImages=${this.addImages}
       ></ai-chat-input>
       <div class="chat-panel-footer">
         ${InformationIcon()}
@@ -156,7 +163,7 @@ export class AIChatComposer extends SignalWatcher(
     );
   }
 
-  protected override updated(_changedProperties: PropertyValues) {
+  protected override willUpdate(_changedProperties: PropertyValues) {
     if (_changedProperties.has('doc')) {
       this._resetComposer();
       requestAnimationFrame(async () => {
@@ -267,6 +274,13 @@ export class AIChatComposer extends SignalWatcher(
     this.chips = chips;
   };
 
+  private readonly addImages = (images: File[]) => {
+    const oldImages = this.chatContextValue.images;
+    this.updateContext({
+      images: [...oldImages, ...images].slice(0, MAX_IMAGE_COUNT),
+    });
+  };
+
   private readonly _pollContextDocsAndFiles = async () => {
     const sessionId = await this.getSessionId();
     const contextId = await this._getContextId();
@@ -347,36 +361,6 @@ export class AIChatComposer extends SignalWatcher(
   private readonly _abortPoll = () => {
     this._pollAbortController?.abort();
     this._pollAbortController = null;
-  };
-
-  private readonly _cleanupHistories = async () => {
-    const sessionId = await this.getSessionId();
-    const notification = this.host.std.getOptional(NotificationProvider);
-    if (!notification) return;
-    try {
-      if (
-        await notification.confirm({
-          title: 'Clear History',
-          message:
-            'Are you sure you want to clear all history? This action will permanently delete all content, including all chat logs and data, and cannot be undone.',
-          confirmText: 'Confirm',
-          cancelText: 'Cancel',
-        })
-      ) {
-        const actionIds = this.chatContextValue.messages
-          .filter(item => 'sessionId' in item)
-          .map(item => item.sessionId);
-        await AIProvider.histories?.cleanup(
-          this.doc.workspace.id,
-          this.doc.id,
-          [...(sessionId ? [sessionId] : []), ...(actionIds || [])]
-        );
-        notification.toast('History cleared');
-        this.onHistoryCleared?.();
-      }
-    } catch {
-      notification.toast('Failed to clear history');
-    }
   };
 
   private readonly _initComposer = async () => {

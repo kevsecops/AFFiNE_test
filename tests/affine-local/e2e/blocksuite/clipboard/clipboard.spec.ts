@@ -23,6 +23,7 @@ import {
 import { setSelection } from '@affine-test/kit/utils/selection';
 import type { CodeBlockComponent } from '@blocksuite/affine-block-code';
 import type { ParagraphBlockComponent } from '@blocksuite/affine-block-paragraph';
+import type { PageRootBlockComponent } from '@blocksuite/affine-block-root';
 import type { BlockComponent } from '@blocksuite/std';
 import { expect, type Page } from '@playwright/test';
 
@@ -432,5 +433,40 @@ test.describe('paste to code block', () => {
 
     // Verify the pasted code maintains indentation
     await verifyCodeBlockContent(page, 0, markdownText);
+  });
+});
+
+test.describe('paste in readonly mode', () => {
+  test('should not paste content when document is in readonly mode', async ({
+    page,
+  }) => {
+    await createParagraphBlocks(page, ['This is a test paragraph']);
+    const { blockIds } = await getParagraphIds(page);
+    const initialParagraphCount = blockIds.length;
+
+    await page.evaluate(() => {
+      const pageRoot = document.querySelector(
+        'affine-page-root'
+      ) as PageRootBlockComponent;
+      pageRoot.doc.readonly = true;
+    });
+
+    await setSelection(page, blockIds[0], 0, blockIds[0], 4);
+    await pasteContent(page, {
+      'text/plain': ' - Added text that should not appear',
+    });
+
+    await verifyParagraphContent(page, 0, 'This is a test paragraph');
+
+    await pressEnter(page);
+    await pasteContent(page, { 'text/plain': 'This should not be pasted' });
+
+    const { blockIds: afterParagraphIds } = await getParagraphIds(page);
+    expect(afterParagraphIds.length).toBe(initialParagraphCount);
+
+    await setSelection(page, blockIds[0], 0, blockIds[0], 4);
+    await pasteByKeyboard(page);
+
+    await verifyParagraphContent(page, 0, 'This is a test paragraph');
   });
 });

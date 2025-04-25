@@ -133,7 +133,7 @@ export class NotificationModel extends BaseModel {
       type: NotificationType.Mention,
       body: data.body,
     });
-    this.logger.log(
+    this.logger.debug(
       `Created mention notification:${row.id} for user:${data.userId} in workspace:${data.body.workspaceId}`
     );
     return row as MentionNotification;
@@ -154,7 +154,7 @@ export class NotificationModel extends BaseModel {
       type,
       body: data.body,
     });
-    this.logger.log(
+    this.logger.debug(
       `Created ${type} notification ${row.id} to user ${data.userId} in workspace ${data.body.workspaceId}`
     );
     return row as InvitationNotification;
@@ -171,7 +171,7 @@ export class NotificationModel extends BaseModel {
       type,
       body: data.body,
     });
-    this.logger.log(
+    this.logger.debug(
       `Created ${type} notification ${row.id} to user ${data.userId} in workspace ${data.body.workspaceId}`
     );
     return row as InvitationReviewDeclinedNotification;
@@ -239,7 +239,9 @@ export class NotificationModel extends BaseModel {
       // delete notifications that are older than one year
       where: { createdAt: { lte: new Date(Date.now() - ONE_YEAR) } },
     });
-    this.logger.log(`Deleted ${count} expired notifications`);
+    if (count > 0) {
+      this.logger.log(`Deleted ${count} expired notifications`);
+    }
     return count;
   }
 

@@ -1112,7 +1112,11 @@ test('CitationParser should replace citation placeholders with URLs', t => {
   const citations = ['https://example1.com', 'https://example2.com'];
 
   const parser = new CitationParser();
-  const result = parser.parse(content, citations) + parser.end();
+  for (const citation of citations) {
+    parser.push(citation);
+  }
+
+  const result = parser.parse(content) + parser.end();
 
   const expected = [
     'This is [a] test sentence with [citations [^1]] and [^2] and [3].',
@@ -1147,8 +1151,12 @@ test('CitationParser should replace chunks of citation placeholders with URLs', 
   ];
 
   const parser = new CitationParser();
+  for (const citation of citations) {
+    parser.push(citation);
+  }
+
   let result = contents.reduce((acc, current) => {
-    return acc + parser.parse(current, citations);
+    return acc + parser.parse(current);
   }, '');
   result += parser.end();
 
@@ -1175,7 +1183,11 @@ test('CitationParser should not replace citation already with URLs', t => {
   ];
 
   const parser = new CitationParser();
-  const result = parser.parse(content, citations) + parser.end();
+  for (const citation of citations) {
+    parser.push(citation);
+  }
+
+  const result = parser.parse(content) + parser.end();
 
   const expected = [
     content,
@@ -1199,8 +1211,12 @@ test('CitationParser should not replace chunks of citation already with URLs', t
   ];
 
   const parser = new CitationParser();
+  for (const citation of citations) {
+    parser.push(citation);
+  }
+
   let result = contents.reduce((acc, current) => {
-    return acc + parser.parse(current, citations);
+    return acc + parser.parse(current);
   }, '');
   result += parser.end();
 
@@ -1209,6 +1225,26 @@ test('CitationParser should not replace chunks of citation already with URLs', t
     `[^1]: {"type":"url","url":"${encodeURIComponent(citations[0])}"}`,
     `[^2]: {"type":"url","url":"${encodeURIComponent(citations[1])}"}`,
     `[^3]: {"type":"url","url":"${encodeURIComponent(citations[2])}"}`,
+  ].join('\n');
+  t.is(result, expected);
+});
+
+test('CitationParser should replace openai style reference chunks', t => {
+  const contents = [
+    'This is [a] test sentence with citations ',
+    '([example1.com](https://example1.com))',
+  ];
+
+  const parser = new CitationParser();
+
+  let result = contents.reduce((acc, current) => {
+    return acc + parser.parse(current);
+  }, '');
+  result += parser.end();
+
+  const expected = [
+    contents[0] + '[^1]',
+    `[^1]: {"type":"url","url":"${encodeURIComponent('https://example1.com')}"}`,
   ].join('\n');
   t.is(result, expected);
 });

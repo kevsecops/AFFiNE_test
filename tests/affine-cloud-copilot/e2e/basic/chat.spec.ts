@@ -113,7 +113,7 @@ test.describe('AIBasic/Chat', () => {
       },
     ]);
 
-    expect(page.getByTestId('chat-action-list')).toBeVisible();
+    await expect(page.getByTestId('chat-action-list')).toBeVisible();
     await utils.chatPanel.makeChat(page, 'Nice to meet you');
     await utils.chatPanel.waitForHistory(page, [
       {
@@ -458,7 +458,7 @@ test.describe('AIBasic/Chat', () => {
     await sendButton.click();
 
     await expect(page.getByTestId('sidebar-tab-content-chat')).toBeVisible();
-    expect(await page.locator('chat-content-images')).toBeVisible();
+    await expect(page.locator('chat-content-images')).toBeVisible();
     await utils.chatPanel.waitForHistory(page, [
       {
         role: 'user',

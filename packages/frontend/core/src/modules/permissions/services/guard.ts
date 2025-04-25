@@ -8,7 +8,6 @@ import {
 } from '@toeverything/infra';
 import {
   combineLatest,
-  EMPTY,
   exhaustMap,
   groupBy,
   map,
@@ -145,8 +144,7 @@ export class GuardService extends Service {
       fromPromise(() => this.guardStore.getWorkspacePermissions()).pipe(
         backoffRetry({
           count: Infinity,
-        }),
-        mergeMap(() => EMPTY)
+        })
       )
     )
   );
@@ -159,8 +157,7 @@ export class GuardService extends Service {
           fromPromise(() => this.loadDocPermission(docId)).pipe(
             backoffRetry({
               count: Infinity,
-            }),
-            mergeMap(() => EMPTY)
+            })
           )
         )
       )

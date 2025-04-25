@@ -47,10 +47,10 @@ import {
 import { COPILOT_LOCKER, CopilotType } from '../resolver';
 import { ChatSessionService } from '../session';
 import { CopilotStorage } from '../storage';
+import { MAX_EMBEDDABLE_SIZE } from '../types';
+import { readStream } from '../utils';
 import { CopilotContextDocJob } from './job';
 import { CopilotContextService } from './service';
-import { MAX_EMBEDDABLE_SIZE } from './types';
-import { readStream } from './utils';
 
 @InputType()
 class AddContextCategoryInput {

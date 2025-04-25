@@ -1,3 +1,4 @@
+import { getStoreManager } from '@affine/core/blocksuite/manager/migrating-store';
 import { MarkdownTransformer } from '@blocksuite/affine/widgets/linked-doc';
 import { Entity } from '@toeverything/infra';
 
@@ -60,6 +61,7 @@ export class IntegrationWriter extends Entity {
         schema: getAFFiNEWorkspaceSchema(),
         markdown,
         fileName: title,
+        extensions: getStoreManager().get('store'),
       });
 
       if (!newDocId) throw new Error('Failed to create a new doc');
@@ -87,6 +89,7 @@ export class IntegrationWriter extends Entity {
           doc,
           blockId: noteBlockId,
           markdown,
+          extensions: getStoreManager().get('store'),
         });
       } else if (updateStrategy === 'append') {
         const pageBlockId = doc.getBlocksByFlavour('affine:page')[0]?.id;
@@ -95,6 +98,7 @@ export class IntegrationWriter extends Entity {
           doc,
           blockId,
           markdown: `---\n${markdown}`,
+          extensions: getStoreManager().get('store'),
         });
       } else {
         throw new Error('Invalid update strategy');

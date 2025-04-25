@@ -90,9 +90,14 @@ const init = async (
   const workspace = await createWorkspace(app);
   const teamWorkspace = await createWorkspace(app);
   {
-    models.workspaceFeature.add(teamWorkspace.id, 'team_plan_v1', 'test', {
-      memberLimit,
-    });
+    await models.workspaceFeature.add(
+      teamWorkspace.id,
+      'team_plan_v1',
+      'test',
+      {
+        memberLimit,
+      }
+    );
   }
 
   const invite = async (
@@ -104,29 +109,29 @@ const init = async (
 
     {
       // normal workspace
-      app.switchUser(owner);
+      await app.switchUser(owner);
       const inviteId = await inviteUser(
         app,
         workspace.id,
         member.email,
         shouldSendEmail
       );
-      app.switchUser(member);
+      await app.switchUser(member);
       await acceptInviteById(app, workspace.id, inviteId, shouldSendEmail);
     }
 
     {
       // team workspace
-      app.switchUser(owner);
+      await app.switchUser(owner);
       const inviteId = await inviteUser(
         app,
         teamWorkspace.id,
         member.email,
         shouldSendEmail
       );
-      app.switchUser(member);
+      await app.switchUser(member);
       await acceptInviteById(app, teamWorkspace.id, inviteId, shouldSendEmail);
-      app.switchUser(owner);
+      await app.switchUser(owner);
       await grantMember(app, teamWorkspace.id, member.id, permission);
     }
 
@@ -143,7 +148,7 @@ const init = async (
       members.push(member);
     }
 
-    app.switchUser(owner);
+    await app.switchUser(owner);
     const invites = await inviteUsers(
       app,
       teamWorkspace.id,
@@ -154,7 +159,7 @@ const init = async (
   };
 
   const getCreateInviteLinkFetcher = async (ws: WorkspaceType) => {
-    app.switchUser(owner);
+    await app.switchUser(owner);
     const { link } = await createInviteLink(app, ws.id, 'OneDay');
     const inviteId = link.split('/').pop()!;
     return [
@@ -165,7 +170,7 @@ const init = async (
         return member;
       },
       async (userId: string) => {
-        app.switchUser(userId);
+        await app.switchUser(userId);
         await acceptInviteById(app, ws.id, inviteId, false);
       },
     ] as const;
@@ -183,7 +188,7 @@ const init = async (
     WorkspaceRole.External
   );
 
-  app.switchUser(owner.id);
+  await app.switchUser(owner.id);
   return {
     invite,
     inviteBatch,
@@ -204,13 +209,13 @@ test('should be able to invite multiple users', async t => {
 
   {
     // no permission
-    app.switchUser(read);
+    await app.switchUser(read);
     await t.throwsAsync(
       inviteUsers(app, ws.id, ['test@affine.pro']),
       { instanceOf: Error },
       'should throw error if not manager'
     );
-    app.switchUser(write);
+    await app.switchUser(write);
     await t.throwsAsync(
       inviteUsers(app, ws.id, ['test@affine.pro']),
       { instanceOf: Error },
@@ -222,13 +227,13 @@ test('should be able to invite multiple users', async t => {
     // manager
     const m1 = await app.signupV1('m1@affine.pro');
     const m2 = await app.signupV1('m2@affine.pro');
-    app.switchUser(owner);
+    await app.switchUser(owner);
     t.is(
       (await inviteUsers(app, ws.id, [m1.email])).length,
       1,
       'should be able to invite user'
     );
-    app.switchUser(admin);
+    await app.switchUser(admin);
     t.is(
       (await inviteUsers(app, ws.id, [m2.email])).length,
       1,
@@ -263,7 +268,7 @@ test('should be able to check seat limit', async t => {
       { message: 'You have exceeded your workspace member quota.' },
       'should throw error if exceed member limit'
     );
-    models.workspaceFeature.add(ws.id, 'team_plan_v1', 'test', {
+    await models.workspaceFeature.add(ws.id, 'team_plan_v1', 'test', {
       memberLimit: 6,
     });
     await t.notThrowsAsync(
@@ -310,14 +315,14 @@ test('should be able to grant team member permission', async t => {
   const { app, models } = t.context;
   const { owner, teamWorkspace: ws, write, read } = await init(app);
 
-  app.switchUser(read);
+  await app.switchUser(read);
   await t.throwsAsync(
     grantMember(app, ws.id, write.id, WorkspaceRole.Collaborator),
     { instanceOf: Error },
     'should throw error if not owner'
   );
 
-  app.switchUser(write);
+  await app.switchUser(write);
   await t.throwsAsync(
     grantMember(app, ws.id, read.id, WorkspaceRole.Collaborator),
     { instanceOf: Error },
@@ -326,7 +331,7 @@ test('should be able to grant team member permission', async t => {
 
   {
     // owner should be able to grant permission
-    app.switchUser(owner);
+    await app.switchUser(owner);
     t.true(
       (await models.workspaceUser.get(ws.id, read.id))?.type ===
         WorkspaceRole.Collaborator,
@@ -348,24 +353,24 @@ test('should be able to leave workspace', async t => {
   const { app } = t.context;
   const { owner, teamWorkspace: ws, admin, write, read } = await init(app);
 
-  app.switchUser(owner);
+  await app.switchUser(owner);
   await t.throwsAsync(leaveWorkspace(app, ws.id), {
     message: 'Owner can not leave the workspace.',
   });
 
-  app.switchUser(admin);
+  await app.switchUser(admin);
   t.true(
     await leaveWorkspace(app, ws.id),
     'admin should be able to leave workspace'
   );
 
-  app.switchUser(write);
+  await app.switchUser(write);
   t.true(
     await leaveWorkspace(app, ws.id),
     'write should be able to leave workspace'
   );
 
-  app.switchUser(read);
+  await app.switchUser(read);
   t.true(
     await leaveWorkspace(app, ws.id),
     'read should be able to leave workspace'
@@ -378,7 +383,7 @@ test('should be able to revoke team member', async t => {
 
   {
     // no permission
-    app.switchUser(read);
+    await app.switchUser(read);
     await t.throwsAsync(
       revokeUser(app, ws.id, read.id),
       { instanceOf: Error },
@@ -393,7 +398,7 @@ test('should be able to revoke team member', async t => {
 
   {
     // manager
-    app.switchUser(admin);
+    await app.switchUser(admin);
     t.true(
       await revokeUser(app, ws.id, read.id),
       'admin should be able to revoke member'
@@ -405,7 +410,7 @@ test('should be able to revoke team member', async t => {
       'should not be able to revoke themselves'
     );
 
-    app.switchUser(owner);
+    await app.switchUser(owner);
     t.true(
       await revokeUser(app, ws.id, write.id),
       'owner should be able to revoke member'
@@ -416,7 +421,7 @@ test('should be able to revoke team member', async t => {
     });
 
     await revokeUser(app, ws.id, admin.id);
-    app.switchUser(admin);
+    await app.switchUser(admin);
     await t.throwsAsync(
       revokeUser(app, ws.id, read.id),
       { instanceOf: Error },
@@ -441,7 +446,7 @@ test('should be able to manage invite link', async t => {
     [tws, [owner, admin]],
   ] as const) {
     for (const manager of managers) {
-      app.switchUser(manager.id);
+      await app.switchUser(manager.id);
       const { link } = await createInviteLink(app, workspace.id, 'OneDay');
       const { link: currLink } = await getInviteLink(app, workspace.id);
       t.is(link, currLink, 'should be able to get invite link');
@@ -453,7 +458,7 @@ test('should be able to manage invite link', async t => {
     }
 
     for (const collaborator of [write, read]) {
-      app.switchUser(collaborator.id);
+      await app.switchUser(collaborator.id);
       await t.throwsAsync(
         createInviteLink(app, workspace.id, 'OneDay'),
         { instanceOf: Error },
@@ -478,7 +483,7 @@ test('should be able to approve team member', async t => {
   const { teamWorkspace: tws, owner, admin, write, read } = await init(app, 6);
 
   {
-    app.switchUser(owner);
+    await app.switchUser(owner);
     const { link } = await createInviteLink(app, tws.id, 'OneDay');
     const inviteId = link.split('/').pop()!;
 
@@ -488,7 +493,7 @@ test('should be able to approve team member', async t => {
       'should be able to accept invite'
     );
 
-    app.switchUser(owner);
+    await app.switchUser(owner);
     const { members } = await getWorkspace(app, tws.id);
     const memberInvite = members.find(m => m.id === member.id)!;
     t.is(memberInvite.status, 'UnderReview', 'should be under review');
@@ -509,21 +514,21 @@ test('should be able to approve team member', async t => {
   }
 
   {
-    app.switchUser(admin);
+    await app.switchUser(admin);
     await t.throwsAsync(
       approveMember(app, tws.id, 'not_exists_id'),
       { instanceOf: Error },
       'should throw error if member not exists'
     );
 
-    app.switchUser(write);
+    await app.switchUser(write);
     await t.throwsAsync(
       approveMember(app, tws.id, 'not_exists_id'),
       { instanceOf: Error },
       'should throw error if not manager'
     );
 
-    app.switchUser(read);
+    await app.switchUser(read);
     await t.throwsAsync(
       approveMember(app, tws.id, 'not_exists_id'),
       { instanceOf: Error },
@@ -547,7 +552,7 @@ test('should be able to invite by link', async t => {
   const member = await app.signup();
   {
     // check invite link
-    app.switchUser(member);
+    await app.switchUser(member);
     const info = await getInviteInfo(app, inviteId);
     t.is(info.workspace.id, ws.id, 'should be able to get invite info');
     t.falsy(info.status);
@@ -601,7 +606,7 @@ test('should be able to invite by link', async t => {
       'should not change status'
     );
 
-    models.workspaceFeature.add(tws.id, 'team_plan_v1', 'test', {
+    await models.workspaceFeature.add(tws.id, 'team_plan_v1', 'test', {
       memberLimit: 6,
     });
     await models.workspaceUser.refresh(tws.id, 6);
@@ -616,7 +621,7 @@ test('should be able to invite by link', async t => {
       'should not change status'
     );
 
-    models.workspaceFeature.add(tws.id, 'team_plan_v1', 'test', {
+    await models.workspaceFeature.add(tws.id, 'team_plan_v1', 'test', {
       memberLimit: 7,
     });
     await models.workspaceUser.refresh(tws.id, 7);
@@ -670,7 +675,7 @@ test('should be able to emit events and send notifications', async t => {
     const { teamWorkspace: tws, owner, createInviteLink } = await init(app);
     const [, invite] = await createInviteLink(tws);
     const user = await invite('m3@affine.pro');
-    app.switchUser(owner);
+    await app.switchUser(owner);
     const { members } = await getWorkspace(app, tws.id);
     const memberInvite = members.find(m => m.id === user.id)!;
     const requestRequestNotification = app.queue.last(
@@ -688,7 +693,7 @@ test('should be able to emit events and send notifications', async t => {
       'should send review request notification'
     );
 
-    app.switchUser(owner);
+    await app.switchUser(owner);
     await revokeUser(app, tws.id, user.id);
     const requestDeclinedNotification = app.queue.last(
       'notification.sendInvitationReviewDeclined'
@@ -735,7 +740,7 @@ test('should be able to emit events and send notifications', async t => {
       'should emit owner transferred event'
     );
 
-    app.switchUser(read);
+    await app.switchUser(read);
     await revokeMember(app, tws.id, owner.id);
     const [memberRemoved, memberUpdated] = event.emit
       .getCalls()
@@ -777,7 +782,7 @@ test('should be able to grant and revoke users role in page', async t => {
   } = await init(app, 5);
   const docId = nanoid();
 
-  app.switchUser(admin);
+  await app.switchUser(admin);
   const res = await grantDocUserRoles(
     app,
     ws.id,
@@ -795,7 +800,7 @@ test('should be able to grant and revoke users role in page', async t => {
     await grantDocUserRoles(app, ws.id, docId, [read.id], DocRole.Reader);
 
     // read still be the Manager of this doc
-    app.switchUser(read);
+    await app.switchUser(read);
     const res = await grantDocUserRoles(
       app,
       ws.id,
@@ -807,7 +812,7 @@ test('should be able to grant and revoke users role in page', async t => {
       grantDocUserRoles: true,
     });
 
-    app.switchUser(admin);
+    await app.switchUser(admin);
     const docUsersList = await docGrantedUsersList(app, ws.id, docId);
     t.is(docUsersList.workspace.doc.grantedUsersList.totalCount, 3);
     const externalRole = docUsersList.workspace.doc.grantedUsersList.edges.find(
@@ -821,7 +826,7 @@ test('should be able to change the default role in page', async t => {
   const { app } = t.context;
   const { teamWorkspace: ws, admin } = await init(app, 5);
   const docId = nanoid();
-  app.switchUser(admin);
+  await app.switchUser(admin);
   const res = await updateDocDefaultRole(app, ws.id, docId, DocRole.Reader);
 
   t.deepEqual(res, {
@@ -840,7 +845,7 @@ test('default page role should be able to override the workspace role', async t 
 
   const docId = nanoid();
 
-  app.switchUser(admin);
+  await app.switchUser(admin);
   const res = await updateDocDefaultRole(
     app,
     workspace.id,
@@ -854,7 +859,7 @@ test('default page role should be able to override the workspace role', async t 
 
   // reader can manage the page if the page default role is Manager
   {
-    app.switchUser(read);
+    await app.switchUser(read);
     const readerRes = await updateDocDefaultRole(
       app,
       workspace.id,
@@ -869,7 +874,7 @@ test('default page role should be able to override the workspace role', async t 
 
   // external can't manage the page even if the page default role is Manager
   {
-    app.switchUser(external);
+    await app.switchUser(external);
     await t.throwsAsync(
       updateDocDefaultRole(app, workspace.id, docId, DocRole.Manager),
       {
@@ -884,7 +889,7 @@ test('should be able to grant and revoke doc user role', async t => {
   const { teamWorkspace: ws, admin, read, external } = await init(app, 5);
   const docId = nanoid();
 
-  app.switchUser(admin);
+  await app.switchUser(admin);
   const res = await grantDocUserRoles(
     app,
     ws.id,
@@ -899,7 +904,7 @@ test('should be able to grant and revoke doc user role', async t => {
 
   // external user can never be able to manage the page
   {
-    app.switchUser(external);
+    await app.switchUser(external);
     await t.throwsAsync(
       grantDocUserRoles(app, ws.id, docId, [read.id], DocRole.Manager),
       {
@@ -910,7 +915,7 @@ test('should be able to grant and revoke doc user role', async t => {
 
   // revoke the role of the external user
   {
-    app.switchUser(admin);
+    await app.switchUser(admin);
     const revokeRes = await revokeDocUserRoles(app, ws.id, docId, external.id);
 
     t.deepEqual(revokeRes, {
@@ -918,7 +923,7 @@ test('should be able to grant and revoke doc user role', async t => {
     });
 
     // external user can't manage the page
-    app.switchUser(external);
+    await app.switchUser(external);
     await t.throwsAsync(revokeDocUserRoles(app, ws.id, docId, read.id), {
       message: `You do not have permission to perform Doc.Users.Manage action on doc ${docId}.`,
     });
@@ -930,7 +935,7 @@ test('update page default role should throw error if the space does not exist', 
   const { admin } = await init(app, 5);
   const docId = nanoid();
   const nonExistWorkspaceId = 'non-exist-workspace';
-  app.switchUser(admin);
+  await app.switchUser(admin);
   await t.throwsAsync(
     updateDocDefaultRole(app, nonExistWorkspaceId, docId, DocRole.Manager),
     {

@@ -10,14 +10,14 @@ import {
 } from '@affine/core/modules/editor-setting';
 import { FeatureFlagService } from '@affine/core/modules/feature-flag';
 import track from '@affine/track';
-import {
-  customImageProxyMiddleware,
-  ImageProxyService,
-} from '@blocksuite/affine/blocks/image';
 import { appendParagraphCommand } from '@blocksuite/affine/blocks/paragraph';
 import type { DocTitle } from '@blocksuite/affine/fragments/doc-title';
 import { DisposableGroup } from '@blocksuite/affine/global/disposable';
 import type { DocMode, RootBlockModel } from '@blocksuite/affine/model';
+import {
+  customImageProxyMiddleware,
+  ImageProxyService,
+} from '@blocksuite/affine/shared/adapters';
 import { focusBlockEnd } from '@blocksuite/affine/shared/commands';
 import { LinkPreviewerService } from '@blocksuite/affine/shared/services';
 import { getLastNoteBlock } from '@blocksuite/affine/shared/utils';

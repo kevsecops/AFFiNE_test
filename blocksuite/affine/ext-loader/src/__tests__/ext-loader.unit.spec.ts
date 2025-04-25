@@ -54,20 +54,28 @@ describe('multiple scopes', () => {
   class ViewExt1 extends ViewExtensionProvider {
     override name = 'ViewExt1';
 
-    override setup(context: ViewExtensionContext) {
-      super.setup(context);
+    constructor() {
+      super();
+      setup1();
+    }
+
+    override setup(context: ViewExtensionContext, option?: { foo: number }) {
+      super.setup(context, option);
       if (context.scope === 'page') {
-        setup1();
         context.register(Ext2);
       }
       if (context.scope === 'edgeless') {
-        setup2();
         context.register(Ext3);
       }
     }
   }
   class ViewExt2 extends ViewExtensionProvider {
     override name = 'ViewExt2';
+
+    constructor() {
+      super();
+      setup2();
+    }
 
     override setup(context: ViewExtensionContext) {
       super.setup(context);
@@ -87,7 +95,7 @@ describe('multiple scopes', () => {
     expect(edgelessExtensions).toEqual([Ext3, Ext5]);
   });
 
-  it('should setup be cached', () => {
+  it('should cache provider instances', () => {
     manager.get('page');
     manager.get('edgeless');
     expect(setup1).toHaveBeenCalledTimes(1);

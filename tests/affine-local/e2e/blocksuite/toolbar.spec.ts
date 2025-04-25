@@ -7,7 +7,6 @@ import {
 } from '@affine-test/kit/utils/editor';
 import { importImage } from '@affine-test/kit/utils/image';
 import {
-  pasteByKeyboard,
   selectAllByKeyboard,
   writeTextToClipboard,
 } from '@affine-test/kit/utils/keyboard';
@@ -253,7 +252,6 @@ test('should show toolbar when inline link is preceded by image or surface-ref',
   const url = new URL(page.url());
 
   await writeTextToClipboard(page, url.toString());
-  await pasteByKeyboard(page);
 
   const toolbar = locateToolbar(page);
 

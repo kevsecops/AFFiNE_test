@@ -1,4 +1,3 @@
-import { getMarkdownAdapterExtensions } from '@blocksuite/affine/adapters';
 import { Container } from '@blocksuite/affine/global/di';
 import type {
   AttachmentBlockModel,
@@ -28,6 +27,7 @@ import {
 } from 'yjs';
 
 import { IndexerDocument } from '../../storage';
+import { getStoreManager } from './bs-store';
 
 const blocksuiteSchema = new Schema();
 blocksuiteSchema.register([...AffineSchemas]);
@@ -119,9 +119,11 @@ function generateMarkdownPreviewBuilder(
   };
 
   const container = new Container();
-  getMarkdownAdapterExtensions().forEach(ext => {
-    ext.setup(container);
-  });
+  getStoreManager()
+    .get('store')
+    .forEach(ext => {
+      ext.setup(container);
+    });
 
   const provider = container.provider();
   const markdownAdapter = new MarkdownAdapter(

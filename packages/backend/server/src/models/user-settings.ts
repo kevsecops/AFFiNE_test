@@ -36,7 +36,7 @@ export class UserSettingsModel extends BaseModel {
         payload,
       },
     });
-    this.logger.log(`UserSettings updated for user ${userId}`);
+    this.logger.debug(`UserSettings updated for user ${userId}`);
     return payload;
   }
 

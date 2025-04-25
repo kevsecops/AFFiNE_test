@@ -7,11 +7,13 @@ import {
   NoteBlockModel,
   NoteDisplayMode,
   type NoteProps,
+  type ParagraphProps,
 } from '@blocksuite/affine-model';
 import {
   draftSelectedModelsCommand,
   duplicateSelectedModelsCommand,
 } from '@blocksuite/affine-shared/commands';
+import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
 import {
   ActionPlacement,
   EditorSettingProvider,
@@ -24,6 +26,7 @@ import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { getBlockProps, matchModels } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/gfx';
 import {
@@ -36,7 +39,12 @@ import {
   OpenInNewIcon,
 } from '@blocksuite/icons/lit';
 import { BlockFlavourIdentifier, isGfxBlockComponent } from '@blocksuite/std';
-import { type BlockModel, type ExtensionType, Slice } from '@blocksuite/store';
+import {
+  type BlockModel,
+  type ExtensionType,
+  Slice,
+  Text,
+} from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
@@ -370,6 +378,24 @@ const builtinSurfaceToolbarConfig = {
                   displayMode: NoteDisplayMode.EdgelessOnly,
                 } satisfies Partial<NoteProps>,
                 ctx.store.root
+              );
+
+              std.store.addBlock(
+                'affine:paragraph',
+                {
+                  text: new Text<AffineTextAttributes>([
+                    {
+                      insert: REFERENCE_NODE,
+                      attributes: {
+                        reference: {
+                          type: 'LinkedPage',
+                          pageId: syncedDocModel.props.pageId,
+                        },
+                      },
+                    },
+                  ]),
+                } satisfies Partial<ParagraphProps>,
+                noteId
               );
 
               await std.clipboard.duplicateSlice(

@@ -507,8 +507,7 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": "A recognizable name for the server. Will be shown when connected with AFFiNE Desktop.\n@default \"AFFiNE Cloud\"",
-          "default": "AFFiNE Cloud"
+          "description": "A recognizable name for the server. Will be shown when connected with AFFiNE Desktop.\n@default undefined"
         },
         "externalUrl": {
           "type": "string",
@@ -532,7 +531,7 @@
         },
         "path": {
           "type": "string",
-          "description": "Subpath where the server get deployed if there is.\n@default \"\"\n@environment `AFFINE_SERVER_SUB_PATH`",
+          "description": "Subpath where the server get deployed if there is one.(e.g. /affine)\n@default \"\"\n@environment `AFFINE_SERVER_SUB_PATH`",
           "default": ""
         }
       }

@@ -28,7 +28,9 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts"
+    "./effects": "./src/effects.ts",
+    "./store": "./src/store.ts",
+    "./view": "./src/view.ts"
   },
   "files": [
     "src",

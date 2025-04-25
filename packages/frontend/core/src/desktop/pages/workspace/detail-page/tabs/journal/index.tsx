@@ -32,6 +32,7 @@ import dayjs from 'dayjs';
 import type { HTMLAttributes, PropsWithChildren, ReactNode } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
+import { CalendarEvents } from './calendar-events';
 import * as styles from './journal.css';
 import { JournalTemplateOnboarding } from './template-onboarding';
 import { JournalTemplateSetting } from './template-setting';
@@ -166,6 +167,7 @@ export const EditorJournalPanel = () => {
       {journalDate ? (
         <>
           <JournalConflictBlock date={journalDate} />
+          <CalendarEvents date={journalDate} />
           <JournalDailyCountBlock date={journalDate} />
         </>
       ) : (

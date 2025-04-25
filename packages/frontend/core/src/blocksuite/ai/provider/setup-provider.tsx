@@ -82,28 +82,22 @@ export function setupAIProvider(
 
   //#region actions
   AIProvider.provide('chat', async options => {
-    const { input, contexts, attachments, networkSearch, retry } = options;
-    const disableSearch =
-      !!contexts?.files.length ||
-      !!contexts?.docs.length ||
-      !!attachments?.length;
-    const promptName =
-      networkSearch && !disableSearch
-        ? 'Search With AFFiNE AI'
-        : 'Chat With AFFiNE AI';
+    const { input, contexts, mustSearch } = options;
+
     const sessionId = await createSession({
-      promptName,
+      promptName: 'Chat With AFFiNE AI',
       ...options,
     });
-    if (!retry) {
-      await AIProvider.session?.updateSession(sessionId, promptName);
-    }
     return textToText({
       ...options,
       client,
       sessionId,
       content: input,
-      params: contexts,
+      params: {
+        docs: contexts?.docs,
+        files: contexts?.files,
+        searchMode: mustSearch ? 'MUST' : 'CAN',
+      },
     });
   });
 
@@ -492,7 +486,7 @@ Could you make a new website based on these notes and send back just the html fi
 
   AIProvider.provide('createImage', async options => {
     // test to image
-    let promptName: PromptKey = 'debug:action:dalle3';
+    let promptName: PromptKey = 'debug:action:gpt-image-1';
     // image to image
     if (options.attachments?.length) {
       promptName = 'debug:action:fal-sd15';
@@ -507,6 +501,8 @@ Could you make a new website based on these notes and send back just the html fi
       client,
       sessionId,
       content: options.input,
+      // 5 minutes
+      timeout: 300000,
     });
   });
 

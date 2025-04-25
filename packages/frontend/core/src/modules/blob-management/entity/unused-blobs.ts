@@ -9,14 +9,13 @@ import {
 } from '@toeverything/infra';
 import { fileTypeFromBuffer } from 'file-type';
 import {
-  EMPTY,
   filter,
   firstValueFrom,
   fromEvent,
   map,
-  mergeMap,
   switchMap,
   takeUntil,
+  tap,
 } from 'rxjs';
 
 import type { DocsSearchService } from '../../docs-search';
@@ -46,9 +45,8 @@ export class UnusedBlobs extends Entity {
       fromPromise(async () => {
         return await this.getUnusedBlobs();
       }).pipe(
-        mergeMap(data => {
+        tap(data => {
           this.unusedBlobs$.setValue(data);
-          return EMPTY;
         }),
         onStart(() => this.isLoading$.setValue(true)),
         onComplete(() => this.isLoading$.setValue(false))

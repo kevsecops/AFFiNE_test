@@ -3,7 +3,6 @@ import {
   type Signal,
 } from '@blocksuite/affine/shared/utils';
 import { LiveData, Service } from '@toeverything/infra';
-import { map } from 'rxjs';
 
 import type { FeatureFlagService } from '../../feature-flag';
 import type { GlobalStateService } from '../../storage';
@@ -42,9 +41,7 @@ export class AINetworkSearchService extends Service {
     this.featureFlagService.flags.enable_ai_network_search.$;
 
   private readonly _enabled$ = LiveData.from(
-    this.globalStateService.globalState
-      .watch<boolean>(AI_NETWORK_SEARCH_KEY)
-      .pipe(map(v => (v === undefined ? true : v))),
+    this.globalStateService.globalState.watch<boolean>(AI_NETWORK_SEARCH_KEY),
     undefined
   );
 

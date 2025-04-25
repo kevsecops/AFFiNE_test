@@ -283,7 +283,7 @@ export class CopilotTranscriptionService {
           .trim();
 
         if (content.length) {
-          payload.summary = await this.chatWithPrompt('Summary', {
+          payload.summary = await this.chatWithPrompt('Summarize the meeting', {
             content,
           });
           await this.models.copilotJob.update(jobId, {
@@ -328,7 +328,7 @@ export class CopilotTranscriptionService {
           await this.models.copilotJob.update(jobId, {
             payload,
           });
-          this.event.emit('workspace.file.transcript.finished', {
+          await this.job.add('copilot.transcript.findAction.submit', {
             jobId,
           });
           return;
@@ -344,6 +344,32 @@ export class CopilotTranscriptionService {
       });
       throw error;
     }
+  }
+
+  @OnJob('copilot.transcript.findAction.submit')
+  async transcriptFindAction({
+    jobId,
+  }: Jobs['copilot.transcript.findAction.submit']) {
+    try {
+      const payload = await this.models.copilotJob.getPayload(
+        jobId,
+        TranscriptPayloadSchema
+      );
+      if (payload.summary) {
+        const actions = await this.chatWithPrompt('Find action for summary', {
+          content: payload.summary,
+        }).then(a => a.trim());
+        if (actions) {
+          payload.actions = actions;
+          await this.models.copilotJob.update(jobId, {
+            payload,
+          });
+        }
+      }
+    } catch {} // finish even if failed
+    this.event.emit('workspace.file.transcript.finished', {
+      jobId,
+    });
   }
 
   @OnEvent('workspace.file.transcript.finished')

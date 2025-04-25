@@ -4,12 +4,13 @@ import {
   EdgelessCRUDIdentifier,
   getSurfaceBlock,
 } from '@blocksuite/affine/blocks/surface';
+import { ViewExtensionManagerIdentifier } from '@blocksuite/affine/ext-loader';
 import { ConnectorMode } from '@blocksuite/affine/model';
 import {
   DocModeProvider,
   TelemetryProvider,
 } from '@blocksuite/affine/shared/services';
-import type { Signal, SpecBuilder } from '@blocksuite/affine/shared/utils';
+import type { Signal } from '@blocksuite/affine/shared/utils';
 import type { EditorHost } from '@blocksuite/affine/std';
 import { signal } from '@preact/signals-core';
 import { html, LitElement, nothing } from 'lit';
@@ -27,7 +28,10 @@ import type {
   DocDisplayConfig,
   SearchMenuConfig,
 } from '../components/ai-chat-chips';
-import type { AINetworkSearchConfig } from '../components/ai-chat-input';
+import type {
+  AINetworkSearchConfig,
+  AIReasoningConfig,
+} from '../components/ai-chat-input';
 import type { ChatMessage } from '../components/ai-chat-messages';
 import { ChatMessagesSchema } from '../components/ai-chat-messages';
 import type { TextRendererOptions } from '../components/text-renderer';
@@ -437,9 +441,11 @@ export class AIChatBlockPeekView extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._textRendererOptions = {
-      extensions: this.previewSpecBuilder.value,
-    };
+    const extensions = this.host.std
+      .get(ViewExtensionManagerIdentifier)
+      .get('preview-page');
+
+    this._textRendererOptions = { extensions };
     this._historyMessages = this._deserializeHistoryChatMessages(
       this.historyMessagesString
     );
@@ -496,6 +502,15 @@ export class AIChatBlockPeekView extends LitElement {
         <div class="new-chat-messages-container">
           ${this.CurrentMessages(currentChatMessages)}
         </div>
+        <div class="history-clear-container">
+          <ai-history-clear
+            .host=${this.host}
+            .doc=${this.host.doc}
+            .getSessionId=${this._getSessionId}
+            .onHistoryCleared=${this._onHistoryCleared}
+            .chatContextValue=${chatContext}
+          ></ai-history-clear>
+        </div>
       </div>
       <ai-chat-composer
         .host=${host}
@@ -504,7 +519,6 @@ export class AIChatBlockPeekView extends LitElement {
         .createSessionId=${this._createSessionId}
         .chatContextValue=${chatContext}
         .updateContext=${updateContext}
-        .onHistoryCleared=${this._onHistoryCleared}
         .isVisible=${this.isComposerVisible}
         .updateEmbeddingProgress=${this._updateEmbeddingProgress}
         .networkSearchConfig=${networkSearchConfig}
@@ -516,6 +530,7 @@ export class AIChatBlockPeekView extends LitElement {
           control: 'chat-send',
         }}
         .portalContainer=${this.parentElement}
+        .reasoningConfig=${this.reasoningConfig}
       ></ai-chat-composer>
     </div> `;
   }
@@ -530,10 +545,10 @@ export class AIChatBlockPeekView extends LitElement {
   accessor host!: EditorHost;
 
   @property({ attribute: false })
-  accessor previewSpecBuilder!: SpecBuilder;
+  accessor networkSearchConfig!: AINetworkSearchConfig;
 
   @property({ attribute: false })
-  accessor networkSearchConfig!: AINetworkSearchConfig;
+  accessor reasoningConfig!: AIReasoningConfig;
 
   @property({ attribute: false })
   accessor docDisplayConfig!: DocDisplayConfig;
@@ -566,17 +581,17 @@ declare global {
 export const AIChatBlockPeekViewTemplate = (
   blockModel: AIChatBlockModel,
   host: EditorHost,
-  previewSpecBuilder: SpecBuilder,
   docDisplayConfig: DocDisplayConfig,
   searchMenuConfig: SearchMenuConfig,
-  networkSearchConfig: AINetworkSearchConfig
+  networkSearchConfig: AINetworkSearchConfig,
+  reasoningConfig: AIReasoningConfig
 ) => {
   return html`<ai-chat-block-peek-view
     .blockModel=${blockModel}
     .host=${host}
-    .previewSpecBuilder=${previewSpecBuilder}
     .networkSearchConfig=${networkSearchConfig}
     .docDisplayConfig=${docDisplayConfig}
     .searchMenuConfig=${searchMenuConfig}
+    .reasoningConfig=${reasoningConfig}
   ></ai-chat-block-peek-view>`;
 };

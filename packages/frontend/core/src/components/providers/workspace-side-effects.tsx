@@ -44,14 +44,7 @@ import {
 } from '@toeverything/infra';
 import { useSetAtom } from 'jotai';
 import { useEffect } from 'react';
-import {
-  catchError,
-  EMPTY,
-  finalize,
-  mergeMap,
-  switchMap,
-  timeout,
-} from 'rxjs';
+import { catchError, EMPTY, finalize, switchMap, tap, timeout } from 'rxjs';
 
 /**
  * @deprecated just for legacy code, will be removed in the future
@@ -88,12 +81,11 @@ export const WorkspaceSideEffects = () => {
           return { doc, mode };
         }).pipe(
           timeout(10000 /* 10s */),
-          mergeMap(({ mode, doc }) => {
+          tap(({ mode, doc }) => {
             if (doc) {
               docsList.setPrimaryMode(doc.id, mode as DocMode);
               workbench.openDoc(doc.id);
             }
-            return EMPTY;
           }),
           onStart(() => {
             pushGlobalLoadingEvent({

@@ -47,7 +47,7 @@ export function createAIEdgelessRootBlockSpec(
   ];
 }
 
-function getAIEdgelessRootWatcher(framework: FrameworkProvider) {
+export function getAIEdgelessRootWatcher(framework: FrameworkProvider) {
   class AIEdgelessRootWatcher extends LifeCycleWatcher {
     static override key = 'ai-edgeless-root-watcher';
 

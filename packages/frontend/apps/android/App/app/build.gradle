@@ -25,7 +25,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName System.getenv('VERSION_NAME') ?: 'v1.0.0-local'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -124,6 +124,7 @@ dependencies {
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.analytics
     implementation libs.firebase.crashlytics
+    implementation libs.firebase.storage
 
     implementation platform(libs.okhttp.bom)
     implementation libs.okhttp

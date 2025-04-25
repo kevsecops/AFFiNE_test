@@ -7,6 +7,7 @@ import { DocStorageModule } from '../../core/doc';
 import { FeatureModule } from '../../core/features';
 import { PermissionModule } from '../../core/permission';
 import { QuotaModule } from '../../core/quota';
+import { WorkspaceModule } from '../../core/workspaces';
 import {
   CopilotContextDocJob,
   CopilotContextResolver,
@@ -29,6 +30,11 @@ import {
   CopilotTranscriptionService,
 } from './transcript';
 import { CopilotWorkflowExecutors, CopilotWorkflowService } from './workflow';
+import {
+  CopilotWorkspaceEmbeddingConfigResolver,
+  CopilotWorkspaceEmbeddingResolver,
+  CopilotWorkspaceService,
+} from './workspace';
 
 @Module({
   imports: [
@@ -37,6 +43,7 @@ import { CopilotWorkflowExecutors, CopilotWorkflowService } from './workflow';
     QuotaModule,
     PermissionModule,
     ServerConfigModule,
+    WorkspaceModule,
   ],
   providers: [
     // providers
@@ -58,6 +65,10 @@ import { CopilotWorkflowExecutors, CopilotWorkflowService } from './workflow';
     // transcription
     CopilotTranscriptionService,
     CopilotTranscriptionResolver,
+    // workspace embeddings
+    CopilotWorkspaceService,
+    CopilotWorkspaceEmbeddingResolver,
+    CopilotWorkspaceEmbeddingConfigResolver,
     // gql resolvers
     UserCopilotResolver,
     PromptsManagementResolver,

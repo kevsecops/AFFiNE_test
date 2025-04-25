@@ -10,7 +10,7 @@ import {
   onStart,
 } from '@toeverything/infra';
 import { clamp } from 'lodash-es';
-import { EMPTY, mergeMap, switchMap } from 'rxjs';
+import { mergeMap, switchMap } from 'rxjs';
 
 import type { WorkspaceService } from '../../workspace';
 
@@ -194,7 +194,6 @@ export class AudioMedia extends Entity<AudioSource> {
             `Calculate audio stats time: ${performance.now() - startTime}ms`
           );
         }),
-        mergeMap(() => EMPTY),
         onStart(() => this.loading$.setValue(true)),
         onComplete(() => {
           this.loading$.setValue(false);

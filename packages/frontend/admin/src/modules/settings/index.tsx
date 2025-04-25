@@ -62,7 +62,7 @@ export function SettingsPage() {
   );
 }
 
-export const AdminPanel = ({
+const AdminPanel = ({
   appConfig,
   patchedAppConfig,
   onUpdate,

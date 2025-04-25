@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { ServerFeature, ServerService } from '../../../core';
+import type { AnthropicProvider } from './anthropic';
 import type { FalProvider } from './fal';
 import type { GeminiProvider } from './gemini';
 import type { OpenAIProvider } from './openai';
@@ -13,6 +14,7 @@ import {
 } from './types';
 
 type TypedProvider = {
+  [CopilotProviderType.Anthropic]: AnthropicProvider;
   [CopilotProviderType.Gemini]: GeminiProvider;
   [CopilotProviderType.OpenAI]: OpenAIProvider;
   [CopilotProviderType.Perplexity]: PerplexityProvider;

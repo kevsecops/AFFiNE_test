@@ -196,7 +196,6 @@ export const cardStyles = css`
     height: ${EMBED_CARD_HEIGHT.horizontal}px;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
-    opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
   }
@@ -209,8 +208,6 @@ export const cardStyles = css`
     align-self: stretch;
     gap: 4px;
     padding: 12px;
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-embed-synced-doc-card-content-title {
@@ -219,9 +216,6 @@ export const cardStyles = css`
     gap: 8px;
     align-items: center;
     align-self: stretch;
-    padding: var(--1, 0px);
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-embed-synced-doc-card-content-title-icon {
@@ -337,7 +331,6 @@ export const cardStyles = css`
     width: 204px;
     max-width: 100%;
     height: 102px;
-    opacity: var(--add, 1);
     pointer-events: none;
   }
   .affine-embed-synced-doc-card-banner.render {
@@ -350,7 +343,7 @@ export const cardStyles = css`
     max-width: 100%;
     height: 102px;
     object-fit: cover;
-    border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
+    border-radius: 4px;
   }
 
   .affine-embed-synced-doc-card.loading,

@@ -53,6 +53,6 @@ test('should not show hidden note in embed view page mode', async ({
 
   // check the content
   const embedLink = page.locator('affine-embed-synced-doc-block');
-  expect(embedLink.getByText(/visible content/)).toBeVisible();
-  expect(embedLink.getByText(/hidden content/)).toBeHidden();
+  await expect(embedLink.getByText(/visible content/)).toBeVisible();
+  await expect(embedLink.getByText(/hidden content/)).toBeHidden();
 });

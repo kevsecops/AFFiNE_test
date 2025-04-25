@@ -21,12 +21,12 @@ import { WorkbenchService } from '@affine/core/modules/workbench';
 import { ViewService } from '@affine/core/modules/workbench/services/view';
 import { WorkspaceService } from '@affine/core/modules/workspace';
 import { i18nTime } from '@affine/i18n';
+import { DisposableGroup } from '@blocksuite/affine/global/disposable';
+import { RefNodeSlotsProvider } from '@blocksuite/affine/inlines/reference';
 import {
   customImageProxyMiddleware,
   ImageProxyService,
-} from '@blocksuite/affine/blocks/image';
-import { DisposableGroup } from '@blocksuite/affine/global/disposable';
-import { RefNodeSlotsProvider } from '@blocksuite/affine/inlines/reference';
+} from '@blocksuite/affine/shared/adapters';
 import { LinkPreviewerService } from '@blocksuite/affine/shared/services';
 import {
   FrameworkScope,

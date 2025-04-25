@@ -239,6 +239,11 @@ export interface CopilotDocType {
   status: Maybe<ContextEmbedStatus>;
 }
 
+export interface CopilotFailedToAddWorkspaceFileEmbeddingDataType {
+  __typename?: 'CopilotFailedToAddWorkspaceFileEmbeddingDataType';
+  message: Scalars['String']['output'];
+}
+
 export interface CopilotFailedToMatchContextDataType {
   __typename?: 'CopilotFailedToMatchContextDataType';
   content: Scalars['String']['output'];
@@ -359,6 +364,50 @@ export interface CopilotSessionType {
   promptName: Scalars['String']['output'];
 }
 
+export interface CopilotWorkspaceConfig {
+  __typename?: 'CopilotWorkspaceConfig';
+  allIgnoredDocs: Array<CopilotWorkspaceIgnoredDoc>;
+  files: PaginatedCopilotWorkspaceFileType;
+  ignoredDocs: PaginatedIgnoredDocsType;
+  workspaceId: Scalars['String']['output'];
+}
+
+export interface CopilotWorkspaceConfigFilesArgs {
+  pagination: PaginationInput;
+}
+
+export interface CopilotWorkspaceConfigIgnoredDocsArgs {
+  pagination: PaginationInput;
+}
+
+export interface CopilotWorkspaceFile {
+  __typename?: 'CopilotWorkspaceFile';
+  createdAt: Scalars['DateTime']['output'];
+  fileId: Scalars['String']['output'];
+  fileName: Scalars['String']['output'];
+  mimeType: Scalars['String']['output'];
+  size: Scalars['SafeInt']['output'];
+  workspaceId: Scalars['String']['output'];
+}
+
+export interface CopilotWorkspaceFileTypeEdge {
+  __typename?: 'CopilotWorkspaceFileTypeEdge';
+  cursor: Scalars['String']['output'];
+  node: CopilotWorkspaceFile;
+}
+
+export interface CopilotWorkspaceIgnoredDoc {
+  __typename?: 'CopilotWorkspaceIgnoredDoc';
+  createdAt: Scalars['DateTime']['output'];
+  docId: Scalars['String']['output'];
+}
+
+export interface CopilotWorkspaceIgnoredDocTypeEdge {
+  __typename?: 'CopilotWorkspaceIgnoredDocTypeEdge';
+  cursor: Scalars['String']['output'];
+  node: CopilotWorkspaceIgnoredDoc;
+}
+
 export interface CreateChatMessageInput {
   attachments?: InputMaybe<Array<Scalars['String']['input']>>;
   blobs?: InputMaybe<Array<Scalars['Upload']['input']>>;
@@ -395,6 +444,7 @@ export interface CreateCopilotPromptInput {
 export interface CreateUserInput {
   email: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
+  password?: InputMaybe<Scalars['String']['input']>;
 }
 
 export interface CredentialsRequirementType {
@@ -507,6 +557,7 @@ export type ErrorDataUnion =
   | BlobNotFoundDataType
   | CopilotContextFileNotSupportedDataType
   | CopilotDocNotFoundDataType
+  | CopilotFailedToAddWorkspaceFileEmbeddingDataType
   | CopilotFailedToMatchContextDataType
   | CopilotFailedToModifyContextDataType
   | CopilotInvalidContextDataType
@@ -572,6 +623,7 @@ export enum ErrorNames {
   COPILOT_DOC_NOT_FOUND = 'COPILOT_DOC_NOT_FOUND',
   COPILOT_EMBEDDING_DISABLED = 'COPILOT_EMBEDDING_DISABLED',
   COPILOT_EMBEDDING_UNAVAILABLE = 'COPILOT_EMBEDDING_UNAVAILABLE',
+  COPILOT_FAILED_TO_ADD_WORKSPACE_FILE_EMBEDDING = 'COPILOT_FAILED_TO_ADD_WORKSPACE_FILE_EMBEDDING',
   COPILOT_FAILED_TO_CREATE_MESSAGE = 'COPILOT_FAILED_TO_CREATE_MESSAGE',
   COPILOT_FAILED_TO_GENERATE_TEXT = 'COPILOT_FAILED_TO_GENERATE_TEXT',
   COPILOT_FAILED_TO_MATCH_CONTEXT = 'COPILOT_FAILED_TO_MATCH_CONTEXT',
@@ -1040,6 +1092,8 @@ export interface Mutation {
   addContextDoc: CopilotContextDoc;
   /** add a file to context */
   addContextFile: CopilotContextFile;
+  /** Update workspace embedding files */
+  addWorkspaceEmbeddingFiles: CopilotWorkspaceFile;
   addWorkspaceFeature: Scalars['Boolean']['output'];
   approveMember: Scalars['Boolean']['output'];
   /** Ban an user */
@@ -1107,6 +1161,8 @@ export interface Mutation {
   removeContextDoc: Scalars['Boolean']['output'];
   /** remove a file from context */
   removeContextFile: Scalars['Boolean']['output'];
+  /** Remove workspace embedding files */
+  removeWorkspaceEmbeddingFiles: Scalars['Boolean']['output'];
   removeWorkspaceFeature: Scalars['Boolean']['output'];
   resumeSubscription: SubscriptionType;
   retryAudioTranscription: Maybe<TranscriptionResultType>;
@@ -1142,6 +1198,8 @@ export interface Mutation {
   updateUserFeatures: Array<FeatureType>;
   /** Update workspace */
   updateWorkspace: WorkspaceType;
+  /** Update ignored docs */
+  updateWorkspaceEmbeddingIgnoredDocs: Scalars['Int']['output'];
   /** Upload user avatar */
   uploadAvatar: UserType;
   verifyEmail: Scalars['Boolean']['output'];
@@ -1169,6 +1227,11 @@ export interface MutationAddContextDocArgs {
 export interface MutationAddContextFileArgs {
   content: Scalars['Upload']['input'];
   options: AddContextFileInput;
+}
+
+export interface MutationAddWorkspaceEmbeddingFilesArgs {
+  blob: Scalars['Upload']['input'];
+  workspaceId: Scalars['String']['input'];
 }
 
 export interface MutationAddWorkspaceFeatureArgs {
@@ -1364,6 +1427,11 @@ export interface MutationRemoveContextFileArgs {
   options: RemoveContextFileInput;
 }
 
+export interface MutationRemoveWorkspaceEmbeddingFilesArgs {
+  fileId: Scalars['String']['input'];
+  workspaceId: Scalars['String']['input'];
+}
+
 export interface MutationRemoveWorkspaceFeatureArgs {
   feature: FeatureType;
   workspaceId: Scalars['String']['input'];
@@ -1494,6 +1562,12 @@ export interface MutationUpdateWorkspaceArgs {
   input: UpdateWorkspaceInput;
 }
 
+export interface MutationUpdateWorkspaceEmbeddingIgnoredDocsArgs {
+  add?: InputMaybe<Array<Scalars['String']['input']>>;
+  remove?: InputMaybe<Array<Scalars['String']['input']>>;
+  workspaceId: Scalars['String']['input'];
+}
+
 export interface MutationUploadAvatarArgs {
   avatar: Scalars['Upload']['input'];
 }
@@ -1576,9 +1650,23 @@ export interface PageInfo {
   startCursor: Maybe<Scalars['String']['output']>;
 }
 
+export interface PaginatedCopilotWorkspaceFileType {
+  __typename?: 'PaginatedCopilotWorkspaceFileType';
+  edges: Array<CopilotWorkspaceFileTypeEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+}
+
 export interface PaginatedGrantedDocUserType {
   __typename?: 'PaginatedGrantedDocUserType';
   edges: Array<GrantedDocUserTypeEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+}
+
+export interface PaginatedIgnoredDocsType {
+  __typename?: 'PaginatedIgnoredDocsType';
+  edges: Array<CopilotWorkspaceIgnoredDocTypeEdge>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
 }
@@ -1935,6 +2023,7 @@ export interface TranscriptionItemType {
 
 export interface TranscriptionResultType {
   __typename?: 'TranscriptionResultType';
+  actions: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   status: AiJobStatus;
   summary: Maybe<Scalars['String']['output']>;
@@ -2231,6 +2320,7 @@ export interface WorkspaceType {
   createdAt: Scalars['DateTime']['output'];
   /** Get get with given id */
   doc: DocType;
+  embedding: CopilotWorkspaceConfig;
   /** Enable AI */
   enableAi: Scalars['Boolean']['output'];
   /** Enable doc embedding */
@@ -3029,6 +3119,7 @@ export type ClaimAudioTranscriptionMutation = {
     status: AiJobStatus;
     title: string | null;
     summary: string | null;
+    actions: string | null;
     transcription: Array<{
       __typename?: 'TranscriptionItemType';
       speaker: string;
@@ -3165,6 +3256,139 @@ export type GetCopilotSessionsQuery = {
       }>;
     };
   } | null;
+};
+
+export type AddWorkspaceEmbeddingFilesMutationVariables = Exact<{
+  workspaceId: Scalars['String']['input'];
+  blob: Scalars['Upload']['input'];
+}>;
+
+export type AddWorkspaceEmbeddingFilesMutation = {
+  __typename?: 'Mutation';
+  addWorkspaceEmbeddingFiles: {
+    __typename?: 'CopilotWorkspaceFile';
+    fileId: string;
+    fileName: string;
+    mimeType: string;
+    size: number;
+    createdAt: string;
+  };
+};
+
+export type GetWorkspaceEmbeddingFilesQueryVariables = Exact<{
+  workspaceId: Scalars['String']['input'];
+  pagination: PaginationInput;
+}>;
+
+export type GetWorkspaceEmbeddingFilesQuery = {
+  __typename?: 'Query';
+  workspace: {
+    __typename?: 'WorkspaceType';
+    embedding: {
+      __typename?: 'CopilotWorkspaceConfig';
+      files: {
+        __typename?: 'PaginatedCopilotWorkspaceFileType';
+        totalCount: number;
+        pageInfo: {
+          __typename?: 'PageInfo';
+          endCursor: string | null;
+          hasNextPage: boolean;
+        };
+        edges: Array<{
+          __typename?: 'CopilotWorkspaceFileTypeEdge';
+          node: {
+            __typename?: 'CopilotWorkspaceFile';
+            fileId: string;
+            fileName: string;
+            mimeType: string;
+            size: number;
+            createdAt: string;
+          };
+        }>;
+      };
+    };
+  };
+};
+
+export type RemoveWorkspaceEmbeddingFilesMutationVariables = Exact<{
+  workspaceId: Scalars['String']['input'];
+  fileId: Scalars['String']['input'];
+}>;
+
+export type RemoveWorkspaceEmbeddingFilesMutation = {
+  __typename?: 'Mutation';
+  removeWorkspaceEmbeddingFiles: boolean;
+};
+
+export type AddWorkspaceEmbeddingIgnoredDocsMutationVariables = Exact<{
+  workspaceId: Scalars['String']['input'];
+  add: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+export type AddWorkspaceEmbeddingIgnoredDocsMutation = {
+  __typename?: 'Mutation';
+  updateWorkspaceEmbeddingIgnoredDocs: number;
+};
+
+export type GetAllWorkspaceEmbeddingIgnoredDocsQueryVariables = Exact<{
+  workspaceId: Scalars['String']['input'];
+}>;
+
+export type GetAllWorkspaceEmbeddingIgnoredDocsQuery = {
+  __typename?: 'Query';
+  workspace: {
+    __typename?: 'WorkspaceType';
+    embedding: {
+      __typename?: 'CopilotWorkspaceConfig';
+      allIgnoredDocs: Array<{
+        __typename?: 'CopilotWorkspaceIgnoredDoc';
+        docId: string;
+        createdAt: string;
+      }>;
+    };
+  };
+};
+
+export type GetWorkspaceEmbeddingIgnoredDocsQueryVariables = Exact<{
+  workspaceId: Scalars['String']['input'];
+  pagination: PaginationInput;
+}>;
+
+export type GetWorkspaceEmbeddingIgnoredDocsQuery = {
+  __typename?: 'Query';
+  workspace: {
+    __typename?: 'WorkspaceType';
+    embedding: {
+      __typename?: 'CopilotWorkspaceConfig';
+      ignoredDocs: {
+        __typename?: 'PaginatedIgnoredDocsType';
+        totalCount: number;
+        pageInfo: {
+          __typename?: 'PageInfo';
+          endCursor: string | null;
+          hasNextPage: boolean;
+        };
+        edges: Array<{
+          __typename?: 'CopilotWorkspaceIgnoredDocTypeEdge';
+          node: {
+            __typename?: 'CopilotWorkspaceIgnoredDoc';
+            docId: string;
+            createdAt: string;
+          };
+        }>;
+      };
+    };
+  };
+};
+
+export type RemoveWorkspaceEmbeddingIgnoredDocsMutationVariables = Exact<{
+  workspaceId: Scalars['String']['input'];
+  remove: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+export type RemoveWorkspaceEmbeddingIgnoredDocsMutation = {
+  __typename?: 'Mutation';
+  updateWorkspaceEmbeddingIgnoredDocs: number;
 };
 
 export type CreateCheckoutSessionMutationVariables = Exact<{
@@ -4426,6 +4650,21 @@ export type Queries =
       response: GetCopilotSessionsQuery;
     }
   | {
+      name: 'getWorkspaceEmbeddingFilesQuery';
+      variables: GetWorkspaceEmbeddingFilesQueryVariables;
+      response: GetWorkspaceEmbeddingFilesQuery;
+    }
+  | {
+      name: 'getAllWorkspaceEmbeddingIgnoredDocsQuery';
+      variables: GetAllWorkspaceEmbeddingIgnoredDocsQueryVariables;
+      response: GetAllWorkspaceEmbeddingIgnoredDocsQuery;
+    }
+  | {
+      name: 'getWorkspaceEmbeddingIgnoredDocsQuery';
+      variables: GetWorkspaceEmbeddingIgnoredDocsQueryVariables;
+      response: GetWorkspaceEmbeddingIgnoredDocsQuery;
+    }
+  | {
       name: 'getDocRolePermissionsQuery';
       variables: GetDocRolePermissionsQueryVariables;
       response: GetDocRolePermissionsQuery;
@@ -4781,6 +5020,26 @@ export type Mutations =
       name: 'updateCopilotSessionMutation';
       variables: UpdateCopilotSessionMutationVariables;
       response: UpdateCopilotSessionMutation;
+    }
+  | {
+      name: 'addWorkspaceEmbeddingFilesMutation';
+      variables: AddWorkspaceEmbeddingFilesMutationVariables;
+      response: AddWorkspaceEmbeddingFilesMutation;
+    }
+  | {
+      name: 'removeWorkspaceEmbeddingFilesMutation';
+      variables: RemoveWorkspaceEmbeddingFilesMutationVariables;
+      response: RemoveWorkspaceEmbeddingFilesMutation;
+    }
+  | {
+      name: 'addWorkspaceEmbeddingIgnoredDocsMutation';
+      variables: AddWorkspaceEmbeddingIgnoredDocsMutationVariables;
+      response: AddWorkspaceEmbeddingIgnoredDocsMutation;
+    }
+  | {
+      name: 'removeWorkspaceEmbeddingIgnoredDocsMutation';
+      variables: RemoveWorkspaceEmbeddingIgnoredDocsMutationVariables;
+      response: RemoveWorkspaceEmbeddingIgnoredDocsMutation;
     }
   | {
       name: 'createCheckoutSessionMutation';

@@ -193,15 +193,15 @@ test.describe('TOC display', () => {
     const toc = await openTocPanel(page);
     const sortingButton = locateSortingButton(toc);
     await expect(sortingButton).not.toHaveClass(/active/);
-    expect(toc.locator('[data-sortable="false"]')).toHaveCount(1);
+    await expect(toc.locator('[data-sortable="false"]')).toHaveCount(1);
 
     await clickEdgelessModeButton(page);
     await expect(sortingButton).toHaveClass(/active/);
-    expect(toc.locator('[data-sortable="true"]')).toHaveCount(1);
+    await expect(toc.locator('[data-sortable="true"]')).toHaveCount(1);
 
     await sortingButton.click();
     await expect(sortingButton).not.toHaveClass(/active/);
-    expect(toc.locator('[data-sortable="false"]')).toHaveCount(1);
+    await expect(toc.locator('[data-sortable="false"]')).toHaveCount(1);
   });
 
   test('should notify user when there are some page only notes and sorting is disabled', async ({

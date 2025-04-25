@@ -33,6 +33,7 @@ export const TranscriptPayloadSchema = z.object({
   infos: AudioBlobInfosSchema.nullable().optional(),
   title: z.string().nullable().optional(),
   summary: z.string().nullable().optional(),
+  actions: z.string().nullable().optional(),
   transcription: TranscriptionSchema.nullable().optional(),
 });
 
@@ -64,6 +65,9 @@ declare global {
       jobId: string;
     };
     'copilot.transcript.title.submit': {
+      jobId: string;
+    };
+    'copilot.transcript.findAction.submit': {
       jobId: string;
     };
   }

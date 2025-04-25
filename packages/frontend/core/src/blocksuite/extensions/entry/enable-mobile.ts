@@ -11,7 +11,6 @@ import {
   VirtualKeyboardProvider as BSVirtualKeyboardProvider,
   type VirtualKeyboardProviderWithAction,
 } from '@blocksuite/affine/shared/services';
-import type { SpecBuilder } from '@blocksuite/affine/shared/utils';
 import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/affine/std';
 import type { ExtensionType } from '@blocksuite/affine/store';
 import { SlashMenuExtension } from '@blocksuite/affine/widgets/slash-menu';
@@ -112,16 +111,26 @@ function KeyboardToolbarExtension(framework: FrameworkProvider): ExtensionType {
 }
 
 export function enableMobileExtension(
-  specBuilder: SpecBuilder,
+  extensions: ExtensionType[],
   framework: FrameworkProvider
-): void {
-  specBuilder.omit(codeToolbarWidget);
-  specBuilder.omit(toolbarWidget);
-  specBuilder.omit(SlashMenuExtension);
-  specBuilder.extend([
+): ExtensionType[] {
+  const next = extensions.filter(extension => {
+    if (extension === codeToolbarWidget) {
+      return false;
+    }
+    if (extension === toolbarWidget) {
+      return false;
+    }
+    if (extension === SlashMenuExtension) {
+      return false;
+    }
+    return true;
+  });
+  next.push(
     MobileSpecsPatches,
     KeyboardToolbarExtension(framework),
     mobileParagraphConfig,
-    mobileCodeConfig,
-  ]);
+    mobileCodeConfig
+  );
+  return next;
 }

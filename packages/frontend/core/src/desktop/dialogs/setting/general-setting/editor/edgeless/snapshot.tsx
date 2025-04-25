@@ -1,10 +1,10 @@
 import { Skeleton } from '@affine/component';
+import { getViewManager } from '@affine/core/blocksuite/manager/migrating-view';
 import type { EditorSettingSchema } from '@affine/core/modules/editor-setting';
 import { EditorSettingService } from '@affine/core/modules/editor-setting';
 import { EdgelessCRUDIdentifier } from '@blocksuite/affine/blocks/surface';
 import { Bound } from '@blocksuite/affine/global/gfx';
 import { ViewportElementExtension } from '@blocksuite/affine/shared/services';
-import { SpecProvider } from '@blocksuite/affine/shared/utils';
 import type { EditorHost } from '@blocksuite/affine/std';
 import { BlockStdScope } from '@blocksuite/affine/std';
 import {
@@ -14,7 +14,7 @@ import {
 import type { Block, Store } from '@blocksuite/affine/store';
 import { useFramework } from '@toeverything/infra';
 import { isEqual } from 'lodash-es';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map, pairwise } from 'rxjs';
 
 import {
@@ -55,6 +55,13 @@ export const EdgelessSnapshot = (props: Props) => {
   const framework = useFramework();
   const { editorSetting } = framework.get(EditorSettingService);
 
+  const extensions = useMemo(() => {
+    const manager = getViewManager(framework, false);
+    return manager
+      .get('preview-edgeless')
+      .concat([ViewportElementExtension('.ref-viewport')]);
+  }, [framework]);
+
   const updateElements = useCallback(() => {
     const editorHost = editorHostRef.current;
     const doc = docRef.current;
@@ -76,9 +83,7 @@ export const EdgelessSnapshot = (props: Props) => {
 
     const editorHost = new BlockStdScope({
       store: doc,
-      extensions: SpecProvider._.getSpec('preview:edgeless').extend([
-        ViewportElementExtension('.ref-viewport'),
-      ]).value,
+      extensions,
     }).render();
     docRef.current = doc;
     editorHostRef.current?.remove();
@@ -115,7 +120,7 @@ export const EdgelessSnapshot = (props: Props) => {
 
     // append to dom node
     wrapperRef.current.append(editorHost);
-  }, [docName, firstUpdate, updateElements]);
+  }, [docName, extensions, firstUpdate, updateElements]);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises

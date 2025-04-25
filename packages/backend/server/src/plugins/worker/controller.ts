@@ -209,7 +209,6 @@ export class WorkerController {
         videos: [],
         favicons: [],
       };
-      const baseUrl = new URL(request.url, this.url.baseUrl).toString();
 
       if (response.body) {
         const resp = await decodeWithCharset(response, res);
@@ -276,7 +275,7 @@ export class WorkerController {
 
         await rewriter.transform(resp).text();
 
-        res.images = await reduceUrls(baseUrl, res.images);
+        res.images = await reduceUrls(res.images);
 
         this.logger.debug('Processed response with HTMLRewriter', {
           origin,
@@ -293,7 +292,7 @@ export class WorkerController {
           appendUrl(faviconUrl.toString(), res.favicons);
         }
 
-        res.favicons = await reduceUrls(baseUrl, res.favicons);
+        res.favicons = await reduceUrls(res.favicons);
       }
 
       const json = JSON.stringify(res);

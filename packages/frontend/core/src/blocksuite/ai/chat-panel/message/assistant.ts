@@ -5,6 +5,7 @@ import { WithDisposable } from '@blocksuite/affine/global/lit';
 import { isInsidePageEditor } from '@blocksuite/affine/shared/utils';
 import type { EditorHost } from '@blocksuite/affine/std';
 import { ShadowlessElement } from '@blocksuite/affine/std';
+import type { ExtensionType } from '@blocksuite/affine/store';
 import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -14,6 +15,7 @@ import {
 } from '../../_common/chat-actions-handle';
 import {
   type ChatMessage,
+  type ChatStatus,
   isChatMessage,
 } from '../../components/ai-chat-messages';
 import { AIChatErrorRenderer } from '../../messages/error';
@@ -38,13 +40,13 @@ export class ChatMessageAssistant extends WithDisposable(ShadowlessElement) {
   accessor isLast: boolean = false;
 
   @property({ attribute: 'data-status', reflect: true })
-  accessor status: string = 'idle';
+  accessor status: ChatStatus = 'idle';
 
   @property({ attribute: false })
   accessor error: AIError | null = null;
 
   @property({ attribute: false })
-  accessor previewSpecBuilder: any;
+  accessor extensions!: ExtensionType[];
 
   @property({ attribute: false })
   accessor getSessionId!: () => Promise<string | undefined>;
@@ -63,7 +65,7 @@ export class ChatMessageAssistant extends WithDisposable(ShadowlessElement) {
       /\[\^\d+\]:{"type":"doc","docId":"[^"]+"}/.test(this.item.content);
 
     return html`<div class="user-info">
-      <chat-assistant-avatar></chat-assistant-avatar>
+      <chat-assistant-avatar .status=${this.status}></chat-assistant-avatar>
       ${isWithDocs
         ? html`<span class="message-info">with your docs</span>`
         : nothing}
@@ -90,7 +92,7 @@ export class ChatMessageAssistant extends WithDisposable(ShadowlessElement) {
         .host=${host}
         .text=${item.content}
         .state=${state}
-        .previewSpecBuilder=${this.previewSpecBuilder}
+        .extensions=${this.extensions}
       ></chat-content-rich-text>
       ${shouldRenderError ? AIChatErrorRenderer(host, error) : nothing}
       ${this.renderEditorActions()}

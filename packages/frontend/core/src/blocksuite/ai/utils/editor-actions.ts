@@ -1,5 +1,5 @@
-import { defaultImageProxyMiddleware } from '@blocksuite/affine/blocks/image';
 import { deleteTextCommand } from '@blocksuite/affine/inlines/preset';
+import { defaultImageProxyMiddleware } from '@blocksuite/affine/shared/adapters';
 import { isInsideEdgelessEditor } from '@blocksuite/affine/shared/utils';
 import {
   type BlockComponent,
@@ -154,7 +154,7 @@ export const copyTextAnswer = async (panel: AffineAIPanelWidget) => {
 
 export const copyText = async (host: EditorHost, text: string) => {
   const previewDoc = await markDownToDoc(
-    host.std.provider,
+    host.std.store.provider,
     host.std.store.schema,
     text,
     [defaultImageProxyMiddleware]

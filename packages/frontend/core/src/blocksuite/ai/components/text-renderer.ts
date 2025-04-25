@@ -1,13 +1,11 @@
 import { createReactComponentFromLit } from '@affine/component';
-import { getMarkdownAdapterExtensions } from '@blocksuite/affine/adapters';
-import {
-  defaultImageProxyMiddleware,
-  ImageProxyService,
-} from '@blocksuite/affine/blocks/image';
-import { PageEditorBlockSpecs } from '@blocksuite/affine/extensions';
 import { Container, type ServiceProvider } from '@blocksuite/affine/global/di';
 import { WithDisposable } from '@blocksuite/affine/global/lit';
-import { codeBlockWrapMiddleware } from '@blocksuite/affine/shared/adapters';
+import {
+  codeBlockWrapMiddleware,
+  defaultImageProxyMiddleware,
+  ImageProxyService,
+} from '@blocksuite/affine/shared/adapters';
 import {
   LinkPreviewerService,
   ThemeProvider,
@@ -37,11 +35,25 @@ import { keyed } from 'lit/directives/keyed.js';
 import { literal } from 'lit/static-html.js';
 import React from 'react';
 
+import { getStoreManager } from '../../manager/migrating-store';
+import { getViewManager } from '../../manager/migrating-view';
 import { markDownToDoc } from '../../utils';
 import type {
   AffineAIPanelState,
   AffineAIPanelWidgetConfig,
 } from '../widgets/ai-panel/type';
+
+export const getCustomPageEditorBlockSpecs: () => ExtensionType[] = () => [
+  ...getViewManager().get('page'),
+  {
+    setup: di => {
+      di.override(
+        BlockViewIdentifier('affine:page'),
+        () => literal`affine-page-root`
+      );
+    },
+  },
+];
 
 const customHeadingStyles = css`
   .custom-heading {
@@ -90,18 +102,6 @@ export type TextRendererOptions = {
   additionalMiddlewares?: TransformerMiddleware[];
   testId?: string;
 };
-
-export const CustomPageEditorBlockSpecs: ExtensionType[] = [
-  ...PageEditorBlockSpecs,
-  {
-    setup: di => {
-      di.override(
-        BlockViewIdentifier('affine:page'),
-        () => literal`affine-page-root`
-      );
-    },
-  },
-];
 
 // todo: refactor it for more general purpose usage instead of AI only?
 export class TextRenderer extends WithDisposable(ShadowlessElement) {
@@ -228,12 +228,14 @@ export class TextRenderer extends WithDisposable(ShadowlessElement) {
       const schema = this.schema ?? this.host?.std.store.schema;
       let provider: ServiceProvider;
       if (this.host) {
-        provider = this.host.std.provider;
+        provider = this.host.std.store.provider;
       } else {
         const container = new Container();
-        getMarkdownAdapterExtensions().forEach(ext => {
-          ext.setup(container);
-        });
+        getStoreManager()
+          .get('store')
+          .forEach(ext => {
+            ext.setup(container);
+          });
 
         provider = container.provider();
       }
@@ -316,7 +318,8 @@ export class TextRenderer extends WithDisposable(ShadowlessElement) {
           html`<div class="ai-answer-text-editor affine-page-viewport">
             ${new BlockStdScope({
               store: this._doc,
-              extensions: this.options.extensions ?? CustomPageEditorBlockSpecs,
+              extensions:
+                this.options.extensions ?? getCustomPageEditorBlockSpecs(),
             }).render()}
           </div>`
         )}

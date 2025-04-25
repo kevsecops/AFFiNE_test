@@ -161,16 +161,27 @@ export class ChatPanelAddPopover extends SignalWatcher(
   };
 
   private readonly _addFileChip = async () => {
-    const file = await openFileOrFiles();
-    if (!file) return;
-    if (file.size > 50 * 1024 * 1024) {
-      toast('You can only upload files less than 50MB');
-      return;
-    }
-    this.addChip({
-      file,
-      state: 'processing',
+    const files = await openFileOrFiles({
+      multiple: true,
     });
+    if (!files || files.length === 0) return;
+
+    const images = files.filter(file => file.type.startsWith('image/'));
+    if (images.length > 0) {
+      this.addImages(images);
+    }
+
+    const others = files.filter(file => !file.type.startsWith('image/'));
+    for (const file of others) {
+      if (file.size > 50 * 1024 * 1024) {
+        toast(`${file.name} is too large, please upload a file less than 50MB`);
+      } else {
+        await this.addChip({
+          file,
+          state: 'processing',
+        });
+      }
+    }
     this._track('file');
     this.abortController.abort();
   };
@@ -249,7 +260,10 @@ export class ChatPanelAddPopover extends SignalWatcher(
   accessor docDisplayConfig!: DocDisplayConfig;
 
   @property({ attribute: false })
-  accessor addChip!: (chip: ChatChip) => void;
+  accessor addChip!: (chip: ChatChip) => Promise<void>;
+
+  @property({ attribute: false })
+  accessor addImages!: (images: File[]) => void;
 
   @property({ attribute: false })
   accessor abortController!: AbortController;
@@ -259,6 +273,8 @@ export class ChatPanelAddPopover extends SignalWatcher(
 
   @query('.search-input')
   accessor searchInput!: HTMLInputElement;
+
+  private _menuGroupAbortController = new AbortController();
 
   override connectedCallback() {
     super.connectedCallback();
@@ -273,6 +289,7 @@ export class ChatPanelAddPopover extends SignalWatcher(
   override disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener('keydown', this._handleKeyDown);
+    this._menuGroupAbortController.abort();
   }
 
   override render() {
@@ -385,13 +402,15 @@ export class ChatPanelAddPopover extends SignalWatcher(
   }
 
   private _updateSearchGroup() {
+    this._menuGroupAbortController.abort();
+    this._menuGroupAbortController = new AbortController();
     switch (this._mode) {
       case AddPopoverMode.Tags: {
         this._searchGroups = [
           this.searchMenuConfig.getTagMenuGroup(
             this._query,
             this._addTagChip,
-            this.abortController.signal
+            this._menuGroupAbortController.signal
           ),
         ];
         break;
@@ -401,7 +420,7 @@ export class ChatPanelAddPopover extends SignalWatcher(
           this.searchMenuConfig.getCollectionMenuGroup(
             this._query,
             this._addCollectionChip,
-            this.abortController.signal
+            this._menuGroupAbortController.signal
           ),
         ];
         break;
@@ -410,7 +429,7 @@ export class ChatPanelAddPopover extends SignalWatcher(
         const docGroup = this.searchMenuConfig.getDocMenuGroup(
           this._query,
           this._addDocChip,
-          this.abortController.signal
+          this._menuGroupAbortController.signal
         );
         if (!this._query) {
           this._searchGroups = [docGroup];
@@ -418,12 +437,12 @@ export class ChatPanelAddPopover extends SignalWatcher(
           const tagGroup = this.searchMenuConfig.getTagMenuGroup(
             this._query,
             this._addTagChip,
-            this.abortController.signal
+            this._menuGroupAbortController.signal
           );
           const collectionGroup = this.searchMenuConfig.getCollectionMenuGroup(
             this._query,
             this._addCollectionChip,
-            this.abortController.signal
+            this._menuGroupAbortController.signal
           );
           const nothing = html``;
           this._searchGroups = [
@@ -454,8 +473,8 @@ export class ChatPanelAddPopover extends SignalWatcher(
     }
   }
 
-  private readonly _addDocChip = (meta: DocMeta) => {
-    this.addChip({
+  private readonly _addDocChip = async (meta: DocMeta) => {
+    await this.addChip({
       docId: meta.id,
       state: 'processing',
     });
@@ -464,8 +483,8 @@ export class ChatPanelAddPopover extends SignalWatcher(
     this.abortController.abort();
   };
 
-  private readonly _addTagChip = (tag: TagMeta) => {
-    this.addChip({
+  private readonly _addTagChip = async (tag: TagMeta) => {
+    await this.addChip({
       tagId: tag.id,
       state: 'processing',
     });
@@ -473,8 +492,8 @@ export class ChatPanelAddPopover extends SignalWatcher(
     this.abortController.abort();
   };
 
-  private readonly _addCollectionChip = (collection: CollectionMeta) => {
-    this.addChip({
+  private readonly _addCollectionChip = async (collection: CollectionMeta) => {
+    await this.addChip({
       collectionId: collection.id,
       state: 'processing',
     });

@@ -152,9 +152,6 @@ export class SearchMenuService extends Service {
         },
         {
           fields: ['docId', 'title'],
-          pagination: {
-            limit: 1,
-          },
           highlights: [
             {
               field: 'title',

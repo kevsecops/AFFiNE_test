@@ -81,12 +81,25 @@ export class ViewExtensionProvider<
    */
   effect(): void {}
 
+  /**
+   * Check if the scope is edgeless
+   * @param scope - The scope to check
+   * @returns True if the scope is edgeless, false otherwise
+   */
+  isEdgeless = (scope: ViewScope) => {
+    return (
+      scope === 'edgeless' ||
+      scope === 'preview-edgeless' ||
+      scope === 'mobile-edgeless'
+    );
+  };
+
   override setup(context: ViewExtensionContext, options?: Options) {
     super.setup(context, options);
     const constructer = this.constructor as typeof ViewExtensionProvider;
     if (!constructer.effectRunned) {
-      this.effect();
       constructer.effectRunned = true;
+      this.effect();
     }
   }
 }

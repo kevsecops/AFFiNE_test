@@ -176,7 +176,7 @@ test('should hide edgeless-only note headings', async ({ page }) => {
     .getByTestId('outline-block-preview-h1')
     .locator('span');
   await h1InPanel.waitFor({ state: 'visible' });
-  expect(h1InPanel).toContainText(['Heading 1']);
+  await expect(h1InPanel).toContainText(['Heading 1']);
 });
 
 test('outline viewer should be useable in doc peek preview', async ({

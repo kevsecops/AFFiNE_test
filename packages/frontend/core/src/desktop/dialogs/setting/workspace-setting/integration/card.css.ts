@@ -8,10 +8,17 @@ export const card = style({
   padding: '8px 12px 12px 12px',
   borderRadius: 8,
   border: '1px solid ' + cssVarV2.layer.insideBorder.border,
-  height: 186,
+  height: 150,
   display: 'flex',
   flexDirection: 'column',
   background: cssVarV2.layer.background.overlayPanel,
+  cursor: 'pointer',
+  color: 'unset',
+  selectors: {
+    '&:visited': {
+      color: 'unset',
+    },
+  },
 });
 export const cardHeader = style({
   display: 'flex',
@@ -48,6 +55,12 @@ export const cardTitle = style({
   lineHeight: '22px',
   color: cssVarV2.text.primary,
 });
+export const cardStatus = style({
+  fontSize: 12,
+  lineHeight: '20px',
+  fontWeight: 400,
+  color: cssVarV2.text.secondary,
+});
 export const cardDesc = style([
   spaceY,
   {
@@ -68,7 +81,4 @@ export const cardFooter = style({
       height: 28,
     },
   },
-});
-export const settingIcon = style({
-  color: cssVarV2.icon.secondary,
 });

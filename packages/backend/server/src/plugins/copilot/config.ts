@@ -3,6 +3,7 @@ import {
   StorageJSONSchema,
   StorageProviderConfig,
 } from '../../base';
+import { AnthropicConfig } from './providers/anthropic';
 import type { FalConfig } from './providers/fal';
 import { GeminiConfig } from './providers/gemini';
 import { OpenAIConfig } from './providers/openai';
@@ -15,12 +16,16 @@ declare global {
       unsplash: ConfigItem<{
         key: string;
       }>;
+      exa: ConfigItem<{
+        key: string;
+      }>;
       storage: ConfigItem<StorageProviderConfig>;
       providers: {
         openai: ConfigItem<OpenAIConfig>;
         fal: ConfigItem<FalConfig>;
         gemini: ConfigItem<GeminiConfig>;
         perplexity: ConfigItem<PerplexityConfig>;
+        anthropic: ConfigItem<AnthropicConfig>;
       };
     };
   }
@@ -56,8 +61,20 @@ defineModuleConfig('copilot', {
       apiKey: '',
     },
   },
+  'providers.anthropic': {
+    desc: 'The config for the anthropic provider.',
+    default: {
+      apiKey: '',
+    },
+  },
   unsplash: {
     desc: 'The config for the unsplash key.',
+    default: {
+      key: '',
+    },
+  },
+  exa: {
+    desc: 'The config for the exa web search key.',
     default: {
       key: '',
     },

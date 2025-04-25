@@ -582,7 +582,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: server-native.node
-          path: ./packages/backend/server
+          path: ./packages/backend/native
 
       - name: Prepare Server Test Environment
         uses: ./.github/actions/server-test-env
@@ -644,7 +644,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: server-native.node
-          path: ./packages/backend/server
+          path: ./packages/backend/native
 
       - name: Prepare Server Test Environment
         uses: ./.github/actions/server-test-env
@@ -885,7 +885,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: server-native.node
-          path: ./packages/backend/server
+          path: ./packages/backend/native
 
       - name: Prepare Server Test Environment
         if: ${{ steps.check-blocksuite-update.outputs.skip != 'true' || steps.apifilter.outputs.changed == 'true' }}
@@ -982,7 +982,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: server-native.node
-          path: ./packages/backend/server
+          path: ./packages/backend/native
 
       - name: Prepare Server Test Environment
         if: ${{ steps.check-blocksuite-update.outputs.skip != 'true' || steps.e2efilter.outputs.changed == 'true' }}
@@ -1077,7 +1077,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: server-native.node
-          path: ./packages/backend/server
+          path: ./packages/backend/native
 
       - name: Download affine.linux-x64-gnu.node
         uses: actions/download-artifact@v4

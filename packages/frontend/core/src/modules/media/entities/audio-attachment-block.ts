@@ -242,7 +242,21 @@ export class AudioAttachmentBlock extends Entity<AttachmentBlockModel> {
       );
     };
 
+    const fillActions = async (actions: TranscriptionResult['actions']) => {
+      if (!actions) {
+        return;
+      }
+      const calloutId = addCalloutBlock('🎯', 'Todo');
+      await insertFromMarkdown(
+        undefined,
+        actions ?? '',
+        this.props.doc,
+        calloutId,
+        1
+      );
+    };
     fillTranscription(result.segments);
     await fillSummary(result.summary);
+    await fillActions(result.actions);
   };
 }

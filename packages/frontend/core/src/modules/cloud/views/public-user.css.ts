@@ -2,7 +2,7 @@ import { style } from '@vanilla-extract/css';
 
 export const publicUserLabel = style({
   fontSize: 'inherit',
-  display: 'flex',
+  display: 'inline-flex',
   alignItems: 'center',
 });
 

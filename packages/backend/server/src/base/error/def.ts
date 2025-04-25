@@ -711,15 +711,21 @@ export const USER_FRIENDLY_ERRORS = {
   },
   copilot_transcription_job_exists: {
     type: 'bad_request',
-    message: () => 'Transcription job already exists',
+    message: 'Transcription job already exists',
   },
   copilot_transcription_job_not_found: {
     type: 'bad_request',
-    message: () => `Transcription job not found.`,
+    message: `Transcription job not found.`,
   },
   copilot_transcription_audio_not_provided: {
     type: 'bad_request',
-    message: () => `Audio not provided.`,
+    message: `Audio not provided.`,
+  },
+  copilot_failed_to_add_workspace_file_embedding: {
+    type: 'internal_server_error',
+    args: { message: 'string' },
+    message: ({ message }) =>
+      `Failed to add workspace file embedding: ${message}`,
   },
 
   // Quota & Limit errors

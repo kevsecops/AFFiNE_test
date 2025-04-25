@@ -36,7 +36,7 @@ export class DocAccessController extends AccessController<'doc'> {
     const allow = permissions[action] || false;
 
     if (!allow) {
-      this.logger.log('Doc access check failed', {
+      this.logger.debug('Doc access check failed', {
         action,
         resource,
         role,

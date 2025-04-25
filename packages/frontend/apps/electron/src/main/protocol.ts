@@ -34,12 +34,7 @@ protocol.registerSchemesAsPrivileged([
   },
 ]);
 
-const NETWORK_REQUESTS = ['/api', '/ws', '/socket.io', '/graphql'];
 const webStaticDir = join(resourcesPath, 'web-static');
-
-function isNetworkResource(pathname: string) {
-  return NETWORK_REQUESTS.some(opt => pathname.startsWith(opt));
-}
 
 async function handleFileRequest(request: Request) {
   const urlObject = new URL(request.url);
@@ -146,8 +141,8 @@ export function registerProtocol() {
 
           delete responseHeaders['access-control-allow-origin'];
           delete responseHeaders['access-control-allow-headers'];
-          responseHeaders['Access-Control-Allow-Origin'] = ['*'];
-          responseHeaders['Access-Control-Allow-Headers'] = ['*'];
+          delete responseHeaders['Access-Control-Allow-Origin'];
+          delete responseHeaders['Access-Control-Allow-Headers'];
         }
       })()
         .catch(err => {
@@ -161,7 +156,6 @@ export function registerProtocol() {
 
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const url = new URL(details.url);
-    const pathname = url.pathname;
 
     (async () => {
       // session cookies are set to file:// on production
@@ -181,12 +175,6 @@ export function registerProtocol() {
           .join('; ');
         delete details.requestHeaders['cookie'];
         details.requestHeaders['Cookie'] = cookieString;
-
-        // mitigate the issue of the worker not being able to access the origin
-        if (isNetworkResource(pathname)) {
-          details.requestHeaders['origin'] = url.origin;
-          details.requestHeaders['referer'] = url.origin;
-        }
       }
     })()
       .catch(err => {

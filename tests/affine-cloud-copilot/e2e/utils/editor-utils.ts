@@ -51,8 +51,22 @@ export class EditorUtils {
   public static async switchToEdgelessMode(page: Page) {
     const editor = await page.waitForSelector('page-editor');
     await page.getByTestId('switch-edgeless-mode-button').click();
-    editor.waitForElementState('hidden');
+    await editor.waitForElementState('hidden');
     await page.waitForSelector('edgeless-editor');
+    try {
+      const edgelessNotificationClose = page.getByTestId(
+        'notification-close-button'
+      );
+      await edgelessNotificationClose.waitFor({
+        state: 'visible',
+        timeout: 2000,
+      });
+      await edgelessNotificationClose.click();
+      // Focus to the edgeless editor
+      await page.mouse.click(400, 400);
+    } catch {
+      // do nothing if the notification close button is not found
+    }
   }
 
   public static async switchToPageMode(page: Page) {
@@ -241,8 +255,8 @@ export class EditorUtils {
   public static async clearAllCollections(page: Page) {
     while (true) {
       const collection = await page
-        .getByTestId('explorer-collections')
-        .locator('[data-testid^="explorer-collection-"]')
+        .getByTestId('navigation-panel-collections')
+        .locator('[data-testid^="navigation-panel-collection-"]')
         .first();
 
       if (!(await collection.isVisible())) {
@@ -252,7 +266,7 @@ export class EditorUtils {
       const collectionContent = await collection.locator('div').first();
       await collectionContent.hover();
       const more = await collectionContent.getByTestId(
-        'explorer-tree-node-operation-button'
+        'navigation-panel-tree-node-operation-button'
       );
       await more.click();
       await page.getByTestId('collection-delete-button').click();
@@ -263,8 +277,8 @@ export class EditorUtils {
   public static async clearAllTags(page: Page) {
     while (true) {
       const tag = await page
-        .getByTestId('explorer-tags')
-        .locator('[data-testid^="explorer-tag-"]')
+        .getByTestId('navigation-panel-tags')
+        .locator('[data-testid^="navigation-panel-tag-"]')
         .first();
 
       if (!(await tag.isVisible())) {
@@ -274,7 +288,7 @@ export class EditorUtils {
       const tagContent = await tag.locator('div').first();
       await tagContent.hover();
       const more = await tagContent.getByTestId(
-        'explorer-tree-node-operation-button'
+        'navigation-panel-tree-node-operation-button'
       );
       await more.click();
       await page.getByTestId('tag-delete-button').click();
@@ -288,7 +302,9 @@ export class EditorUtils {
     docContent: string
   ) {
     // Create collection
-    await page.getByTestId('explorer-bar-add-collection-button').click();
+    await page
+      .getByTestId('navigation-panel-bar-add-collection-button')
+      .click();
     const input = await page.getByTestId('prompt-modal-input');
     await input.focus();
     await input.pressSequentially(collectionName);
@@ -318,9 +334,9 @@ export class EditorUtils {
     docContent: string
   ) {
     // Create tag
-    const tags = await page.getByTestId('explorer-tags');
+    const tags = await page.getByTestId('navigation-panel-tags');
     await tags.hover();
-    await tags.getByTestId('explorer-bar-add-tag-button').click();
+    await tags.getByTestId('navigation-panel-bar-add-tag-button').click();
     const input = await page.getByTestId('rename-modal-input');
     await input.focus();
     await input.pressSequentially(tagName);
@@ -392,9 +408,7 @@ export class EditorUtils {
       checkCodeError: this.createAction(page, () =>
         page.getByTestId('action-check-code-error').click()
       ),
-      continueWithAi: async () => {
-        page.getByTestId('action-continue-with-ai').click();
-      },
+      continueWithAi: () => page.getByTestId('action-continue-with-ai').click(),
       continueWriting: this.createAction(page, () =>
         page.getByTestId('action-continue-writing').click()
       ),
@@ -580,9 +594,7 @@ export class EditorUtils {
       checkCodeError: this.createAction(page, () =>
         page.getByTestId('action-check-code-error').click()
       ),
-      continueWithAi: async () => {
-        page.getByTestId('action-continue-with-ai').click();
-      },
+      continueWithAi: () => page.getByTestId('action-continue-with-ai').click(),
       continueWriting: this.createAction(page, () =>
         page.getByTestId('action-continue-writing').click()
       ),

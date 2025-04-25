@@ -1,6 +1,7 @@
 import { type Tokenizer } from '@affine/server-native';
 import { z } from 'zod';
 
+import { OneMB } from '../../base';
 import { fromModelName } from '../../native';
 import type { ChatPrompt } from './prompt';
 import { PromptMessageSchema, PureMessageSchema } from './providers';
@@ -116,3 +117,5 @@ export type CopilotContextFile = {
   // embedding status
   status: 'in_progress' | 'completed' | 'failed';
 };
+
+export const MAX_EMBEDDABLE_SIZE = 50 * OneMB;

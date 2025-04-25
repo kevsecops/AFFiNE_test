@@ -1,8 +1,8 @@
 // manually synced with packages/backend/server/src/data/migrations/utils/prompts.ts
 // TODO(@Peng): automate this
 export const promptKeys = [
-  'debug:chat:gpt4',
   'debug:action:dalle3',
+  'debug:action:gpt-image-1',
   'debug:action:fal-sd15',
   'debug:action:fal-upscaler',
   'debug:action:fal-remove-bg',

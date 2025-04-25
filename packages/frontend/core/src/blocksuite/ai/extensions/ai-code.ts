@@ -7,7 +7,7 @@ import type { ExtensionType } from '@blocksuite/affine/store';
 
 import { setupCodeToolbarAIEntry } from '../entries/code-toolbar/setup-code-toolbar';
 
-class AICodeBlockWatcher extends LifeCycleWatcher {
+export class AICodeBlockWatcher extends LifeCycleWatcher {
   static override key = 'ai-code-block-watcher';
 
   override mounted() {

@@ -30,7 +30,7 @@ export class JobQueue {
       } as JobData<T>,
       opts
     );
-    this.logger.log(`Job [${name}] added; id=${job.id}`);
+    this.logger.debug(`Job [${name}] added; id=${job.id}`);
     return job;
   }
 

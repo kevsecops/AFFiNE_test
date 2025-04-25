@@ -54,6 +54,9 @@ class TranscriptionResultType implements TranscriptionPayload {
   @Field(() => String, { nullable: true })
   summary!: string | null;
 
+  @Field(() => String, { nullable: true })
+  actions!: string | null;
+
   @Field(() => [TranscriptionItemType], { nullable: true })
   transcription!: TranscriptionItemType[] | null;
 
@@ -84,11 +87,13 @@ export class CopilotTranscriptionResolver {
         status,
         title: null,
         summary: null,
+        actions: null,
         transcription: null,
       };
       if (FinishedStatus.has(finalJob.status)) {
         finalJob.title = ret?.title || null;
         finalJob.summary = ret?.summary || null;
+        finalJob.actions = ret?.actions || null;
         finalJob.transcription = ret?.transcription || null;
       }
       return finalJob;

@@ -515,8 +515,6 @@ test('can paste a doc link to create link reference', async ({ page }) => {
   // paste the url
   await writeTextToClipboard(page, url);
 
-  // check the link reference
-  await page.waitForTimeout(500);
   await expect(
     page.locator('affine-reference:has-text("Getting Started")')
   ).toBeVisible();
@@ -524,8 +522,6 @@ test('can paste a doc link to create link reference', async ({ page }) => {
   // can ctrl-z to revert to normal link
   await page.keyboard.press('ControlOrMeta+z');
 
-  // check the normal link
-  await page.waitForTimeout(500);
   await expect(page.locator(`affine-link:has-text("${url}")`)).toBeVisible();
 });
 

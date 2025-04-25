@@ -6,6 +6,6 @@ export const e2e = test;
 // @ts-expect-error created in prelude.ts
 export const app: TestingApp = globalThis.app;
 
-registerCompletionHandler(() => {
-  app.close();
+registerCompletionHandler(async () => {
+  await app.close();
 });

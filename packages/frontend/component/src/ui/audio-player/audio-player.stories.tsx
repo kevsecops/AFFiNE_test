@@ -82,7 +82,7 @@ const AudioWrapper = () => {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
       if (file && file.type.startsWith('audio/')) {
-        handleFileChange(file);
+        handleFileChange(file).catch(console.error);
       }
     },
     [handleFileChange]
@@ -92,7 +92,7 @@ const AudioWrapper = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-        handleFileChange(file);
+        handleFileChange(file).catch(console.error);
       }
     },
     [handleFileChange]

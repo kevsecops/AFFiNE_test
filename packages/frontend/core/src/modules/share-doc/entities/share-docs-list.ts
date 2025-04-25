@@ -11,7 +11,7 @@ import {
   onStart,
   smartRetry,
 } from '@toeverything/infra';
-import { EMPTY, mergeMap } from 'rxjs';
+import { tap } from 'rxjs';
 
 import type { GlobalCache } from '../../storage';
 import type { WorkspaceService } from '../../workspace';
@@ -43,9 +43,8 @@ export class ShareDocsList extends Entity {
         );
       }).pipe(
         smartRetry(),
-        mergeMap(list => {
+        tap(list => {
           this.cache.set('share-docs', list);
-          return EMPTY;
         }),
         catchErrorInto(this.error$, err =>
           logger.error('revalidate share docs error', err)

@@ -1,5 +1,6 @@
 import {
   Input,
+  type Notification,
   notify,
   toast,
   type ToastOptions,
@@ -96,17 +97,25 @@ export function patchNotificationService({
         throw new Error('Invalid notification accent');
       }
 
+      const toAffineNotificationActions = (
+        actions: (typeof notification)['actions']
+      ): Notification['actions'] => {
+        if (!actions) return undefined;
+
+        return actions.map(({ label, onClick, key }) => {
+          return {
+            key,
+            label: toReactNode(label),
+            onClick,
+          };
+        });
+      };
+
       const toastId = fn(
         {
           title: toReactNode(notification.title),
           message: toReactNode(notification.message),
-          footer: toReactNode(notification.footer),
-          action: notification.action?.onClick
-            ? {
-                label: toReactNode(notification.action?.label),
-                onClick: notification.action.onClick,
-              }
-            : undefined,
+          actions: toAffineNotificationActions(notification.actions),
           onDismiss: notification.onClose,
         },
         {

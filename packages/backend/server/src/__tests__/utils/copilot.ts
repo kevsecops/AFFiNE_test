@@ -408,6 +408,7 @@ export async function claimAudioTranscription(
   status: string;
   title: string | null;
   summary: string | null;
+  actions: string | null;
   transcription:
     | {
         speaker: string;
@@ -425,6 +426,7 @@ export async function claimAudioTranscription(
           status
           title
           summary
+          actions
           transcription {
             speaker
             start
@@ -490,19 +492,53 @@ export async function createCopilotMessage(
   sessionId: string,
   content?: string,
   attachments?: string[],
-  blobs?: ArrayBuffer[],
+  blobs?: File[],
   params?: Record<string, string>
 ): Promise<string> {
-  const res = await app.gql(
-    `
-    mutation createCopilotMessage($options: CreateChatMessageInput!) {
-      createCopilotMessage(options: $options)
+  let resp = app
+    .POST('/graphql')
+    .set({ 'x-request-id': 'test', 'x-operation-name': 'test' })
+    .field(
+      'operations',
+      JSON.stringify({
+        query: `
+          mutation createCopilotMessage($options: CreateChatMessageInput!) {
+            createCopilotMessage(options: $options)
+          }
+        `,
+        variables: {
+          options: { sessionId, content, attachments, blobs: [], params },
+        },
+      })
+    )
+    .field(
+      'map',
+      JSON.stringify(
+        Array.from<any>({ length: blobs?.length ?? 0 }).reduce(
+          (acc, _, idx) => {
+            acc[idx.toString()] = [`variables.options.blobs.${idx}`];
+            return acc;
+          },
+          {}
+        )
+      )
+    );
+  if (blobs && blobs.length) {
+    for (const [idx, file] of blobs.entries()) {
+      resp = resp.attach(
+        idx.toString(),
+        Buffer.from(await file.arrayBuffer()),
+        {
+          filename: file.name || `file${idx}`,
+          contentType: file.type || 'application/octet-stream',
+        }
+      );
     }
-  `,
-    { options: { sessionId, content, attachments, blobs, params } }
-  );
+  }
 
-  return res.createCopilotMessage;
+  const res = await resp.expect(200);
+
+  return res.body.data.createCopilotMessage;
 }
 
 export async function chatWithText(

@@ -5,6 +5,7 @@ import {
 import { CodeBlockSchemaExtension } from '@blocksuite/affine-model';
 
 import { CodeBlockAdapterExtensions } from './adapters/extension';
+import { CodeMarkdownPreprocessorExtension } from './adapters/markdown/preprocessor';
 
 export class CodeStoreExtension extends StoreExtensionProvider {
   override name = 'affine-code-block';
@@ -13,5 +14,6 @@ export class CodeStoreExtension extends StoreExtensionProvider {
     super.setup(context);
     context.register(CodeBlockSchemaExtension);
     context.register(CodeBlockAdapterExtensions);
+    context.register(CodeMarkdownPreprocessorExtension);
   }
 }

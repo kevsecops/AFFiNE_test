@@ -30,12 +30,13 @@ export class ChatPanelUtils {
       await page.getByTestId('right-sidebar-toggle').click({
         delay: 200,
       });
+      await page.waitForTimeout(500); // wait the sidebar stable
+    }
+    if (await page.getByTestId('notification-close-button').isVisible()) {
+      await page.getByTestId('notification-close-button').click();
     }
     await page.getByTestId('sidebar-tab-chat').click();
     await expect(page.getByTestId('sidebar-tab-content-chat')).toBeVisible();
-    // TODO: remove this
-    // after network search is disabled by default
-    await this.disableNetworkSearch(page);
   }
 
   public static async closeChatPanel(page: Page) {
@@ -291,16 +292,30 @@ export class ChatPanelUtils {
   }
 
   public static async enableNetworkSearch(page: Page) {
-    const networkSearch = await page.getByTestId('chat-network-search');
+    const networkSearch = page.getByTestId('chat-network-search');
     if ((await networkSearch.getAttribute('data-active')) === 'false') {
       await networkSearch.click();
     }
   }
 
   public static async disableNetworkSearch(page: Page) {
-    const networkSearch = await page.getByTestId('chat-network-search');
+    const networkSearch = page.getByTestId('chat-network-search');
     if ((await networkSearch.getAttribute('data-active')) === 'true') {
       await networkSearch.click();
+    }
+  }
+
+  public static async enableReasoning(page: Page) {
+    const reasoning = page.getByTestId('chat-reasoning');
+    if ((await reasoning.getAttribute('data-active')) === 'false') {
+      await reasoning.click();
+    }
+  }
+
+  public static async disableReasoning(page: Page) {
+    const reasoning = page.getByTestId('chat-reasoning');
+    if ((await reasoning.getAttribute('data-active')) === 'true') {
+      await reasoning.click();
     }
   }
 

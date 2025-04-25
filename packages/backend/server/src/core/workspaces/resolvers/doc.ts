@@ -536,7 +536,7 @@ export class DocResolver {
     @Args('input') input: UpdateDocDefaultRoleInput
   ) {
     if (input.role === DocRole.Owner) {
-      this.logger.log(
+      this.logger.debug(
         `Doc default role can not be owner (${JSON.stringify(input)})`
       );
       throw new DocDefaultRoleCanNotBeOwner();
@@ -559,7 +559,7 @@ export class DocResolver {
       await this.ac.user(user.id).doc(input).assert('Doc.Users.Manage');
     } catch (error) {
       if (error instanceof DocActionDenied) {
-        this.logger.log(
+        this.logger.debug(
           `User does not have permission to update page default role (${JSON.stringify(
             {
               ...pairs,

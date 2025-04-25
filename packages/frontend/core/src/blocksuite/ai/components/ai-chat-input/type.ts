@@ -9,6 +9,11 @@ export interface AINetworkSearchConfig {
   setEnabled: (state: boolean) => void;
 }
 
+export interface AIReasoningConfig {
+  enabled: Signal<boolean | undefined>;
+  setEnabled: (state: boolean) => void;
+}
+
 // TODO: remove this type
 export type AIChatInputContext = {
   messages: HistoryMessage[];

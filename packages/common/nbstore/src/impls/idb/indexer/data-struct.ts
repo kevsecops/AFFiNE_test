@@ -265,40 +265,47 @@ export class DataStruct {
     if (cached) {
       return cached;
     }
-    using _ = await this.measure(`query[${query.type}]`);
-    if (query.type === 'match') {
-      const iidx = this.invertedIndex.get(table)?.get(query.field as string);
-      if (!iidx) {
-        return new Match();
+
+    const result = await (async () => {
+      using _ = await this.measure(`query[${query.type}]`);
+      if (query.type === 'match') {
+        const iidx = this.invertedIndex.get(table)?.get(query.field as string);
+        if (!iidx) {
+          return new Match();
+        }
+        return await iidx.match(trx, query.match);
+      } else if (query.type === 'boolean') {
+        const weights = [];
+        for (const q of query.queries) {
+          weights.push(await this.queryRaw(trx, table, q, cache));
+        }
+        if (query.occur === 'must') {
+          return weights.reduce((acc, w) => acc.and(w));
+        } else if (query.occur === 'must_not') {
+          const total = weights.reduce((acc, w) => acc.and(w));
+          return (await this.matchAll(trx, table)).exclude(total);
+        } else if (query.occur === 'should') {
+          return weights.reduce((acc, w) => acc.or(w));
+        }
+      } else if (query.type === 'all') {
+        return await this.matchAll(trx, table);
+      } else if (query.type === 'boost') {
+        return (await this.queryRaw(trx, table, query.query, cache)).boost(
+          query.boost
+        );
+      } else if (query.type === 'exists') {
+        const iidx = this.invertedIndex.get(table)?.get(query.field as string);
+        if (!iidx) {
+          return new Match();
+        }
+        return await iidx.all(trx);
       }
-      return await iidx.match(trx, query.match);
-    } else if (query.type === 'boolean') {
-      const weights = [];
-      for (const q of query.queries) {
-        weights.push(await this.queryRaw(trx, table, q, cache));
-      }
-      if (query.occur === 'must') {
-        return weights.reduce((acc, w) => acc.and(w));
-      } else if (query.occur === 'must_not') {
-        const total = weights.reduce((acc, w) => acc.and(w));
-        return (await this.matchAll(trx, table)).exclude(total);
-      } else if (query.occur === 'should') {
-        return weights.reduce((acc, w) => acc.or(w));
-      }
-    } else if (query.type === 'all') {
-      return await this.matchAll(trx, table);
-    } else if (query.type === 'boost') {
-      return (await this.queryRaw(trx, table, query.query, cache)).boost(
-        query.boost
-      );
-    } else if (query.type === 'exists') {
-      const iidx = this.invertedIndex.get(table)?.get(query.field as string);
-      if (!iidx) {
-        return new Match();
-      }
-      return await iidx.all(trx);
-    }
-    throw new Error(`Query type '${query.type}' not supported`);
+      throw new Error(`Query type '${query.type}' not supported`);
+    })();
+
+    cache.set(query, result);
+
+    return result;
   }
 
   async clear(trx: DataStructRWTransaction) {

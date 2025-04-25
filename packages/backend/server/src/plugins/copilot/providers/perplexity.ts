@@ -95,11 +95,14 @@ export class PerplexityProvider
         abortSignal: options.signal,
       });
 
-      const citationParser = new CitationParser();
-      const citations = sources.map(s => s.url);
+      const parser = new CitationParser();
+      for (const source of sources) {
+        parser.push(source.url);
+      }
+
       let result = text.replaceAll(/<\/?think>\n/g, '\n---\n');
-      result = citationParser.parse(result, citations);
-      result += citationParser.end();
+      result = parser.parse(result);
+      result += parser.end();
       return result;
     } catch (e: any) {
       metrics.ai.counter('chat_text_errors').add(1, { model });
@@ -129,24 +132,24 @@ export class PerplexityProvider
         abortSignal: options.signal,
       });
 
-      const citationParser = new CitationParser();
-      const citations = [];
+      const parser = new CitationParser();
       for await (const chunk of stream.fullStream) {
         switch (chunk.type) {
           case 'source': {
-            citations.push(chunk.source.url);
+            parser.push(chunk.source.url);
             break;
           }
           case 'text-delta': {
-            const result = citationParser.parse(
-              chunk.textDelta.replaceAll(/<\/?think>\n?/g, '\n---\n'),
-              citations
+            const text = chunk.textDelta.replaceAll(
+              /<\/?think>\n?/g,
+              '\n---\n'
             );
+            const result = parser.parse(text);
             yield result;
             break;
           }
           case 'step-finish': {
-            const result = citationParser.end();
+            const result = parser.end();
             yield result;
             break;
           }

@@ -31,7 +31,7 @@ test.describe('AIInsertion/SaveAsDoc', () => {
     const { actions, content } =
       await utils.chatPanel.getLatestAssistantMessage(page);
     await actions.saveAsDoc();
-    await page.getByText('New doc created');
+    await page.getByText('New doc created').waitFor({ state: 'visible' });
 
     // Verify the ai block is created
     const editorContent = await utils.editor.getEditorContent(page);
@@ -63,7 +63,7 @@ test.describe('AIInsertion/SaveAsDoc', () => {
     const { actions, content } =
       await utils.chatPanel.getLatestAssistantMessage(page);
     await actions.saveAsDoc();
-    await page.getByText('New doc created');
+    await page.getByText('New doc created').waitFor({ state: 'visible' });
 
     // Switch to page mode
     await utils.editor.isPageMode(page);

@@ -2,12 +2,10 @@ import { ChatPanel } from '@affine/core/blocksuite/ai';
 import type { AffineEditorContainer } from '@affine/core/blocksuite/block-suite-editor';
 import { useAIChatConfig } from '@affine/core/components/hooks/affine/use-ai-chat-config';
 import { WorkbenchService } from '@affine/core/modules/workbench';
+import { ViewExtensionManagerIdentifier } from '@blocksuite/affine/ext-loader';
 import { RefNodeSlotsProvider } from '@blocksuite/affine/inlines/reference';
 import { DocModeProvider } from '@blocksuite/affine/shared/services';
-import {
-  createSignalFromObservable,
-  SpecProvider,
-} from '@blocksuite/affine/shared/utils';
+import { createSignalFromObservable } from '@blocksuite/affine/shared/utils';
 import { useFramework } from '@toeverything/infra';
 import { forwardRef, useEffect, useRef } from 'react';
 
@@ -43,8 +41,12 @@ export const EditorChatPanel = forwardRef(function EditorChatPanel(
     }
   }, [onLoad, ref]);
 
-  const { docDisplayConfig, searchMenuConfig, networkSearchConfig } =
-    useAIChatConfig();
+  const {
+    docDisplayConfig,
+    searchMenuConfig,
+    networkSearchConfig,
+    reasoningConfig,
+  } = useAIChatConfig();
 
   useEffect(() => {
     if (!editor || !editor.host) return;
@@ -69,8 +71,10 @@ export const EditorChatPanel = forwardRef(function EditorChatPanel(
       chatPanelRef.current.docDisplayConfig = docDisplayConfig;
       chatPanelRef.current.searchMenuConfig = searchMenuConfig;
       chatPanelRef.current.networkSearchConfig = networkSearchConfig;
-      chatPanelRef.current.previewSpecBuilder =
-        SpecProvider._.getSpec('preview:page');
+      chatPanelRef.current.reasoningConfig = reasoningConfig;
+      chatPanelRef.current.extensions = editor.host.std
+        .get(ViewExtensionManagerIdentifier)
+        .get('preview-page');
 
       containerRef.current?.append(chatPanelRef.current);
     } else {
@@ -99,6 +103,7 @@ export const EditorChatPanel = forwardRef(function EditorChatPanel(
     framework,
     networkSearchConfig,
     searchMenuConfig,
+    reasoningConfig,
   ]);
 
   return <div className={styles.root} ref={containerRef} />;

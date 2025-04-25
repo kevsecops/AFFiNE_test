@@ -40,7 +40,7 @@ export class WorkspaceAccessController extends AccessController<'ws'> {
     const allow = permissions[action] || false;
 
     if (!allow) {
-      this.logger.log('Workspace access check failed', {
+      this.logger.debug('Workspace access check failed', {
         action,
         resource,
         role,

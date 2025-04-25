@@ -1,7 +1,7 @@
 import { WorkspaceImpl } from '@affine/core/modules/workspace/impls/workspace';
-import { defaultImageProxyMiddleware } from '@blocksuite/affine/blocks/image';
 import type { ServiceProvider } from '@blocksuite/affine/global/di';
 import {
+  defaultImageProxyMiddleware,
   embedSyncedDocMiddleware,
   MarkdownAdapter,
   MixTextAdapter,
@@ -91,8 +91,8 @@ export async function getContentFromSlice(
   processTextInSnapshot(snapshot, host);
   const adapter =
     type === 'markdown'
-      ? new MarkdownAdapter(transformer, host.std.provider)
-      : new PlainTextAdapter(transformer, host.std.provider);
+      ? new MarkdownAdapter(transformer, host.std.store.provider)
+      : new PlainTextAdapter(transformer, host.std.store.provider);
   const content = await adapter.fromSliceSnapshot({
     snapshot,
     assets: transformer.assetsManager,

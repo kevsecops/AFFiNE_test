@@ -514,7 +514,7 @@ const actions = [
     type: 'image' as const,
   },
   {
-    promptName: ['debug:action:dalle3'],
+    promptName: ['debug:action:dalle3', 'debug:action:gpt-image-1'],
     messages: [
       {
         role: 'user' as const,
@@ -600,6 +600,8 @@ const workflows = [
     content: 'apple company',
     verifier: (t: ExecutionContext, result: string) => {
       for (const l of result.split('\n')) {
+        const line = l.trim();
+        if (!line) continue;
         t.notThrows(() => {
           JSON.parse(l.trim());
         }, 'should be valid json');

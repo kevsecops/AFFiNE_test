@@ -350,15 +350,21 @@ export class CopilotClient {
   async chatText({
     sessionId,
     messageId,
+    reasoning,
     signal,
   }: {
     sessionId: string;
     messageId?: string;
+    reasoning?: boolean;
     signal?: AbortSignal;
   }) {
     let url = `/api/copilot/chat/${sessionId}`;
-    if (messageId) {
-      url += `?messageId=${encodeURIComponent(messageId)}`;
+    const queryString = this.paramsToQueryString({
+      messageId,
+      reasoning,
+    });
+    if (queryString) {
+      url += `?${queryString}`;
     }
     const response = await this.fetcher(url.toString(), { signal });
     return response.text();
@@ -369,15 +375,21 @@ export class CopilotClient {
     {
       sessionId,
       messageId,
+      reasoning,
     }: {
       sessionId: string;
       messageId?: string;
+      reasoning?: boolean;
     },
     endpoint = 'stream'
   ) {
     let url = `/api/copilot/chat/${sessionId}/${endpoint}`;
-    if (messageId) {
-      url += `?messageId=${encodeURIComponent(messageId)}`;
+    const queryString = this.paramsToQueryString({
+      messageId,
+      reasoning,
+    });
+    if (queryString) {
+      url += `?${queryString}`;
     }
     return this.eventSource(url);
   }
@@ -390,17 +402,27 @@ export class CopilotClient {
     endpoint = 'images'
   ) {
     let url = `/api/copilot/chat/${sessionId}/${endpoint}`;
-
-    if (messageId || seed) {
-      url += '?';
-      url += new URLSearchParams(
-        Object.fromEntries(
-          Object.entries({ messageId, seed }).filter(
-            ([_, v]) => v !== undefined
-          )
-        ) as Record<string, string>
-      ).toString();
+    const queryString = this.paramsToQueryString({
+      messageId,
+      seed,
+    });
+    if (queryString) {
+      url += `?${queryString}`;
     }
     return this.eventSource(url);
+  }
+
+  paramsToQueryString(params: Record<string, string | boolean | undefined>) {
+    const queryString = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (typeof value === 'boolean') {
+        if (value) {
+          queryString.append(key, 'true');
+        }
+      } else if (typeof value === 'string') {
+        queryString.append(key, value);
+      }
+    });
+    return queryString.toString();
   }
 }

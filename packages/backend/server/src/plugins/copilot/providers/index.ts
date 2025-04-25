@@ -1,3 +1,4 @@
+import { AnthropicProvider } from './anthropic';
 import { FalProvider } from './fal';
 import { GeminiProvider } from './gemini';
 import { OpenAIProvider } from './openai';
@@ -8,8 +9,10 @@ export const CopilotProviders = [
   FalProvider,
   GeminiProvider,
   PerplexityProvider,
+  AnthropicProvider,
 ];
 
+export { AnthropicProvider } from './anthropic';
 export { CopilotProviderFactory } from './factory';
 export { FalProvider } from './fal';
 export { GeminiProvider } from './gemini';

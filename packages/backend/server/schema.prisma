@@ -114,13 +114,13 @@ model Workspace {
   name               String?  @db.VarChar
   avatarKey          String?  @map("avatar_key") @db.VarChar
 
-  features               WorkspaceFeature[]
-  docs                   WorkspaceDoc[]
-  permissions            WorkspaceUserRole[]
-  docPermissions         WorkspaceDocUserRole[]
-  blobs                  Blob[]
-  AiWorkspaceIgnoredDocs AiWorkspaceIgnoredDocs[]
-  AiWorkspaceFiles       AiWorkspaceFiles[]
+  features       WorkspaceFeature[]
+  docs           WorkspaceDoc[]
+  permissions    WorkspaceUserRole[]
+  docPermissions WorkspaceDocUserRole[]
+  blobs          Blob[]
+  ignoredDocs    AiWorkspaceIgnoredDocs[]
+  embedFiles     AiWorkspaceFiles[]
 
   @@map("workspaces")
 }

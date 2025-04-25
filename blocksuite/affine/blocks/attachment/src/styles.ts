@@ -26,9 +26,6 @@ export const styles = css`
     align-items: flex-start;
     gap: 12px;
     flex: 1 0 0;
-
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-attachment-content-title {
@@ -38,9 +35,6 @@ export const styles = css`
     align-items: center;
 
     align-self: stretch;
-    padding: var(--1, 0px);
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-attachment-content-title-icon {

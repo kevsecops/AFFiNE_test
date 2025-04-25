@@ -16,7 +16,7 @@ import {
 } from '../widgets/ai-panel/ai-panel';
 import { AiSlashMenuConfigExtension } from './ai-slash-menu';
 
-function getAIPageRootWatcher(framework: FrameworkProvider) {
+export function getAIPageRootWatcher(framework: FrameworkProvider) {
   class AIPageRootWatcher extends LifeCycleWatcher {
     static override key = 'ai-page-root-watcher';
 

@@ -32,7 +32,7 @@ export class DocRpcController {
     if (!doc) {
       throw new NotFound('Doc not found');
     }
-    this.logger.log(
+    this.logger.debug(
       `get doc ${docId} from workspace ${workspaceId}, size: ${doc.bin.length}`
     );
     res.setHeader('x-doc-timestamp', doc.timestamp.toString());
@@ -59,7 +59,7 @@ export class DocRpcController {
     if (!diff) {
       throw new NotFound('Doc not found');
     }
-    this.logger.log(
+    this.logger.debug(
       `get doc diff ${docId} from workspace ${workspaceId}, missing size: ${diff.missing.length}, old state size: ${stateVector?.length}, new state size: ${diff.state.length}`
     );
     res.setHeader('x-doc-timestamp', diff.timestamp.toString());
@@ -86,7 +86,7 @@ export class DocRpcController {
     if (!content) {
       throw new NotFound('Doc not found');
     }
-    this.logger.log(`get doc content ${docId} from workspace ${workspaceId}`);
+    this.logger.debug(`get doc content ${docId} from workspace ${workspaceId}`);
     return content;
   }
 
@@ -98,7 +98,7 @@ export class DocRpcController {
     if (!content) {
       throw new NotFound('Workspace not found');
     }
-    this.logger.log(`get workspace content ${workspaceId}`);
+    this.logger.debug(`get workspace content ${workspaceId}`);
     return content;
   }
 }

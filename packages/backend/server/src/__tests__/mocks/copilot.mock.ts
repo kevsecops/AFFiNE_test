@@ -42,7 +42,7 @@ export class MockCopilotProvider extends OpenAIProvider {
     model: string = 'test',
     options: CopilotChatOptions = {}
   ): Promise<string> {
-    this.checkParams({ messages, model, options });
+    await this.checkParams({ messages, model, options });
     // make some time gap for history test case
     await sleep(100);
     return 'generate text to text';
@@ -53,7 +53,7 @@ export class MockCopilotProvider extends OpenAIProvider {
     model: string = 'gpt-4.1-mini',
     options: CopilotChatOptions = {}
   ): AsyncIterable<string> {
-    this.checkParams({ messages, model, options });
+    await this.checkParams({ messages, model, options });
 
     // make some time gap for history test case
     await sleep(100);
@@ -74,7 +74,7 @@ export class MockCopilotProvider extends OpenAIProvider {
     options: CopilotEmbeddingOptions = { dimensions: DEFAULT_DIMENSIONS }
   ): Promise<number[][]> {
     messages = Array.isArray(messages) ? messages : [messages];
-    this.checkParams({ embeddings: messages, model, options });
+    await this.checkParams({ embeddings: messages, model, options });
 
     // make some time gap for history test case
     await sleep(100);

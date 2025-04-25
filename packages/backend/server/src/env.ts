@@ -102,7 +102,8 @@ export class Env implements AppEnv {
       sync: this.isFlavor(Flavor.Sync),
       renderer: this.isFlavor(Flavor.Renderer),
       doc: this.isFlavor(Flavor.Doc),
-      script: this.isFlavor(Flavor.Script),
+      // Script in a special flavor, return true only when it is set explicitly
+      script: this.FLAVOR === Flavor.Script,
     };
   }
 

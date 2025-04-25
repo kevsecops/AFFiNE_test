@@ -174,7 +174,7 @@
     },
     "path": {
       "type": "String",
-      "desc": "Subpath where the server get deployed if there is.",
+      "desc": "Subpath where the server get deployed if there is one.(e.g. /affine)",
       "env": "AFFINE_SERVER_SUB_PATH"
     }
   },
@@ -233,9 +233,17 @@
       "type": "Object",
       "desc": "The config for the perplexity provider."
     },
+    "providers.anthropic": {
+      "type": "Object",
+      "desc": "The config for the anthropic provider."
+    },
     "unsplash": {
       "type": "Object",
       "desc": "The config for the unsplash key."
+    },
+    "exa": {
+      "type": "Object",
+      "desc": "The config for the exa web search key."
     },
     "storage": {
       "type": "Object",

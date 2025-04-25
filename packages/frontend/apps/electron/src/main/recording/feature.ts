@@ -531,6 +531,7 @@ export function startRecording(
 
   // set a timeout to stop the recording after MAX_DURATION_FOR_TRANSCRIPTION
   setTimeout(() => {
+    const state = recordingStateMachine.status$.value;
     if (
       state?.status === 'recording' &&
       state.id === recordingStatus$.value?.id

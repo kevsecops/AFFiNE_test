@@ -322,19 +322,14 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/attachment',
       'blocksuite/affine/blocks/bookmark',
-      'blocksuite/affine/blocks/data-view',
       'blocksuite/affine/blocks/database',
       'blocksuite/affine/blocks/edgeless-text',
       'blocksuite/affine/blocks/embed',
       'blocksuite/affine/blocks/frame',
       'blocksuite/affine/blocks/image',
-      'blocksuite/affine/blocks/latex',
-      'blocksuite/affine/blocks/list',
       'blocksuite/affine/blocks/note',
       'blocksuite/affine/blocks/paragraph',
       'blocksuite/affine/blocks/surface',
-      'blocksuite/affine/blocks/surface-ref',
-      'blocksuite/affine/blocks/table',
       'blocksuite/affine/components',
       'blocksuite/affine/fragments/doc-title',
       'blocksuite/affine/gfx/brush',
@@ -343,16 +338,11 @@ export const PackageList = [
       'blocksuite/affine/gfx/mindmap',
       'blocksuite/affine/gfx/note',
       'blocksuite/affine/gfx/shape',
-      'blocksuite/affine/gfx/template',
       'blocksuite/affine/gfx/text',
-      'blocksuite/affine/inlines/latex',
-      'blocksuite/affine/inlines/link',
       'blocksuite/affine/inlines/preset',
-      'blocksuite/affine/inlines/reference',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
-      'blocksuite/affine/widgets/drag-handle',
       'blocksuite/affine/widgets/edgeless-auto-connect',
       'blocksuite/affine/widgets/edgeless-toolbar',
       'blocksuite/affine/widgets/frame-title',
@@ -373,6 +363,7 @@ export const PackageList = [
     name: '@blocksuite/affine-block-surface',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
@@ -388,6 +379,7 @@ export const PackageList = [
       'blocksuite/affine/blocks/frame',
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/inlines/reference',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
@@ -402,6 +394,7 @@ export const PackageList = [
     name: '@blocksuite/affine-block-table',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/inlines/preset',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
@@ -465,6 +458,7 @@ export const PackageList = [
       'blocksuite/affine/blocks/frame',
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
@@ -494,6 +488,7 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
@@ -509,6 +504,7 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/gfx/text',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
@@ -525,6 +521,7 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/gfx/text',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
@@ -544,6 +541,7 @@ export const PackageList = [
       'blocksuite/affine/blocks/image',
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/gfx/connector',
       'blocksuite/affine/gfx/shape',
       'blocksuite/affine/gfx/text',
@@ -565,6 +563,7 @@ export const PackageList = [
       'blocksuite/affine/blocks/image',
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
@@ -580,6 +579,7 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/gfx/text',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
@@ -596,6 +596,7 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/gfx/text',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
@@ -612,6 +613,7 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
@@ -635,6 +637,7 @@ export const PackageList = [
     name: '@blocksuite/affine-inline-footnote',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/inlines/reference',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
@@ -648,6 +651,7 @@ export const PackageList = [
     name: '@blocksuite/affine-inline-latex',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/inlines/reference',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
@@ -662,6 +666,7 @@ export const PackageList = [
     name: '@blocksuite/affine-inline-link',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/inlines/reference',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
@@ -675,6 +680,7 @@ export const PackageList = [
     name: '@blocksuite/affine-inline-mention',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
@@ -687,6 +693,7 @@ export const PackageList = [
     name: '@blocksuite/affine-inline-preset',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/inlines/footnote',
       'blocksuite/affine/inlines/latex',
       'blocksuite/affine/inlines/link',
@@ -705,6 +712,7 @@ export const PackageList = [
     name: '@blocksuite/affine-inline-reference',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
@@ -754,6 +762,7 @@ export const PackageList = [
       'blocksuite/affine/blocks/paragraph',
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
@@ -834,6 +843,7 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/image',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/inlines/reference',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
@@ -953,10 +963,10 @@ export const PackageList = [
     location: 'packages/backend/server',
     name: '@affine/server',
     workspaceDependencies: [
+      'packages/backend/native',
       'tools/cli',
       'tools/utils',
       'packages/common/graphql',
-      'packages/backend/native',
     ],
   },
   {
@@ -1016,6 +1026,7 @@ export const PackageList = [
       'packages/frontend/core',
       'packages/common/error',
       'packages/common/graphql',
+      'packages/frontend/routes',
       'packages/common/infra',
     ],
   },
@@ -1156,6 +1167,11 @@ export const PackageList = [
     workspaceDependencies: [],
   },
   {
+    location: 'packages/frontend/routes',
+    name: '@affine/routes',
+    workspaceDependencies: ['tools/cli', 'tools/utils'],
+  },
+  {
     location: 'packages/frontend/templates',
     name: '@affine/templates',
     workspaceDependencies: [],
@@ -1206,7 +1222,11 @@ export const PackageList = [
   {
     location: 'tests/kit',
     name: '@affine-test/kit',
-    workspaceDependencies: ['tools/utils', 'blocksuite/affine/all'],
+    workspaceDependencies: [
+      'tools/utils',
+      'blocksuite/affine/all',
+      'packages/common/infra',
+    ],
   },
   {
     location: 'tools/@types/build-config',
@@ -1335,6 +1355,7 @@ export type PackageName =
   | '@affine/i18n'
   | '@affine/media-capture-playground'
   | '@affine/native'
+  | '@affine/routes'
   | '@affine/templates'
   | '@affine/track'
   | '@affine-test/affine-cloud'

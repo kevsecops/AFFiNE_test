@@ -68,7 +68,7 @@ test('can enable share page', async ({ page, browser }) => {
     await waitForEditorLoad(page2);
     const title = getBlockSuiteEditorTitle(page2);
     await expect(title).toContainText('TEST TITLE');
-    expect(page2.locator('affine-paragraph').first()).toContainText(
+    await expect(page2.locator('affine-paragraph').first()).toContainText(
       'TEST CONTENT'
     );
   }
@@ -174,7 +174,7 @@ test('append paragraph should be disabled in shared mode', async ({
     }
     expect(error).toBeNull();
 
-    expect(await paragraph.count()).toBe(numParagraphs);
+    await expect(paragraph).toHaveCount(numParagraphs);
   }
 });
 
@@ -217,7 +217,7 @@ test('share page with default edgeless', async ({ page, browser }) => {
     await expect(page.locator('affine-edgeless-root')).toBeVisible({
       timeout: 1000,
     });
-    expect(page2.locator('affine-paragraph').first()).toContainText(
+    await expect(page2.locator('affine-paragraph').first()).toContainText(
       'TEST CONTENT'
     );
   }

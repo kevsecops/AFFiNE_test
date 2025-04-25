@@ -34,6 +34,7 @@ import { Admin } from '../../core/common';
 import { AccessController } from '../../core/permission';
 import { UserType } from '../../core/user';
 import { PromptService } from './prompt';
+import { PromptMessage } from './providers';
 import { ChatSessionService } from './session';
 import { CopilotStorage } from './storage';
 import {
@@ -113,7 +114,7 @@ class CreateChatMessageInput implements Omit<SubmittedMessage, 'content'> {
   @Field(() => String, { nullable: true })
   content!: string | undefined;
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String], { nullable: true, deprecationReason: 'use blobs' })
   attachments!: string[] | undefined;
 
   @Field(() => [GraphQLUpload], { nullable: true })
@@ -527,8 +528,8 @@ export class CopilotResolver {
       throw new BadRequestException('Session not found');
     }
 
+    const attachments: PromptMessage['attachments'] = options.attachments || [];
     if (options.blobs) {
-      options.attachments = options.attachments || [];
       const { workspaceId } = session.config;
 
       const blobs = await Promise.all(options.blobs);
@@ -539,18 +540,18 @@ export class CopilotResolver {
         const filename = createHash('sha256')
           .update(uploaded.buffer)
           .digest('base64url');
-        const link = await this.storage.put(
+        const attachment = await this.storage.put(
           user.id,
           workspaceId,
           filename,
           uploaded.buffer
         );
-        options.attachments.push(link);
+        attachments.push({ attachment, mimeType: blob.mimetype });
       }
     }
 
     try {
-      return await this.chatSession.createMessage(options);
+      return await this.chatSession.createMessage({ ...options, attachments });
     } catch (e: any) {
       throw new CopilotFailedToCreateMessage(e.message);
     }

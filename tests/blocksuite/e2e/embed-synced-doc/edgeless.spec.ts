@@ -1,3 +1,4 @@
+import type { AffineReference } from '@blocksuite/affine/inlines/reference';
 import { expect, type Page } from '@playwright/test';
 
 import { clickView } from '../utils/actions/click.js';
@@ -95,6 +96,12 @@ test.describe('Embed synced doc in edgeless mode', () => {
       await edgelessEmbedSyncedBlock.click();
     });
 
+    const getDocIds = async (page: Page) => {
+      return page.evaluate(() => {
+        return [...window.collection.docs.keys()];
+      });
+    };
+
     const locateToolbar = (page: Page) => {
       return page.locator(
         // TODO(@L-Sun): simplify this selector after that toolbar widget are disabled in preview rendering is ready
@@ -123,7 +130,7 @@ test.describe('Embed synced doc in edgeless mode', () => {
       await expect(embedSyncedBlock).toBeVisible();
     });
 
-    test('should using all content of embed-synced-doc to duplicate as a note', async ({
+    test('should render a reference node and all content of embed-synced-doc after click "Duplicate as note" button', async ({
       page,
     }) => {
       // switch doc
@@ -158,13 +165,21 @@ test.describe('Embed synced doc in edgeless mode', () => {
       await expect(edgelessNotes).toHaveCount(2);
       await expect(edgelessNotes.last()).toBeVisible();
 
-      const paragraphs = edgelessNotes
-        .last()
-        .locator('affine-paragraph [data-v-root="true"]');
+      const blocks = edgelessNotes.last().locator('[data-block-id]');
+      await expect(blocks).toHaveCount(3);
+      const reference = blocks.nth(0).locator('affine-reference');
+      const paragraph1 = blocks.nth(1).locator('[data-v-text="true"]');
+      const paragraph2 = blocks.nth(2).locator('[data-v-text="true"]');
+      const refInfo = await reference.evaluate((reference: AffineReference) => {
+        return reference.delta.attributes?.reference;
+      });
 
-      await expect(paragraphs).toHaveCount(2);
-      await expect(paragraphs.first()).toHaveText('hello page 1');
-      await expect(paragraphs.last()).toHaveText('hello note');
+      expect(refInfo).toEqual({
+        type: 'LinkedPage',
+        pageId: (await getDocIds(page))[1],
+      });
+      await expect(paragraph1).toHaveText('hello page 1');
+      await expect(paragraph2).toHaveText('hello note');
     });
 
     test('should be selected and not overlay with the embed-synced-doc after duplicating as note', async ({
@@ -181,7 +196,7 @@ test.describe('Embed synced doc in edgeless mode', () => {
       await expect(edgelessNotes).toHaveCount(2);
       expect(await getSelectedIds(page)).toHaveLength(1);
       expect(await getSelectedIds(page)).not.toContain(prevIds);
-      expect(edgelessNotes.last()).toBeVisible();
+      await expect(edgelessNotes.last()).toBeVisible();
 
       const noteBound = await getSelectedBound(page);
       expect(isIntersected(embedDocBound, noteBound)).toBe(false);

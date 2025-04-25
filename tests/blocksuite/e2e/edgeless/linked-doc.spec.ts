@@ -89,7 +89,7 @@ test.describe('note to linked doc', () => {
     const moreButton = locatorComponentToolbarMoreButton(page);
     await moreButton.click();
     const turnButton = page.locator('.turn-into-linked-doc');
-    expect(turnButton).toBeNull();
+    await expect(turnButton).toBeHidden();
   });
 
   // TODO FIX ME
@@ -110,7 +110,7 @@ test.describe('note to linked doc', () => {
     const moreButton = locatorComponentToolbarMoreButton(page);
     await moreButton.click();
     const turnButton = page.locator('.turn-into-linked-doc');
-    expect(turnButton).toBeNull();
+    await expect(turnButton).toBeHidden();
   });
 });
 

@@ -200,6 +200,9 @@ jobs:
       - build-android-web
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Version
+        id: version
+        uses: ./.github/actions/setup-version
       - name: Download mobile artifact
         uses: actions/download-artifact@v4
         with:
@@ -258,13 +261,14 @@ jobs:
           AFFINE_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.AFFINE_ANDROID_KEYSTORE_PASSWORD }}
           AFFINE_ANDROID_KEYSTORE_ALIAS_PASSWORD: ${{ secrets.AFFINE_ANDROID_KEYSTORE_ALIAS_PASSWORD }}
           AFFINE_ANDROID_SIGN_KEYSTORE: ${{ secrets.AFFINE_ANDROID_SIGN_KEYSTORE }}
-
+          VERSION_NAME: ${{ steps.version.outputs.APP_VERSION }}
       - name: Upload to Google Play
         uses: r0adkll/upload-google-play@v1
         if: ${{ env.BUILD_TARGET == 'distribution' }}
         with:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName: app.affine.pro
+          releaseName: ${{ steps.version.outputs.APP_VERSION }}
           releaseFiles: packages/frontend/apps/android/App/app/build/outputs/bundle/${{ env.BUILD_TYPE }}Release/app-${{ env.BUILD_TYPE }}-release-signed.aab
           track: internal
           status: draft

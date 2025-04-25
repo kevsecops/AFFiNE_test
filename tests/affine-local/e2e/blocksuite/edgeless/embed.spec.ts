@@ -36,7 +36,7 @@ test('should close embed editing modal when editor switching to page mode by sho
 
   await page.keyboard.press('Alt+s');
   await waitForEditorLoad(page);
-  expect(editingModal).toBeHidden();
+  await expect(editingModal).toBeHidden();
 });
 
 test('embed card should not overflow the edgeless note', async ({ page }) => {

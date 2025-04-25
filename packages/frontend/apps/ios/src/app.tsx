@@ -1,3 +1,4 @@
+import { getStoreManager } from '@affine/core/blocksuite/manager/migrating-store';
 import { AffineContext } from '@affine/core/components/context';
 import { AppFallback } from '@affine/core/mobile/components/app-fallback';
 import { configureMobileModules } from '@affine/core/mobile/modules';
@@ -38,7 +39,6 @@ import { configureBrowserWorkspaceFlavours } from '@affine/core/modules/workspac
 import { getWorkerUrl } from '@affine/env/worker';
 import { I18n } from '@affine/i18n';
 import { StoreManagerClient } from '@affine/nbstore/worker/client';
-import { getMarkdownAdapterExtensions } from '@blocksuite/affine/adapters';
 import { Container } from '@blocksuite/affine/global/di';
 import {
   docLinkBaseURLMiddleware,
@@ -262,9 +262,11 @@ const frameworkProvider = framework.provider();
     const snapshot = transformer.docToSnapshot(blockSuiteDoc);
 
     const container = new Container();
-    getMarkdownAdapterExtensions().forEach(ext => {
-      ext.setup(container);
-    });
+    getStoreManager()
+      .get('store')
+      .forEach(ext => {
+        ext.setup(container);
+      });
     const provider = container.provider();
 
     const adapter = new MarkdownAdapter(transformer, provider);
@@ -306,6 +308,7 @@ const frameworkProvider = framework.provider();
       collection: workspace.docCollection,
       schema: getAFFiNEWorkspaceSchema(),
       markdown,
+      extensions: getStoreManager().get('store'),
     });
     const docsService = workspace.scope.get(DocsService);
     if (docId) {

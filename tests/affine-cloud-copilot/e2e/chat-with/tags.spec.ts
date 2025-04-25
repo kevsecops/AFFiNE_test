@@ -37,7 +37,7 @@ test.describe('AIChatWith/tags', () => {
       const { content, message } =
         await utils.chatPanel.getLatestAssistantMessage(page);
       expect(content).toMatch(/TagAAaa.*cat/);
-      expect(await message.locator('affine-footnote-node').count()).toBe(1);
+      await expect(message.locator('affine-footnote-node')).toHaveCount(1);
     }).toPass();
   });
 
@@ -67,7 +67,7 @@ test.describe('AIChatWith/tags', () => {
         await utils.chatPanel.getLatestAssistantMessage(page);
       expect(content).toMatch(/TagEEee.*cat/);
       expect(content).toMatch(/TagFFff.*dog/);
-      expect(await message.locator('affine-footnote-node').count()).toBe(2);
+      await expect(message.locator('affine-footnote-node')).toHaveCount(2);
     }).toPass();
   });
 });

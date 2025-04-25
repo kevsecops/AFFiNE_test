@@ -133,7 +133,8 @@ declare global {
     interface ChatOptions extends AITextActionOptions {
       sessionId?: string;
       isRootSession?: boolean;
-      networkSearch?: boolean;
+      mustSearch?: boolean;
+      reasoning?: boolean;
       contexts?: {
         docs: AIDocContextOption[];
         files: AIFileContextOption[];

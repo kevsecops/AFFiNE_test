@@ -243,30 +243,30 @@ test.describe('edgeless note element toolbar', () => {
 
     await displayInPage.click();
     await locateModeSwitchButton(page, 'page').click();
-    expect(notes).toHaveCount(2);
+    await expect(notes).toHaveCount(2);
 
     await clickEdgelessModeButton(page);
     await clickView(page, [100, 100]);
     await displayInPage.click();
     await locateModeSwitchButton(page, 'page').click();
     await waitForEditorLoad(page);
-    expect(notes).toHaveCount(1);
+    await expect(notes).toHaveCount(1);
 
-    const undoButton = page.getByTestId('undo-display-in-page');
+    const undoButton = page.getByTestId('notification-card-undo');
     const viewTocButton = page.getByTestId('view-in-toc');
 
     await clickEdgelessModeButton(page);
     await waitForEditorLoad(page);
     await clickView(page, [100, 100]);
     await displayInPage.click();
-    expect(undoButton).toBeVisible();
-    expect(viewTocButton).toBeVisible();
+    await expect(undoButton).toBeVisible();
+    await expect(viewTocButton).toBeVisible();
 
     await undoButton.click();
     await expect(undoButton).toBeHidden();
     await locateModeSwitchButton(page, 'page').click();
     await waitForEditorLoad(page);
-    expect(notes).toHaveCount(1);
+    await expect(notes).toHaveCount(1);
 
     await clickEdgelessModeButton(page);
     await waitForEditorLoad(page);
@@ -274,7 +274,7 @@ test.describe('edgeless note element toolbar', () => {
     await displayInPage.click();
     await undoByKeyboard(page);
     await page.waitForTimeout(500);
-    expect(
+    await expect(
       undoButton,
       'the toast should be hidden immediately when undo by keyboard'
     ).toBeHidden();
@@ -286,7 +286,7 @@ test.describe('edgeless note element toolbar', () => {
     const highlightNoteCards = toc.locator(
       'affine-outline-note-card > [data-status="selected"]'
     );
-    expect(highlightNoteCards).toHaveCount(1);
+    await expect(highlightNoteCards).toHaveCount(1);
   });
 
   test('note edgeless styles', async ({ page }) => {

@@ -170,7 +170,7 @@ test.describe('AIInsertion/Insert', () => {
 
     // Delete default note
     await (await page.waitForSelector('affine-edgeless-note')).click();
-    page.keyboard.press('Delete');
+    await page.keyboard.press('Delete');
 
     await utils.chatPanel.openChatPanel(page);
     await utils.chatPanel.makeChat(page, 'Hello');

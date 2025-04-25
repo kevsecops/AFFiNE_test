@@ -185,3 +185,28 @@ test('should clone from original config without modifications', t => {
 
   t.not(newConfig.auth.allowSignup, config.auth.allowSignup);
 });
+
+test('should override with undefined fields', async t => {
+  await using module = await createModule({
+    imports: [ConfigModule],
+  });
+
+  const config = module.get(Config);
+  const configFactory = module.get(ConfigFactory);
+
+  configFactory.override({
+    copilot: {
+      providers: {
+        // @ts-expect-error undefined field
+        unknown: {
+          apiKey: '123',
+        },
+      },
+    },
+  });
+
+  // @ts-expect-error undefined field
+  t.deepEqual(config.copilot.providers.unknown, {
+    apiKey: '123',
+  });
+});

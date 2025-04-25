@@ -15,6 +15,7 @@
     "@blocksuite/affine-block-image": "workspace:*",
     "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/affine-ext-loader": "workspace:*",
     "@blocksuite/affine-gfx-connector": "workspace:*",
     "@blocksuite/affine-gfx-shape": "workspace:*",
     "@blocksuite/affine-gfx-text": "workspace:*",
@@ -40,7 +41,9 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts"
+    "./effects": "./src/effects.ts",
+    "./view": "./src/view.ts",
+    "./store": "./src/store.ts"
   },
   "files": [
     "src",

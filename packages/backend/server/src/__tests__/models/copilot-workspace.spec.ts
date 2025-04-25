@@ -6,6 +6,7 @@ import { CopilotWorkspaceConfigModel } from '../../models/copilot-workspace';
 import { UserModel } from '../../models/user';
 import { WorkspaceModel } from '../../models/workspace';
 import { createTestingModule, type TestingModule } from '../utils';
+import { cleanObject } from '../utils/copilot';
 
 interface Context {
   config: Config;
@@ -56,16 +57,16 @@ test('should manage copilot workspace ignored docs', async t => {
       workspace.id,
       [docId]
     );
-    t.is(count, 1, 'should add ignored doc');
+    t.snapshot(count, 'should add ignored doc');
 
     const ret = await t.context.copilotWorkspace.listIgnoredDocs(workspace.id);
-    t.deepEqual(ret, [docId], 'should return added doc');
+    t.snapshot(cleanObject(ret), 'should return added doc');
 
     const check = await t.context.copilotWorkspace.checkIgnoredDocs(
       workspace.id,
       [docId]
     );
-    t.deepEqual(check, [docId], 'should return ignored docs in workspace');
+    t.snapshot(check, 'should return ignored docs in workspace');
   }
 
   {
@@ -76,7 +77,7 @@ test('should manage copilot workspace ignored docs', async t => {
     t.is(count, 1, 'should not add ignored doc again');
 
     const ret = await t.context.copilotWorkspace.listIgnoredDocs(workspace.id);
-    t.deepEqual(ret, [docId], 'should not add ignored doc again');
+    t.snapshot(cleanObject(ret), 'should not add ignored doc again');
   }
 
   {
@@ -84,10 +85,10 @@ test('should manage copilot workspace ignored docs', async t => {
       workspace.id,
       ['new_doc']
     );
-    t.is(count, 2, 'should add new ignored doc');
+    t.snapshot(count, 'should add new ignored doc');
 
     const ret = await t.context.copilotWorkspace.listIgnoredDocs(workspace.id);
-    t.deepEqual(ret, [docId, 'new_doc'], 'should add ignored doc');
+    t.snapshot(cleanObject(ret), 'should add ignored doc');
   }
 
   {
@@ -98,28 +99,24 @@ test('should manage copilot workspace ignored docs', async t => {
     );
 
     const ret = await t.context.copilotWorkspace.listIgnoredDocs(workspace.id);
-    t.deepEqual(ret, ['new_doc'], 'should remove ignored doc');
+    t.snapshot(cleanObject(ret), 'should remove ignored doc');
   }
 });
 
 test('should insert and search embedding', async t => {
   {
-    await t.context.copilotWorkspace.addWorkspaceFile(
-      workspace.id,
+    const { fileId } = await t.context.copilotWorkspace.addFile(workspace.id, {
+      fileName: 'file1',
+      mimeType: 'text/plain',
+      size: 1,
+    });
+    await t.context.copilotWorkspace.addFileEmbeddings(workspace.id, fileId, [
       {
-        fileName: 'file1',
-        mimeType: 'text/plain',
-
-        size: 1,
+        index: 0,
+        content: 'content',
+        embedding: Array.from({ length: 1024 }, () => 1),
       },
-      [
-        {
-          index: 0,
-          content: 'content',
-          embedding: Array.from({ length: 1024 }, () => 1),
-        },
-      ]
-    );
+    ]);
 
     {
       const ret = await t.context.copilotWorkspace.matchWorkspaceFileEmbedding(

@@ -1,6 +1,6 @@
 import { File } from 'node:buffer';
 
-import { CopilotContextFileNotSupported, OneMB } from '../../../base';
+import { CopilotContextFileNotSupported } from '../../../base';
 import { Embedding } from '../../../models';
 import { parseDoc } from '../../../native';
 
@@ -45,8 +45,6 @@ declare global {
     };
   }
 }
-
-export const MAX_EMBEDDABLE_SIZE = 50 * OneMB;
 
 export type Chunk = {
   index: number;

@@ -78,7 +78,7 @@ export class NotificationService {
         },
       },
     });
-    this.logger.log(`Mention email sent to user ${receiver.id}`);
+    this.logger.debug(`Mention email sent to user ${receiver.id}`);
   }
 
   async createInvitation(input: InvitationNotificationCreate) {
@@ -123,7 +123,7 @@ export class NotificationService {
         url: inviteUrl,
       },
     });
-    this.logger.log(
+    this.logger.debug(
       `Invitation email sent to user ${receiver.id} for workspace ${input.body.workspaceId}`
     );
   }
@@ -179,7 +179,7 @@ export class NotificationService {
         ),
       },
     });
-    this.logger.log(
+    this.logger.debug(
       `Invitation accepted email sent to user ${inviter.id} for workspace ${workspaceId}`
     );
   }
@@ -244,7 +244,7 @@ export class NotificationService {
         ),
       },
     });
-    this.logger.log(
+    this.logger.debug(
       `Invitation review request email sent to user ${reviewer.id} for workspace ${workspaceId}`
     );
   }
@@ -283,7 +283,7 @@ export class NotificationService {
         url: this.url.link(`/workspace/${workspaceId}`),
       },
     });
-    this.logger.log(
+    this.logger.debug(
       `Invitation review approved email sent to user ${receiver.id} for workspace ${workspaceId}`
     );
   }
@@ -321,7 +321,7 @@ export class NotificationService {
         },
       },
     });
-    this.logger.log(
+    this.logger.debug(
       `Invitation review declined email sent to user ${receiver.id} for workspace ${workspaceId}`
     );
   }

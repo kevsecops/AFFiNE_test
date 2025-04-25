@@ -6,7 +6,7 @@ import {
   onStart,
 } from '@toeverything/infra';
 import { truncate } from 'lodash-es';
-import { EMPTY, map, mergeMap, of, switchMap, throttleTime } from 'rxjs';
+import { map, of, switchMap, tap, throttleTime } from 'rxjs';
 
 import type { DocRecord, DocsService } from '../../doc';
 import type { DocDisplayMetaService } from '../../doc-display-meta';
@@ -97,10 +97,9 @@ export class DocsQuickSearchSession
         );
       }
       return out.pipe(
-        mergeMap((items: QuickSearchItem<'docs', DocsPayload>[]) => {
+        tap((items: QuickSearchItem<'docs', DocsPayload>[]) => {
           this.items$.next(items);
           this.isQueryLoading$.next(false);
-          return EMPTY;
         }),
         onStart(() => {
           this.items$.next([]);
@@ -115,5 +114,9 @@ export class DocsQuickSearchSession
 
   setQuery(query: string) {
     this.query$.next(query);
+  }
+
+  override dispose(): void {
+    this.query.unsubscribe();
   }
 }

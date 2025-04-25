@@ -968,6 +968,8 @@ impl Drop for AggregateDeviceManager {
 pub struct AudioCaptureSession {
   // Use Option<Box<...>> to allow taking ownership in stop()
   manager: Option<Box<AggregateDeviceManager>>,
+  sample_rate: Option<f64>,
+  channels: Option<u32>,
 }
 
 #[napi]
@@ -976,14 +978,21 @@ impl AudioCaptureSession {
   pub(crate) fn new(manager: Box<AggregateDeviceManager>) -> Self {
     Self {
       manager: Some(manager),
+      sample_rate: None,
+      channels: None,
     }
   }
 
   #[napi]
   pub fn stop(&mut self) -> Result<()> {
     if let Some(manager) = self.manager.take() {
-      // manager.stop_capture() will be called by its Drop impl
-      // We just need to drop the manager here.
+      // Cache the stats before dropping
+      if let Some(stats) = manager.get_current_stats() {
+        self.sample_rate = Some(stats.sample_rate);
+        self.channels = Some(stats.channels);
+      }
+
+      // Drop the manager
       drop(manager);
       Ok(())
     } else {
@@ -1000,8 +1009,13 @@ impl AudioCaptureSession {
         .get_current_stats()
         .map(|stats| stats.sample_rate)
         .ok_or_else(|| napi::Error::from_reason("No active audio stream to get sample rate from"))
+    } else if let Some(cached_rate) = self.sample_rate {
+      // Return cached value when session is stopped
+      Ok(cached_rate)
     } else {
-      Err(napi::Error::from_reason("Audio session is stopped"))
+      Err(napi::Error::from_reason(
+        "Audio session is stopped and no cached sample rate available",
+      ))
     }
   }
 
@@ -1012,8 +1026,13 @@ impl AudioCaptureSession {
         .get_current_stats()
         .map(|stats| stats.channels)
         .ok_or_else(|| napi::Error::from_reason("No active audio stream to get channels from"))
+    } else if let Some(cached_channels) = self.channels {
+      // Return cached value when session is stopped
+      Ok(cached_channels)
     } else {
-      Err(napi::Error::from_reason("Audio session is stopped"))
+      Err(napi::Error::from_reason(
+        "Audio session is stopped and no cached channels available",
+      ))
     }
   }
 
@@ -1025,8 +1044,13 @@ impl AudioCaptureSession {
         .ok_or_else(|| {
           napi::Error::from_reason("No active audio stream to get actual sample rate from")
         })
+    } else if let Some(cached_rate) = self.sample_rate {
+      // Return cached sample rate as the best approximation when session is stopped
+      Ok(cached_rate)
     } else {
-      Err(napi::Error::from_reason("Audio session is stopped"))
+      Err(napi::Error::from_reason(
+        "Audio session is stopped and no cached sample rate available",
+      ))
     }
   }
 }

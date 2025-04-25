@@ -788,6 +788,16 @@ export class CopilotTranscriptionAudioNotProvided extends UserFriendlyError {
     super('bad_request', 'copilot_transcription_audio_not_provided', message);
   }
 }
+@ObjectType()
+class CopilotFailedToAddWorkspaceFileEmbeddingDataType {
+  @Field() message!: string
+}
+
+export class CopilotFailedToAddWorkspaceFileEmbedding extends UserFriendlyError {
+  constructor(args: CopilotFailedToAddWorkspaceFileEmbeddingDataType, message?: string | ((args: CopilotFailedToAddWorkspaceFileEmbeddingDataType) => string)) {
+    super('internal_server_error', 'copilot_failed_to_add_workspace_file_embedding', message, args);
+  }
+}
 
 export class BlobQuotaExceeded extends UserFriendlyError {
   constructor(message?: string) {
@@ -1048,6 +1058,7 @@ export enum ErrorNames {
   COPILOT_TRANSCRIPTION_JOB_EXISTS,
   COPILOT_TRANSCRIPTION_JOB_NOT_FOUND,
   COPILOT_TRANSCRIPTION_AUDIO_NOT_PROVIDED,
+  COPILOT_FAILED_TO_ADD_WORKSPACE_FILE_EMBEDDING,
   BLOB_QUOTA_EXCEEDED,
   STORAGE_QUOTA_EXCEEDED,
   MEMBER_QUOTA_EXCEEDED,
@@ -1078,5 +1089,5 @@ registerEnumType(ErrorNames, {
 export const ErrorDataUnionType = createUnionType({
   name: 'ErrorDataUnion',
   types: () =>
-    [GraphqlBadRequestDataType, HttpRequestErrorDataType, QueryTooLongDataType, ValidationErrorDataType, WrongSignInCredentialsDataType, UnknownOauthProviderDataType, InvalidOauthCallbackCodeDataType, MissingOauthQueryParameterDataType, InvalidEmailDataType, InvalidPasswordLengthDataType, WorkspacePermissionNotFoundDataType, SpaceNotFoundDataType, MemberNotFoundInSpaceDataType, NotInSpaceDataType, AlreadyInSpaceDataType, SpaceAccessDeniedDataType, SpaceOwnerNotFoundDataType, SpaceShouldHaveOnlyOneOwnerDataType, DocNotFoundDataType, DocActionDeniedDataType, DocUpdateBlockedDataType, VersionRejectedDataType, InvalidHistoryTimestampDataType, DocHistoryNotFoundDataType, BlobNotFoundDataType, ExpectToGrantDocUserRolesDataType, ExpectToRevokeDocUserRolesDataType, ExpectToUpdateDocUserRoleDataType, UnsupportedSubscriptionPlanDataType, SubscriptionAlreadyExistsDataType, SubscriptionNotExistsDataType, SameSubscriptionRecurringDataType, SubscriptionPlanNotFoundDataType, CopilotDocNotFoundDataType, CopilotMessageNotFoundDataType, CopilotPromptNotFoundDataType, CopilotProviderSideErrorDataType, CopilotInvalidContextDataType, CopilotContextFileNotSupportedDataType, CopilotFailedToModifyContextDataType, CopilotFailedToMatchContextDataType, RuntimeConfigNotFoundDataType, InvalidRuntimeConfigTypeDataType, InvalidLicenseUpdateParamsDataType, WorkspaceMembersExceedLimitToDowngradeDataType, UnsupportedClientVersionDataType, MentionUserDocAccessDeniedDataType] as const,
+    [GraphqlBadRequestDataType, HttpRequestErrorDataType, QueryTooLongDataType, ValidationErrorDataType, WrongSignInCredentialsDataType, UnknownOauthProviderDataType, InvalidOauthCallbackCodeDataType, MissingOauthQueryParameterDataType, InvalidEmailDataType, InvalidPasswordLengthDataType, WorkspacePermissionNotFoundDataType, SpaceNotFoundDataType, MemberNotFoundInSpaceDataType, NotInSpaceDataType, AlreadyInSpaceDataType, SpaceAccessDeniedDataType, SpaceOwnerNotFoundDataType, SpaceShouldHaveOnlyOneOwnerDataType, DocNotFoundDataType, DocActionDeniedDataType, DocUpdateBlockedDataType, VersionRejectedDataType, InvalidHistoryTimestampDataType, DocHistoryNotFoundDataType, BlobNotFoundDataType, ExpectToGrantDocUserRolesDataType, ExpectToRevokeDocUserRolesDataType, ExpectToUpdateDocUserRoleDataType, UnsupportedSubscriptionPlanDataType, SubscriptionAlreadyExistsDataType, SubscriptionNotExistsDataType, SameSubscriptionRecurringDataType, SubscriptionPlanNotFoundDataType, CopilotDocNotFoundDataType, CopilotMessageNotFoundDataType, CopilotPromptNotFoundDataType, CopilotProviderSideErrorDataType, CopilotInvalidContextDataType, CopilotContextFileNotSupportedDataType, CopilotFailedToModifyContextDataType, CopilotFailedToMatchContextDataType, CopilotFailedToAddWorkspaceFileEmbeddingDataType, RuntimeConfigNotFoundDataType, InvalidRuntimeConfigTypeDataType, InvalidLicenseUpdateParamsDataType, WorkspaceMembersExceedLimitToDowngradeDataType, UnsupportedClientVersionDataType, MentionUserDocAccessDeniedDataType] as const,
 });

@@ -112,9 +112,11 @@ export class DocModel extends BaseModel {
         },
       },
     });
-    this.logger.log(
-      `Deleted ${count} updates for workspace ${workspaceId} doc ${docId}`
-    );
+    if (count > 0) {
+      this.logger.log(
+        `Deleted ${count} updates for workspace ${workspaceId} doc ${docId}`
+      );
+    }
     return count;
   }
 

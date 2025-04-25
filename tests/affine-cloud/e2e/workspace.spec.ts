@@ -93,11 +93,11 @@ test('should have pagination in member list', async ({ page }) => {
   // Click left arrow to back to first page
   await navigationItems[0].click();
   await page.waitForTimeout(500);
-  expect(await page.locator('[data-testid="member-item"]').count()).toBe(8);
+  await expect(page.locator('[data-testid="member-item"]')).toHaveCount(8);
   // Click right arrow to second page
   await navigationItems[3].click();
   await page.waitForTimeout(500);
-  expect(await page.locator('[data-testid="member-item"]').count()).toBe(3);
+  await expect(page.locator('[data-testid="member-item"]')).toHaveCount(3);
 });
 
 test('should transform local favorites data', async ({ page }) => {
@@ -109,21 +109,24 @@ test('should transform local favorites data', async ({ page }) => {
     },
     page
   );
-  await page.getByTestId('explorer-bar-add-favorite-button').first().click();
+  await page
+    .getByTestId('navigation-panel-bar-add-favorite-button')
+    .first()
+    .click();
   await clickPageModeButton(page);
   await waitForEmptyEditor(page);
 
   await getBlockSuiteEditorTitle(page).fill('this is a new fav page');
   await expect(
     page
-      .getByTestId('explorer-favorites')
+      .getByTestId('navigation-panel-favorites')
       .locator('[draggable] >> text=this is a new fav page')
   ).toBeVisible();
 
   await enableCloudWorkspace(page);
   await expect(
     page
-      .getByTestId('explorer-favorites')
+      .getByTestId('navigation-panel-favorites')
       .locator('[draggable] >> text=this is a new fav page')
   ).toBeVisible();
 });

@@ -4,6 +4,7 @@ import { type Framework } from '@toeverything/infra';
 import {
   configureAIButtonModule,
   configureAINetworkSearchModule,
+  configureAIReasoningModule,
 } from './ai-button';
 import { configureAppSidebarModule } from './app-sidebar';
 import { configAtMenuConfigModule } from './at-menu-config';
@@ -20,7 +21,6 @@ import { configureDocLinksModule } from './doc-link';
 import { configureDocsSearchModule } from './docs-search';
 import { configureEditorModule } from './editor';
 import { configureEditorSettingModule } from './editor-setting';
-import { configureExplorerModule } from './explorer';
 import { configureFavoriteModule } from './favorite';
 import { configureFeatureFlagModule } from './feature-flag';
 import { configureGlobalContextModule } from './global-context';
@@ -32,6 +32,7 @@ import { configureJournalModule } from './journal';
 import { configureLifecycleModule } from './lifecycle';
 import { configureMediaModule } from './media';
 import { configureNavigationModule } from './navigation';
+import { configureNavigationPanelModule } from './navigation-panel';
 import { configureNotificationModule } from './notification';
 import { configureOpenInApp } from './open-in-app';
 import { configureOrganizeModule } from './organize';
@@ -82,7 +83,7 @@ export function configureCommonModules(framework: Framework) {
   configureDocLinksModule(framework);
   configureOrganizeModule(framework);
   configureFavoriteModule(framework);
-  configureExplorerModule(framework);
+  configureNavigationPanelModule(framework);
   configureThemeEditorModule(framework);
   configureEditorModule(framework);
   configureSystemFontFamilyModule(framework);
@@ -101,6 +102,7 @@ export function configureCommonModules(framework: Framework) {
   configureDndModule(framework);
   configureCommonGlobalStorageImpls(framework);
   configureAINetworkSearchModule(framework);
+  configureAIReasoningModule(framework);
   configureAIButtonModule(framework);
   configureTemplateDocModule(framework);
   configureBlobManagementModule(framework);

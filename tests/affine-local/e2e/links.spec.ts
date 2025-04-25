@@ -64,7 +64,6 @@ test('not allowed to switch to embed view when linking to the same document', as
   const url0 = new URL(page.url());
 
   await writeTextToClipboard(page, url0.toString());
-  await pasteByKeyboard(page);
 
   const { toolbar, switchViewBtn, inlineViewBtn, cardViewBtn, embedViewBtn } =
     toolbarButtons(page);
@@ -296,7 +295,6 @@ test('allow switching to embed view when linking to the other document with mode
   await page.keyboard.press('Enter');
 
   await writeTextToClipboard(page, url.toString());
-  await pasteByKeyboard(page);
 
   // Inline
   await inlineLink.hover();
@@ -516,9 +514,8 @@ test('the viewport should be fit when the linked document is with edgeless mode'
 
   // move viewport
   const { x, y } = noteBoundingBox;
-  await page.mouse.click(x - 10, y - 10);
+  await page.mouse.click(x - 10, y + 100);
   await page.keyboard.down('Space');
-  await page.waitForTimeout(50);
   await page.mouse.down();
   await page.mouse.move(x + 1000, y);
   await page.mouse.up();
@@ -538,7 +535,6 @@ test('the viewport should be fit when the linked document is with edgeless mode'
   await page.keyboard.press('Enter');
 
   await writeTextToClipboard(page, url.toString());
-  await pasteByKeyboard(page);
 
   // Inline
   await page.locator('affine-reference').hover();
@@ -608,7 +604,7 @@ test('should show edgeless content when switching card view of linked mode doc i
   await clickEdgelessModeButton(page);
 
   await page.mouse.move(x, y);
-  await writeTextToClipboard(page, url.toString());
+  await writeTextToClipboard(page, url.toString(), false);
 
   // Inline
   const embed = page.locator('affine-embed-edgeless-linked-doc-block');
@@ -1116,7 +1112,6 @@ test('should show full email address', async ({ page }) => {
   await page.keyboard.press('Enter');
 
   await writeTextToClipboard(page, 'dev@affine.pro');
-  await pasteByKeyboard(page);
 
   const inlineLink = page.locator('affine-link');
 
@@ -1140,7 +1135,6 @@ test('should not show view toggle button when protocol of link is not http(s)', 
   await page.keyboard.press('Enter');
 
   await writeTextToClipboard(page, 'ftp://affine.pro/blocksuite.pdf');
-  await pasteByKeyboard(page);
 
   const inlineLink = page.locator('affine-link');
 
