@@ -722,12 +722,24 @@ export class CopilotContextResolver {
     }
 
     try {
-      return await session.matchWorkspaceChunks(
+      const chunks = await session.matchWorkspaceChunks(
         content,
         limit,
         this.getSignal(ctx.req),
         threshold
       );
+      const docsMap = await Promise.all(
+        chunks.map(c =>
+          this.ac
+            .user(user.id)
+            .workspace(session.workspaceId)
+            .doc(c.docId)
+            .can('Doc.Read')
+            .then(ret => [c.docId, ret] as const)
+        )
+      ).then(r => new Map(r));
+
+      return chunks.filter(c => docsMap.get(c.docId));
     } catch (e: any) {
       throw new CopilotFailedToMatchContext({
         contextId: context.id,
