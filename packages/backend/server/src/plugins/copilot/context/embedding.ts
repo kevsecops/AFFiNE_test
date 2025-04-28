@@ -37,25 +37,41 @@ export class OpenAIEmbeddingClient extends EmbeddingClient {
     }));
   }
 
+  private getRelevancePrompt<Chunk extends ChunkSimilarity = ChunkSimilarity>(
+    query: string,
+    embeddings: Chunk[]
+  ) {
+    const results = embeddings
+      .map(e => [
+        '<result>',
+        `<targetId>${'docId' in e ? e.docId : 'fileId' in e ? e.fileId : ''}</targetId>`,
+        `<chunk>${e.chunk}</chunk>`,
+        `<content>${e.content}</content>`,
+        '</result>',
+      ])
+      .flat()
+      .join('\n');
+    return `Generate a score array based on the search results list to measure the likelihood that the information contained in the search results is useful for the report on the following topic: ${query}\n\nHere are the search results:\n<results>\n${results}\n</results>`;
+  }
+
   private async getEmbeddingRelevance<
     Chunk extends ChunkSimilarity = ChunkSimilarity,
-  >(query: string, embeddings: Chunk[]): Promise<ReRankResult> {
+  >(
+    query: string,
+    embeddings: Chunk[],
+    signal?: AbortSignal
+  ): Promise<ReRankResult> {
+    const prompt = this.getRelevancePrompt(query, embeddings);
     const modelInstance = this.#instance('gpt-4.1-mini');
-    const results = embeddings.map(e => [
-      `
-  <result>
-    <targetId>${'docId' in e ? e.docId : 'fileId' in e ? e.fileId : ''}</targetId>
-    <chunk>${e.chunk}</chunk>
-    <content>${e.content}</content>
-  </result>`,
-    ]);
+
     const {
       object: { ranks },
     } = await generateObject({
       model: modelInstance,
-      prompt: `Generate a score array based on the search results list to measure the likelihood that the information contained in the search results is useful for the report on the following topic: ${query}\n\nHere are the search results:\n<results>${results}\n</results>`,
-      schema: getReRankSchema(1),
+      prompt,
+      schema: getReRankSchema(embeddings.length),
       maxRetries: 3,
+      abortSignal: signal,
     });
     return ranks;
   }
@@ -63,7 +79,8 @@ export class OpenAIEmbeddingClient extends EmbeddingClient {
   override async reRank<Chunk extends ChunkSimilarity = ChunkSimilarity>(
     query: string,
     embeddings: Chunk[],
-    topK: number
+    topK: number,
+    signal?: AbortSignal
   ): Promise<Chunk[]> {
     const sortedEmbeddings = embeddings.toSorted(
       (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)
@@ -71,7 +88,8 @@ export class OpenAIEmbeddingClient extends EmbeddingClient {
 
     const chunks = sortedEmbeddings.reduce(
       (acc, e) => {
-        const key = `${'docId' in e ? e.docId : 'fileId' in e ? e.fileId : ''}:${e.chunk}`;
+        const targetId = 'docId' in e ? e.docId : 'fileId' in e ? e.fileId : '';
+        const key = `${targetId}:${e.chunk}`;
         acc[key] = e;
         return acc;
       },
@@ -80,7 +98,7 @@ export class OpenAIEmbeddingClient extends EmbeddingClient {
 
     const ranks = await Promise.all(
       chunk(sortedEmbeddings, topK).map(e =>
-        this.getEmbeddingRelevance(query, e)
+        this.getEmbeddingRelevance(query, e, signal)
       )
     );
 
@@ -88,7 +106,8 @@ export class OpenAIEmbeddingClient extends EmbeddingClient {
       .flat()
       .toSorted((a, b) => b.scores.score - a.scores.score)
       .filter(r => r.scores.score > 5)
-      .map(r => chunks[`${r.scores.targetId}:${r.scores.chunk}`]);
+      .map(r => chunks[`${r.scores.targetId}:${r.scores.chunk}`])
+      .filter(Boolean);
 
     return highConfidenceChunks.slice(0, topK);
   }

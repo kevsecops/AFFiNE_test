@@ -119,7 +119,8 @@ export abstract class EmbeddingClient {
   async reRank<Chunk extends ChunkSimilarity = ChunkSimilarity>(
     _query: string,
     embeddings: Chunk[],
-    topK: number
+    topK: number,
+    _signal?: AbortSignal
   ): Promise<Chunk[]> {
     // sort by distance with ascending order
     return embeddings
@@ -144,6 +145,8 @@ const ReRankItemSchema = z.object({
     targetId: z.string().describe('The id of the target.'),
     score: z
       .number()
+      .min(0)
+      .max(10)
       .describe(
         'The relevance score of the results should be 0-10, with 0 being the least relevant and 10 being the most relevant.'
       ),

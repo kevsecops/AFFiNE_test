@@ -198,7 +198,12 @@ export class ContextSession implements AsyncDisposable {
       ),
     ]);
 
-    return this.client.reRank(content, [...context, ...workspace], topK);
+    return this.client.reRank(
+      content,
+      [...context, ...workspace],
+      topK,
+      signal
+    );
   }
 
   /**
