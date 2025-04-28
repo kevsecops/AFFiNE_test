@@ -153,6 +153,9 @@ const workflows: Prompt[] = [
         content: '{{content}}',
       },
     ],
+    config: {
+      requireContent: false,
+    },
   },
   {
     name: 'workflow:image-sketch:step3',
@@ -166,6 +169,7 @@ const workflows: Prompt[] = [
           path: 'https://models.affine.pro/fal/sketch_for_art_examination.safetensors',
         },
       ],
+      requireContent: false,
     },
   },
   // clay filter
@@ -190,6 +194,9 @@ const workflows: Prompt[] = [
         content: '{{content}}',
       },
     ],
+    config: {
+      requireContent: false,
+    },
   },
   {
     name: 'workflow:image-clay:step3',
@@ -203,6 +210,7 @@ const workflows: Prompt[] = [
           path: 'https://models.affine.pro/fal/Clay_AFFiNEAI_SDXL1_CLAYMATION.safetensors',
         },
       ],
+      requireContent: false,
     },
   },
   // anime filter
@@ -227,6 +235,9 @@ const workflows: Prompt[] = [
         content: '{{content}}',
       },
     ],
+    config: {
+      requireContent: false,
+    },
   },
   {
     name: 'workflow:image-anime:step3',
@@ -240,6 +251,7 @@ const workflows: Prompt[] = [
           path: 'https://civitai.com/api/download/models/210701',
         },
       ],
+      requireContent: false,
     },
   },
   // pixel filter
@@ -264,6 +276,9 @@ const workflows: Prompt[] = [
         content: '{{content}}',
       },
     ],
+    config: {
+      requireContent: false,
+    },
   },
   {
     name: 'workflow:image-pixel:step3',
@@ -277,6 +292,7 @@ const workflows: Prompt[] = [
           path: 'https://models.affine.pro/fal/pixel-art-xl-v1.1.safetensors',
         },
       ],
+      requireContent: false,
     },
   },
 ];
