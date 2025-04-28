@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import { execAsync } from '@affine-tools/utils/process';
 import type { Package, PackageName } from '@affine-tools/utils/workspace';
 
@@ -173,16 +175,16 @@ export class RunCommand extends PackageCommand {
       NODE_OPTIONS.push(`--import=@oxc-node/core/register`);
     }
 
-    if (args[0] !== 'yarn') {
-      // add 'yarn' to the command so we can bypass bin execution to it
-      args.unshift('yarn');
-    }
-
     await execAsync(pkg.name, args, {
       cwd: pkg.path.value,
       env: {
         ...envs,
         NODE_OPTIONS: NODE_OPTIONS.join(' '),
+        PATH: `${path.join(pkg.nodeModulesPath.value, '.bin')}${path.delimiter}${path.join(
+          this.workspace.path.value,
+          'node_modules',
+          '.bin'
+        )}${path.delimiter}${process.env.PATH}`,
       },
     });
   }
