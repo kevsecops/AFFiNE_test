@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "Öppna sparade inspelningar",
   "com.affine.settings.meetings.record.open-saved-file.description": "Öppna de lokalt sparade inspelningsfilerna.",
   "com.affine.settings.meetings.transcription.header": "Transkription med AI",
-  "com.affine.settings.meetings.transcription.auto-transcription": "Automatisk transkription",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "Transkribera mötesanteckningarna automatiskt.",
   "com.affine.settings.meetings.privacy.header": "Sekretess & Säkerhet",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "Skärm- & systemljudinspelning",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "Mötesfunktionen kräver tillstånd för att användas.",

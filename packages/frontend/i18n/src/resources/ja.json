@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "保存された録音を開く",
   "com.affine.settings.meetings.record.open-saved-file.description": "ローカルに保存された録音ファイルを開く。",
   "com.affine.settings.meetings.transcription.header": "AIによる文字起こし",
-  "com.affine.settings.meetings.transcription.auto-transcription": "自動文字起こし",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "会議メモを自動的に文字起こしします。",
   "com.affine.settings.meetings.privacy.header": "プライバシー & セキュリティ",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "画面 & システム音声録音",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "会議機能の利用には許可が必要です。",

@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "Άνοιγμα αποθηκευμένων ηχογραφήσεων",
   "com.affine.settings.meetings.record.open-saved-file.description": "Άνοιγμα τοπικά αποθηκευμένων αρχείων ηχογράφησης.",
   "com.affine.settings.meetings.transcription.header": "Μεταγραφή με AI",
-  "com.affine.settings.meetings.transcription.auto-transcription": "Αυτόματη μεταγραφή",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "Αυτόματη μεταγραφή των σημειώσεων συνάντησης.",
   "com.affine.settings.meetings.privacy.header": "Απόρρητο & Ασφάλεια",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "Ηχογράφηση Οθόνης & Συστήματος",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "Η δυνατότητα Συνάντηση απαιτεί άδεια για χρήση.",

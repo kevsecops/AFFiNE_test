@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "باز کردن ضبط‌های ذخیره‌شده",
   "com.affine.settings.meetings.record.open-saved-file.description": "فایل‌های ضبط‌شده ذخیره‌شده به صورت محلی را باز کنید.",
   "com.affine.settings.meetings.transcription.header": "متن با AI",
-  "com.affine.settings.meetings.transcription.auto-transcription": "متن خودکار",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "یادداشت‌های جلسه را به صورت خودکار رونوشت کنید.",
   "com.affine.settings.meetings.privacy.header": "حریم خصوصی و امنیت",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "ضبط صدا و سیستم صفحه‌نمایش",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "برای استفاده از ویژگی جلسه به اجازه نیاز است.",

@@ -260,18 +260,6 @@ export const AFFINE_FLAGS = {
     configurable: isCanaryBuild,
     defaultState: false,
   },
-  enable_meetings: {
-    category: 'affine',
-    displayName:
-      'com.affine.settings.workspace.experimental-features.enable-meetings.name',
-    description:
-      'com.affine.settings.workspace.experimental-features.enable-meetings.description',
-    configurable: !isMobile && environment.isMacOs && BUILD_CONFIG.isElectron,
-    feedbackType: 'discord',
-    feedbackLink:
-      'https://discord.com/channels/959027316334407691/1358384103925350542',
-    defaultState: false,
-  },
   // TODO(@L-Sun): remove this flag after the feature is released
   enable_embed_doc_with_alias: {
     category: 'blocksuite',

@@ -16,6 +16,7 @@ import { cssVarV2 } from '@toeverything/theme/v2';
 
 import type { WorkspaceService } from '../../workspace';
 import type { AudioMediaManagerService } from '../services/audio-media-manager';
+import type { MeetingSettingsService } from '../services/meeting-settings';
 import type { AudioMedia } from './audio-media';
 import { AudioTranscriptionJob } from './audio-transcription-job';
 import type { TranscriptionResult } from './types';
@@ -44,7 +45,8 @@ export class AudioAttachmentBlock extends Entity<AttachmentBlockModel> {
   readonly audioMedia: AudioMedia;
   constructor(
     readonly audioMediaManagerService: AudioMediaManagerService,
-    readonly workspaceService: WorkspaceService
+    readonly workspaceService: WorkspaceService,
+    readonly meetingSettingsService: MeetingSettingsService
   ) {
     super();
     const mediaRef = audioMediaManagerService.ensureMediaEntity(this.props);
@@ -256,7 +258,11 @@ export class AudioAttachmentBlock extends Entity<AttachmentBlockModel> {
       );
     };
     fillTranscription(result.segments);
-    await fillSummary(result.summary);
-    await fillActions(result.actions);
+    if (this.meetingSettingsService.settings.autoTranscriptionSummary) {
+      await fillSummary(result.summary);
+    }
+    if (this.meetingSettingsService.settings.autoTranscriptionTodo) {
+      await fillActions(result.actions);
+    }
   };
 }

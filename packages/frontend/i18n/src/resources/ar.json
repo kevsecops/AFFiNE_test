@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "افتح التسجيلات المحفوظة",
   "com.affine.settings.meetings.record.open-saved-file.description": "افتح الملفات المسجلة المخزنة محليًا.",
   "com.affine.settings.meetings.transcription.header": "النسخ باستخدام الذكاء الاصطناعي",
-  "com.affine.settings.meetings.transcription.auto-transcription": "النسخ التلقائي",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "انسخ ملاحظات الاجتماع تلقائيًا.",
   "com.affine.settings.meetings.privacy.header": "الخصوصية والأمان",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "تسجيل الصوت من النظام والشاشة",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "تتطلب ميزة الاجتماع إذنًا للاستخدام.",

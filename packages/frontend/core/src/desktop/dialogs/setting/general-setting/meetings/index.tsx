@@ -4,7 +4,6 @@ import {
   MenuItem,
   MenuTrigger,
   Switch,
-  useConfirmModal,
 } from '@affine/component';
 import {
   SettingHeader,
@@ -15,7 +14,6 @@ import { useAsyncCallback } from '@affine/core/components/hooks/affine-async-hoo
 import { MeetingSettingsService } from '@affine/core/modules/media/services/meeting-settings';
 import type { MeetingSettingsSchema } from '@affine/electron/main/shared-state-schema';
 import { Trans, useI18n } from '@affine/i18n';
-import track from '@affine/track';
 import {
   ArrowRightSmallIcon,
   DoneIcon,
@@ -25,6 +23,8 @@ import { useLiveData, useService } from '@toeverything/infra';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import * as styles from './styles.css';
+import { useEnableRecording } from './use-enable-recording';
+import { MeetingsWelcomePage } from './welcome-page';
 
 const RecordingModes: MeetingSettingsSchema['recordingMode'][] = [
   'prompt',
@@ -130,7 +130,7 @@ const PermissionSettingRow = ({
   );
 };
 
-export const MeetingsSettings = () => {
+const MeetingsSettingsMain = () => {
   const t = useI18n();
   const meetingSettingsService = useService(MeetingSettingsService);
   const settings = useLiveData(meetingSettingsService.settings$);
@@ -141,8 +141,6 @@ export const MeetingsSettings = () => {
     screen: boolean;
     microphone: boolean;
   }>();
-
-  const confirmModal = useConfirmModal();
 
   useEffect(() => {
     meetingSettingsService
@@ -161,44 +159,18 @@ export const MeetingsSettings = () => {
       .catch(err => console.log(err));
   }, [meetingSettingsService]);
 
-  const handleEnabledChange = useAsyncCallback(
-    async (checked: boolean) => {
-      try {
-        track.$.settingsPanel.meetings.toggleMeetingFeatureFlag({
-          option: checked ? 'on' : 'off',
-          type: 'Meeting record',
-        });
-        await meetingSettingsService.setEnabled(checked);
-      } catch {
-        confirmModal.openConfirmModal({
-          title:
-            t['com.affine.settings.meetings.record.permission-modal.title'](),
-          description:
-            t[
-              'com.affine.settings.meetings.record.permission-modal.description'
-            ](),
-          onConfirm: async () => {
-            await meetingSettingsService.showRecordingPermissionSetting(
-              'screen'
-            );
-          },
-          cancelText: t['com.affine.recording.dismiss'](),
-          confirmButtonOptions: {
-            variant: 'primary',
-          },
-          confirmText:
-            t[
-              'com.affine.settings.meetings.record.permission-modal.open-setting'
-            ](),
-        });
-      }
+  const handleEnabledChange = useEnableRecording();
+
+  const handleAutoSummaryChange = useCallback(
+    (checked: boolean) => {
+      meetingSettingsService.setAutoSummary(checked);
     },
-    [confirmModal, meetingSettingsService, t]
+    [meetingSettingsService]
   );
 
-  const handleAutoTranscriptionChange = useCallback(
+  const handleAutoTodoChange = useCallback(
     (checked: boolean) => {
-      meetingSettingsService.setAutoTranscription(checked);
+      meetingSettingsService.setAutoTodo(checked);
     },
     [meetingSettingsService]
   );
@@ -225,7 +197,22 @@ export const MeetingsSettings = () => {
 
   return (
     <div className={styles.meetingWrapper}>
-      <SettingHeader title={t['com.affine.settings.meetings']()} />
+      <SettingHeader
+        beta
+        title={t['com.affine.settings.meetings']()}
+        subtitle={
+          t['com.affine.settings.meetings.setting.prompt']() +
+          '\n' +
+          (
+            <Trans
+              i18nKey="com.affine.settings.meetings.setting.prompt.2"
+              components={{
+                strong: <strong />,
+              }}
+            />
+          )
+        }
+      />
 
       <SettingRow
         name={t['com.affine.settings.meetings.enable.title']()}
@@ -284,16 +271,28 @@ export const MeetingsSettings = () => {
           >
             <SettingRow
               name={t[
-                'com.affine.settings.meetings.transcription.auto-transcription'
+                'com.affine.settings.meetings.transcription.auto-summary'
               ]()}
               desc={t[
-                'com.affine.settings.meetings.transcription.auto-transcription.description'
+                'com.affine.settings.meetings.transcription.auto-summary.description'
               ]()}
             >
               <Switch
-                checked={settings.autoTranscription}
-                onChange={handleAutoTranscriptionChange}
-                data-testid="meetings-auto-transcription-switch"
+                checked={settings.autoTranscriptionSummary}
+                onChange={handleAutoSummaryChange}
+                data-testid="meetings-auto-summary-switch"
+              />
+            </SettingRow>
+            <SettingRow
+              name={t['com.affine.settings.meetings.transcription.auto-todo']()}
+              desc={t[
+                'com.affine.settings.meetings.transcription.auto-todo.description'
+              ]()}
+            >
+              <Switch
+                checked={settings.autoTranscriptionTodo}
+                onChange={handleAutoTodoChange}
+                data-testid="meetings-auto-todo-switch"
               />
             </SettingRow>
           </SettingWrapper>
@@ -323,4 +322,16 @@ export const MeetingsSettings = () => {
       )}
     </div>
   );
+};
+
+export const MeetingsSettings = () => {
+  const meetingSettingsService = useService(MeetingSettingsService);
+  const settings = useLiveData(meetingSettingsService.settings$);
+  const accepted = settings.betaDisclaimerAccepted || settings.enabled;
+
+  if (!accepted) {
+    return <MeetingsWelcomePage />;
+  }
+
+  return <MeetingsSettingsMain />;
 };

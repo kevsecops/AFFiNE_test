@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "Apri registrazioni salvate",
   "com.affine.settings.meetings.record.open-saved-file.description": "Apri i file di registrazione archiviati localmente.",
   "com.affine.settings.meetings.transcription.header": "Trascrizione con AI",
-  "com.affine.settings.meetings.transcription.auto-transcription": "Trascrizione automatica",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "Trascrivi automaticamente le note riunioni.",
   "com.affine.settings.meetings.privacy.header": "Privacy & Sicurezza",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "Registrazione audio schermo e sistema",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "La funzione Riunione richiede un permesso per essere utilizzata.",

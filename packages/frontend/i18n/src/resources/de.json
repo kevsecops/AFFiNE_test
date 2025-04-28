@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "Gespeicherte Aufzeichnungen öffnen",
   "com.affine.settings.meetings.record.open-saved-file.description": "Öffne die lokal gespeicherten Aufzeichnungsdateien.",
   "com.affine.settings.meetings.transcription.header": "Transkription mit KI",
-  "com.affine.settings.meetings.transcription.auto-transcription": "Automatische Transkription",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "Automatische Transkription der Besprechungsnotizen.",
   "com.affine.settings.meetings.privacy.header": "Datenschutz & Sicherheit",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "Bildschirm- und Systemaudioaufnahme",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "Für die Nutzung der Besprechungsfunktion ist eine Berechtigung erforderlich.",

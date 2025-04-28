@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "打开已保存的录制",
   "com.affine.settings.meetings.record.open-saved-file.description": "打开本地存储的录制文件。",
   "com.affine.settings.meetings.transcription.header": "AI转录",
-  "com.affine.settings.meetings.transcription.auto-transcription": "自动转录",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "自动转录会议记录。",
   "com.affine.settings.meetings.privacy.header": "隐私 & 安全",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "屏幕和系统音频录制",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "会议功能需要权限才能使用。",

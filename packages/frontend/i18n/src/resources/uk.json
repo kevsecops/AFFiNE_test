@@ -1338,8 +1338,6 @@
   "com.affine.settings.meetings.record.open-saved-file": "Відкрити збережені записи",
   "com.affine.settings.meetings.record.open-saved-file.description": "Відкрити локально збережені файли записів.",
   "com.affine.settings.meetings.transcription.header": "Транскрипція з AI",
-  "com.affine.settings.meetings.transcription.auto-transcription": "Авто транскрипція",
-  "com.affine.settings.meetings.transcription.auto-transcription.description": "Автоматично транскрибувати замітки зустрічей.",
   "com.affine.settings.meetings.privacy.header": "Конфіденційність та безпека",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording": "Запис екрану та системного аудіо",
   "com.affine.settings.meetings.privacy.screen-system-audio-recording.description": "Для використання функції зустрічей потрібен дозвіл.",

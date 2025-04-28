@@ -5382,6 +5382,19 @@ export function useAFFiNEI18N(): {
       */
     ["com.affine.settings.meetings"](): string;
     /**
+      * `Beyond Recording
+    Your AI Meeting Assistant is Here`
+      */
+    ["com.affine.settings.meetings.setting.welcome"](): string;
+    /**
+      * `Native Audio Capture, No Bots Required - Direct from Your Mac to Meeting Intelligence.`
+      */
+    ["com.affine.settings.meetings.setting.prompt"](): string;
+    /**
+      * `Learn more`
+      */
+    ["com.affine.settings.meetings.setting.welcome.learn-more"](): string;
+    /**
       * `Enable meeting notes`
       */
     ["com.affine.settings.meetings.enable.title"](): string;
@@ -5410,13 +5423,21 @@ export function useAFFiNEI18N(): {
       */
     ["com.affine.settings.meetings.transcription.header"](): string;
     /**
-      * `Auto transcription`
+      * `AI auto summary`
       */
-    ["com.affine.settings.meetings.transcription.auto-transcription"](): string;
+    ["com.affine.settings.meetings.transcription.auto-summary"](): string;
     /**
-      * `Automatically transcribe the meeting notes.`
+      * `Automatically generate a summary of the meeting notes.`
       */
-    ["com.affine.settings.meetings.transcription.auto-transcription.description"](): string;
+    ["com.affine.settings.meetings.transcription.auto-summary.description"](): string;
+    /**
+      * `AI auto todo list`
+      */
+    ["com.affine.settings.meetings.transcription.auto-todo"](): string;
+    /**
+      * `Automatically generate a todo list of the meeting notes.`
+      */
+    ["com.affine.settings.meetings.transcription.auto-todo.description"](): string;
     /**
       * `Privacy & Security`
       */
@@ -8689,6 +8710,21 @@ export const TypedTrans: {
     ["com.affine.settings.suggestion-2"]: ComponentType<TypedTransProps<Readonly<{}>, {
         ["1"]: JSX.Element;
         ["2"]: JSX.Element;
+    }>>;
+    /**
+      * `Meeting Features Available <strong>Free</strong> in Beta Phase`
+      */
+    ["com.affine.settings.meetings.setting.prompt.2"]: ComponentType<TypedTransProps<Readonly<{}>, {
+        strong: JSX.Element;
+    }>>;
+    /**
+      * `<strong>Where AI meets your meetings - affine your collaboration.</strong>
+    <ul><li>Extract Action Items & Key Insights Instantly</li><li>Smart Auto-Capture Starts With Your Meeting</li><li>Seamless Integration Across All Meeting Platforms</li><li>One Unified Space for All Your Meeting's Context</li><li>Your AI Assistant with Every Meeting Context Preserved</li></ul>`
+      */
+    ["com.affine.settings.meetings.setting.welcome.hints"]: ComponentType<TypedTransProps<Readonly<{}>, {
+        strong: JSX.Element;
+        ul: JSX.Element;
+        li: JSX.Element;
     }>>;
     /**
       * `Utilize the meeting notes and AI summarization features provided by AFFiNE. <1>Discuss more in the community</1>.`

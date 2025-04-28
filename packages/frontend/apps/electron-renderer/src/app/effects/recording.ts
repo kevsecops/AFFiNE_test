@@ -2,7 +2,6 @@ import type { DocProps } from '@affine/core/blocksuite/initialization';
 import { DocsService } from '@affine/core/modules/doc';
 import { EditorSettingService } from '@affine/core/modules/editor-setting';
 import { AudioAttachmentService } from '@affine/core/modules/media/services/audio-attachment';
-import { MeetingSettingsService } from '@affine/core/modules/media/services/meeting-settings';
 import { WorkbenchService } from '@affine/core/modules/workbench';
 import { DebugLogger } from '@affine/debug';
 import { apis, events } from '@affine/electron-api';
@@ -94,16 +93,7 @@ export function setupRecordingEvents(frameworkProvider: FrameworkProvider) {
                 model.props.sourceId = blobId;
                 model.props.embed = true;
 
-                const meetingSettingsService = frameworkProvider.get(
-                  MeetingSettingsService
-                );
-
-                if (
-                  !meetingSettingsService.settings.autoTranscription ||
-                  !aiEnabled
-                ) {
-                  // auto transcription is disabled,
-                  // so we don't need to transcribe the recording by default
+                if (!aiEnabled) {
                   return;
                 }
 
