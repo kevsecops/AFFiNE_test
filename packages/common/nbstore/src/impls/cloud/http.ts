@@ -16,7 +16,7 @@ export class HttpConnection extends DummyConnection {
 
     const timeout = 15000;
     const timeoutId = setTimeout(() => {
-      abortController.abort('timeout');
+      abortController.abort(new Error('request timeout'));
     }, timeout);
 
     const res = await globalThis

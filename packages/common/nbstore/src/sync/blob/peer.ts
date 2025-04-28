@@ -185,8 +185,7 @@ export class BlobSyncPeer {
           this.status.remoteOverCapacity();
           this.status.blobError(blob.key, 'Remote storage over capacity');
         } else if (err instanceof OverSizeError) {
-          this.status.blobOverSize(blob.key);
-          this.status.blobError(blob.key, 'Blob size too large');
+          this.status.blobOverSizeWithError(blob.key, err.message);
         } else {
           this.status.blobError(
             blob.key,
@@ -445,7 +444,6 @@ class BlobSyncPeerStatus {
     if (deleted) {
       this.statusUpdatedSubject$.next(blobId);
     }
-    this.blobErrorFree(blobId);
   }
 
   blobWillUpload(blobId: string) {
@@ -514,6 +512,12 @@ class BlobSyncPeerStatus {
 
   blobOverSize(blobId: string) {
     this.overSize.add(blobId);
+    this.statusUpdatedSubject$.next(blobId);
+  }
+
+  blobOverSizeWithError(blobId: string, errorMessage: string) {
+    this.overSize.add(blobId);
+    this.error.set(blobId, errorMessage);
     this.statusUpdatedSubject$.next(blobId);
   }
 
