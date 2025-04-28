@@ -60,10 +60,7 @@ export async function linkWebContainer(
   });
 
   const installProcess = await webContainer.spawn('npm', ['install']);
-  const exitCode = await installProcess.exit;
-  if (exitCode !== 0) {
-    throw new Error('Failed to install dependencies');
-  }
+  await installProcess.exit;
 
   // throw error to html renderer
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
