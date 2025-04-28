@@ -7,7 +7,7 @@ import {
   ImageBlockSchema,
 } from '@blocksuite/affine-model';
 import {
-  FileSizeLimitService,
+  FileSizeLimitProvider,
   NativeClipboardProvider,
 } from '@blocksuite/affine-shared/services';
 import {
@@ -362,7 +362,7 @@ export function shouldResizeImage(node: Node, target: EventTarget | null) {
 function hasExceeded(
   std: BlockStdScope,
   files: File[],
-  maxFileSize = std.store.get(FileSizeLimitService).maxFileSize
+  maxFileSize = std.get(FileSizeLimitProvider).maxFileSize
 ) {
   const exceeded = files.some(file => file.size > maxFileSize);
 

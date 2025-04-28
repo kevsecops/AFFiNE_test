@@ -15,7 +15,6 @@ import { HighlightSelectionExtension } from '@blocksuite/affine-shared/selection
 import {
   BlockMetaService,
   FeatureFlagService,
-  FileSizeLimitService,
   LinkPreviewerService,
 } from '@blocksuite/affine-shared/services';
 import {
@@ -51,7 +50,6 @@ export class FoundationStoreExtension extends StoreExtensionProvider {
       BlockMetaService,
       // TODO(@mirone): maybe merge these services into a file setting service
       LinkPreviewerService,
-      FileSizeLimitService,
       ImageProxyService,
     ]);
   }

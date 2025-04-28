@@ -19,6 +19,7 @@ import {
   DocModeService,
   EditPropsStore,
   EmbedOptionService,
+  FileSizeLimitService,
   FontLoaderService,
   PageViewportServiceExtension,
   ThemeService,
@@ -109,6 +110,7 @@ export class FoundationViewExtension extends ViewExtensionProvider {
       FileDropExtension,
       ToolbarRegistryExtension,
       AutoClearSelectionService,
+      FileSizeLimitService,
     ]);
     context.register(clipboardConfigs);
     if (this.isEdgeless(context.scope)) {

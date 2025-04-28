@@ -11,11 +11,16 @@ import {
   AttachmentBlockStyles,
 } from '@blocksuite/affine-model';
 import {
-  FileSizeLimitService,
+  FileSizeLimitProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
-import { AttachmentIcon, ResetIcon, WarningIcon } from '@blocksuite/icons/lit';
+import {
+  AttachmentIcon,
+  ResetIcon,
+  UpgradeIcon,
+  WarningIcon,
+} from '@blocksuite/icons/lit';
 import { BlockSelection } from '@blocksuite/std';
 import { Slice } from '@blocksuite/store';
 import { type BlobState } from '@blocksuite/sync';
@@ -50,7 +55,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   });
 
   private get _maxFileSize() {
-    return this.std.store.get(FileSizeLimitService).maxFileSize;
+    return this.std.get(FileSizeLimitProvider).maxFileSize;
   }
 
   convertTo = () => {
@@ -181,7 +186,24 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   }
 
   protected renderUpgradeButton = () => {
-    return null;
+    if (this.std.store.readonly) return null;
+
+    const onOverFileSize = this.std.get(FileSizeLimitProvider).onOverFileSize;
+
+    return when(
+      onOverFileSize,
+      () => html`
+        <button
+          class="affine-attachment-content-button"
+          @click=${(event: MouseEvent) => {
+            event.stopPropagation();
+            onOverFileSize?.();
+          }}
+        >
+          ${UpgradeIcon()} Upgrade
+        </button>
+      `
+    );
   };
 
   protected renderReloadButton = () => {

@@ -3,7 +3,7 @@ import {
   type ImageBlockProps,
   MAX_IMAGE_WIDTH,
 } from '@blocksuite/affine-model';
-import { FileSizeLimitService } from '@blocksuite/affine-shared/services';
+import { FileSizeLimitProvider } from '@blocksuite/affine-shared/services';
 import {
   readImageSize,
   transformModel,
@@ -68,7 +68,7 @@ export const AttachmentEmbedProvider = createIdentifier<AttachmentEmbedService>(
 
 export class AttachmentEmbedService extends Extension {
   private get _maxFileSize() {
-    return this.std.store.get(FileSizeLimitService).maxFileSize;
+    return this.std.get(FileSizeLimitProvider).maxFileSize;
   }
 
   get keys() {

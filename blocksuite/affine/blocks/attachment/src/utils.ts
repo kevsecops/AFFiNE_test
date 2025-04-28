@@ -10,7 +10,7 @@ import {
 } from '@blocksuite/affine-shared/consts';
 import {
   type AttachmentUploadedEvent,
-  FileSizeLimitService,
+  FileSizeLimitProvider,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
@@ -110,7 +110,7 @@ export async function getFileType(file: File) {
 function hasExceeded(
   std: BlockStdScope,
   files: File[],
-  maxFileSize = std.store.get(FileSizeLimitService).maxFileSize
+  maxFileSize = std.get(FileSizeLimitProvider).maxFileSize
 ) {
   const exceeded = files.some(file => file.size > maxFileSize);
 
