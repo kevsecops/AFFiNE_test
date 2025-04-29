@@ -530,6 +530,7 @@ export class CopilotController implements BeforeApplicationShutdown {
       const source$ = from(
         provider.generateImagesStream(session.finish(params), session.model, {
           ...session.config.promptConfig,
+          quality: params.quality || undefined,
           seed: this.parseNumber(params.seed),
           signal: this.getSignal(req),
           user: user.id,

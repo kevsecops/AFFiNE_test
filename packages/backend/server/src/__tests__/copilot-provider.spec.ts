@@ -523,7 +523,7 @@ const actions = [
     type: 'image' as const,
   },
   {
-    promptName: ['debug:action:dalle3', 'debug:action:gpt-image-1'],
+    promptName: ['debug:action:dalle3'],
     messages: [
       {
         role: 'user' as const,
@@ -535,9 +535,23 @@ const actions = [
     },
     type: 'image' as const,
   },
+  {
+    promptName: ['debug:action:gpt-image-1'],
+    messages: [
+      {
+        role: 'user' as const,
+        content: 'Panda',
+      },
+    ],
+    config: { quality: 'low' },
+    verifier: (t: ExecutionContext<Tester>, link: string) => {
+      t.truthy(checkUrl(link), 'should be a valid url');
+    },
+    type: 'image' as const,
+  },
 ];
 
-for (const { name, promptName, messages, verifier, type } of actions) {
+for (const { name, promptName, messages, verifier, type, config } of actions) {
   const prompts = Array.isArray(promptName) ? promptName : [promptName];
   for (const promptName of prompts) {
     test(
@@ -563,7 +577,7 @@ for (const { name, promptName, messages, verifier, type } of actions) {
                 ...messages,
               ],
               prompt.model,
-              Object.assign({}, prompt.config)
+              Object.assign({}, prompt.config, config)
             );
             t.truthy(result, 'should return result');
             verifier?.(t, result);
