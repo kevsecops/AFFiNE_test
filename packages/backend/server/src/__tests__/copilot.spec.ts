@@ -1316,7 +1316,11 @@ test('should be able to manage context', async t => {
     // file record
     {
       await storage.put(userId, session.workspaceId, 'blob', buffer);
-      const file = await session.addFile('blob', 'sample.pdf');
+      const file = await session.addFile(
+        'blob',
+        'sample.pdf',
+        'application/pdf'
+      );
 
       const handler = Sinon.spy(event, 'emit');
 

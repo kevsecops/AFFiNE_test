@@ -129,8 +129,10 @@ test('should insert and search embedding', async t => {
         1,
         1
       );
-      t.is(ret.length, 1);
-      t.is(ret[0].content, 'content');
+      t.snapshot(
+        cleanObject(ret, ['fileId']),
+        'should match workspace file embedding'
+      );
     }
   }
 });

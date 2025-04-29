@@ -214,9 +214,18 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
     const similarityChunks = await this.db.$queryRaw<
       Array<FileChunkSimilarity>
     >`
-      SELECT "file_id" as "fileId", "chunk", "content", "embedding" <=> ${embedding}::vector as "distance" 
-      FROM "ai_workspace_file_embeddings"
-      WHERE workspace_id = ${workspaceId}
+      SELECT
+        e."file_id" as "fileId",
+        f."file_name" as "fileName",
+        f."mime_type" as "mimeType",
+        e."chunk",
+        e."content",
+        e."embedding" <=> ${embedding}::vector as "distance" 
+      FROM "ai_workspace_file_embeddings" e
+      JOIN "ai_workspace_files" f
+        ON e."workspace_id" = f."workspace_id"
+        AND e."file_id" = f."file_id"
+      WHERE e.workspace_id = ${workspaceId}
       ORDER BY "distance" ASC
       LIMIT ${topK};
     `;

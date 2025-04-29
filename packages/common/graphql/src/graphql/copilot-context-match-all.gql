@@ -1,9 +1,11 @@
-query matchContext($contextId: String!, $content: String!, $limit: SafeInt, $threshold: Float) {
+query matchContext($contextId: String, $content: String!, $limit: SafeInt, $threshold: Float) {
   currentUser {
     copilot {
       contexts(contextId: $contextId) {
         matchFiles(content: $content, limit: $limit, threshold: $threshold) {
           fileId
+          name
+          mimeType
           chunk
           content
           distance

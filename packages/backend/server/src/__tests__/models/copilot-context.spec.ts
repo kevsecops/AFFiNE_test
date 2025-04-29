@@ -111,8 +111,7 @@ test('should insert embedding by doc id', async t => {
         1,
         1
       );
-      t.is(ret.length, 1);
-      t.is(ret[0].content, 'content');
+      t.snapshot(ret, 'should match file embedding');
     }
 
     {

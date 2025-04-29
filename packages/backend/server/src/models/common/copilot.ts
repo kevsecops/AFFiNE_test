@@ -46,6 +46,7 @@ export const ContextFileSchema = z.object({
   id: z.string(),
   chunkSize: z.number(),
   name: z.string(),
+  mimeType: z.string().optional(),
   status: ContextEmbedStatusSchema,
   error: z.string().nullable(),
   blobId: z.string(),
@@ -100,6 +101,8 @@ export type ChunkSimilarity = {
 
 export type FileChunkSimilarity = ChunkSimilarity & {
   fileId: string;
+  name: string;
+  mimeType: string;
 };
 
 export type DocChunkSimilarity = ChunkSimilarity & {

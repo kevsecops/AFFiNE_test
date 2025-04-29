@@ -393,6 +393,7 @@ export const addContextFileMutation = {
     id
     createdAt
     name
+    mimeType
     chunkSize
     error
     status
@@ -426,6 +427,7 @@ export const listContextObjectQuery = {
         files {
           id
           name
+          mimeType
           blobId
           chunkSize
           error
@@ -476,12 +478,14 @@ export const listContextQuery = {
 export const matchContextQuery = {
   id: 'matchContextQuery' as const,
   op: 'matchContext',
-  query: `query matchContext($contextId: String!, $content: String!, $limit: SafeInt, $threshold: Float) {
+  query: `query matchContext($contextId: String, $content: String!, $limit: SafeInt, $threshold: Float) {
   currentUser {
     copilot {
       contexts(contextId: $contextId) {
         matchFiles(content: $content, limit: $limit, threshold: $threshold) {
           fileId
+          name
+          mimeType
           chunk
           content
           distance
@@ -501,7 +505,7 @@ export const matchContextQuery = {
 export const matchWorkspaceDocsQuery = {
   id: 'matchWorkspaceDocsQuery' as const,
   op: 'matchWorkspaceDocs',
-  query: `query matchWorkspaceDocs($contextId: String!, $content: String!, $limit: SafeInt, $threshold: Float) {
+  query: `query matchWorkspaceDocs($contextId: String, $content: String!, $limit: SafeInt, $threshold: Float) {
   currentUser {
     copilot {
       contexts(contextId: $contextId) {
@@ -520,7 +524,7 @@ export const matchWorkspaceDocsQuery = {
 export const matchFilesQuery = {
   id: 'matchFilesQuery' as const,
   op: 'matchFiles',
-  query: `query matchFiles($contextId: String!, $content: String!, $limit: SafeInt, $threshold: Float) {
+  query: `query matchFiles($contextId: String, $content: String!, $limit: SafeInt, $threshold: Float) {
   currentUser {
     copilot {
       contexts(contextId: $contextId) {

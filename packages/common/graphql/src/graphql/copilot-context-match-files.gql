@@ -1,4 +1,4 @@
-query matchFiles($contextId: String!, $content: String!, $limit: SafeInt, $threshold: Float) {
+query matchFiles($contextId: String, $content: String!, $limit: SafeInt, $threshold: Float) {
   currentUser {
     copilot {
       contexts(contextId: $contextId) {

@@ -113,6 +113,8 @@ export interface ContextMatchedFileChunk {
   content: Scalars['String']['output'];
   distance: Maybe<Scalars['Float']['output']>;
   fileId: Scalars['String']['output'];
+  mimeType: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 }
 
 export interface ContextWorkspaceEmbeddingStatus {
@@ -172,7 +174,7 @@ export interface CopilotContext {
   docs: Array<CopilotContextDoc>;
   /** list files in context */
   files: Array<CopilotContextFile>;
-  id: Scalars['ID']['output'];
+  id: Maybe<Scalars['ID']['output']>;
   /** match file in context */
   matchFiles: Array<ContextMatchedFileChunk>;
   /** match workspace docs */
@@ -217,6 +219,7 @@ export interface CopilotContextFile {
   createdAt: Scalars['SafeInt']['output'];
   error: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  mimeType: Scalars['String']['output'];
   name: Scalars['String']['output'];
   status: ContextEmbedStatus;
 }
@@ -249,6 +252,13 @@ export interface CopilotFailedToMatchContextDataType {
   content: Scalars['String']['output'];
   contextId: Scalars['String']['output'];
   message: Scalars['String']['output'];
+}
+
+export interface CopilotFailedToMatchGlobalContextDataType {
+  __typename?: 'CopilotFailedToMatchGlobalContextDataType';
+  content: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+  workspaceId: Scalars['String']['output'];
 }
 
 export interface CopilotFailedToModifyContextDataType {
@@ -565,6 +575,7 @@ export type ErrorDataUnion =
   | CopilotDocNotFoundDataType
   | CopilotFailedToAddWorkspaceFileEmbeddingDataType
   | CopilotFailedToMatchContextDataType
+  | CopilotFailedToMatchGlobalContextDataType
   | CopilotFailedToModifyContextDataType
   | CopilotInvalidContextDataType
   | CopilotMessageNotFoundDataType
@@ -633,6 +644,7 @@ export enum ErrorNames {
   COPILOT_FAILED_TO_CREATE_MESSAGE = 'COPILOT_FAILED_TO_CREATE_MESSAGE',
   COPILOT_FAILED_TO_GENERATE_TEXT = 'COPILOT_FAILED_TO_GENERATE_TEXT',
   COPILOT_FAILED_TO_MATCH_CONTEXT = 'COPILOT_FAILED_TO_MATCH_CONTEXT',
+  COPILOT_FAILED_TO_MATCH_GLOBAL_CONTEXT = 'COPILOT_FAILED_TO_MATCH_GLOBAL_CONTEXT',
   COPILOT_FAILED_TO_MODIFY_CONTEXT = 'COPILOT_FAILED_TO_MODIFY_CONTEXT',
   COPILOT_INVALID_CONTEXT = 'COPILOT_INVALID_CONTEXT',
   COPILOT_MESSAGE_NOT_FOUND = 'COPILOT_MESSAGE_NOT_FOUND',
@@ -2833,6 +2845,7 @@ export type AddContextFileMutation = {
     id: string;
     createdAt: number;
     name: string;
+    mimeType: string;
     chunkSize: number;
     error: string | null;
     status: ContextEmbedStatus;
@@ -2874,6 +2887,7 @@ export type ListContextObjectQuery = {
           __typename?: 'CopilotContextFile';
           id: string;
           name: string;
+          mimeType: string;
           blobId: string;
           chunkSize: number;
           error: string | null;
@@ -2922,7 +2936,7 @@ export type ListContextQuery = {
       __typename?: 'Copilot';
       contexts: Array<{
         __typename?: 'CopilotContext';
-        id: string;
+        id: string | null;
         workspaceId: string;
       }>;
     };
@@ -2930,7 +2944,7 @@ export type ListContextQuery = {
 };
 
 export type MatchContextQueryVariables = Exact<{
-  contextId: Scalars['String']['input'];
+  contextId?: InputMaybe<Scalars['String']['input']>;
   content: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['SafeInt']['input']>;
   threshold?: InputMaybe<Scalars['Float']['input']>;
@@ -2947,6 +2961,8 @@ export type MatchContextQuery = {
         matchFiles: Array<{
           __typename?: 'ContextMatchedFileChunk';
           fileId: string;
+          name: string;
+          mimeType: string;
           chunk: number;
           content: string;
           distance: number | null;
@@ -2964,7 +2980,7 @@ export type MatchContextQuery = {
 };
 
 export type MatchWorkspaceDocsQueryVariables = Exact<{
-  contextId: Scalars['String']['input'];
+  contextId?: InputMaybe<Scalars['String']['input']>;
   content: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['SafeInt']['input']>;
   threshold?: InputMaybe<Scalars['Float']['input']>;
@@ -2991,7 +3007,7 @@ export type MatchWorkspaceDocsQuery = {
 };
 
 export type MatchFilesQueryVariables = Exact<{
-  contextId: Scalars['String']['input'];
+  contextId?: InputMaybe<Scalars['String']['input']>;
   content: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['SafeInt']['input']>;
   threshold?: InputMaybe<Scalars['Float']['input']>;
