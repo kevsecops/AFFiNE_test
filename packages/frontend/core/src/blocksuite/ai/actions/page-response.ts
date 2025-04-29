@@ -1,4 +1,4 @@
-import { uploadBlobForImage } from '@blocksuite/affine/blocks/image';
+import { addSiblingImageBlocks } from '@blocksuite/affine/blocks/image';
 import {
   getSurfaceBlock,
   SurfaceBlockModel,
@@ -178,14 +178,11 @@ export function responseToCreateImage(host: EditorHost, place: Place) {
   fetchImageToFile(answer, filename, imageProxy)
     .then(file => {
       if (!file) return;
-      host.doc.transact(() => {
-        const props = {
-          flavour: 'affine:image',
-          size: file.size,
-        };
-        const blockId = addSiblingBlocks(host, [props], place)?.[0];
-        blockId && uploadBlobForImage(host, blockId, file).catch(console.error);
-      });
+
+      const targetModel = getTargetModel(host, place);
+      if (!targetModel) return;
+
+      return addSiblingImageBlocks(host.std, [file], targetModel, place);
     })
     .catch(console.error);
 }
@@ -284,18 +281,21 @@ function addSurfaceRefBlock(host: EditorHost, bound: Bound, place: Place) {
   return addSiblingBlocks(host, [props], place);
 }
 
+function getTargetModel(host: EditorHost, place: Place) {
+  const { selectedModels } = getSelection(host) || {};
+  if (!selectedModels) return;
+  return place === 'before'
+    ? selectedModels[0]
+    : selectedModels[selectedModels.length - 1];
+}
+
 function addSiblingBlocks(
   host: EditorHost,
   props: Array<Partial<BlockProps>>,
   place: Place
 ) {
-  const { selectedModels } = getSelection(host) || {};
-  if (!selectedModels) return;
-  const targetModel =
-    place === 'before'
-      ? selectedModels[0]
-      : selectedModels[selectedModels.length - 1];
-
+  const targetModel = getTargetModel(host, place);
+  if (!targetModel) return;
   return host.doc.addSiblingBlocks(targetModel, props, place);
 }
 

@@ -2703,6 +2703,7 @@ __metadata:
     "@blocksuite/icons": "npm:^2.2.12"
     "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
+    "@blocksuite/sync": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"

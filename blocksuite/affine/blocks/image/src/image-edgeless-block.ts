@@ -1,20 +1,22 @@
 import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { GfxBlockComponent } from '@blocksuite/std';
+import type { BlobState } from '@blocksuite/sync';
+import { effect, signal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ImageBlockFallbackCard } from './components/image-block-fallback.js';
+import type { ImageBlockFallbackCard } from './components/image-block-fallback';
 import {
   copyImageBlob,
   downloadImageBlob,
-  fetchImageBlob,
-  resetImageSize,
+  refreshData,
   turnImageIntoCardView,
-} from './utils.js';
+} from './utils';
 
 @Peekable()
 export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockModel> {
@@ -25,6 +27,8 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
       height: 100%;
     }
   `;
+
+  blobState$ = signal<Partial<BlobState>>({});
 
   convertToCardView = () => {
     turnImageIntoCardView(this).catch(console.error);
@@ -39,18 +43,12 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
   };
 
   refreshData = () => {
-    this.retryCount = 0;
-    fetchImageBlob(this)
-      .then(() => {
-        const { width, height } = this.model.props;
-        if ((!width || !height) && this.blob) {
-          return resetImageSize(this);
-        }
-
-        return;
-      })
-      .catch(console.error);
+    refreshData(this.std, this).catch(console.error);
   };
+
+  updateBlobState(state: Partial<BlobState>) {
+    this.blobState$.value = { ...this.blobState$.value, ...state };
+  }
 
   private _handleError(error: Error) {
     this.dispatchEvent(new CustomEvent('error', { detail: error }));
@@ -59,13 +57,28 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
   override connectedCallback() {
     super.connectedCallback();
 
-    this.refreshData();
     this.contentEditable = 'false';
+
+    this.refreshData();
+
     this.disposables.add(
-      this.model.propsUpdated.subscribe(({ key }) => {
-        if (key === 'sourceId') {
-          this.refreshData();
-        }
+      effect(() => {
+        const blobId = this.model.props.sourceId$.value;
+        if (!blobId) return;
+
+        const blobState$ = this.std.store.blobSync.blobState$(blobId);
+        if (!blobState$) return;
+
+        const subscription = blobState$.subscribe(state => {
+          if (state.overSize || state.errorMessage) {
+            state.uploading = false;
+            state.downloading = false;
+          }
+
+          this.updateBlobState(state);
+        });
+
+        return () => subscription.unsubscribe();
       })
     );
   }
@@ -85,6 +98,7 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
       transform: `rotate(${rotate}deg)`,
       transformOrigin: 'center',
     });
+    const theme = this.std.get(ThemeProvider).theme$.value;
 
     return html`
       <div class="affine-image-container" style=${containerStyleMap}>
@@ -94,10 +108,11 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
             html`<affine-image-fallback-card
               .error=${this.error}
               .loading=${this.loading}
-              .mode=${'page'}
+              .mode="${'edgeless'}"
+              .theme=${theme}
             ></affine-image-fallback-card>`,
-          () =>
-            html`<div class="resizable-img">
+          () => html`
+            <div class="resizable-img">
               <img
                 class="drag-target"
                 src=${this.blobUrl ?? ''}
@@ -105,7 +120,8 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
                 @error=${this._handleError}
                 loading="lazy"
               />
-            </div>`
+            </div>
+          `
         )}
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>

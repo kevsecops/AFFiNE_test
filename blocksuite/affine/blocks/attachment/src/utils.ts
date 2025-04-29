@@ -22,15 +22,13 @@ import type { BlockModel } from '@blocksuite/store';
 import type { AttachmentBlockComponent } from './attachment-block';
 
 export async function getAttachmentBlob(model: AttachmentBlockModel) {
-  const {
-    sourceId$: { value: sourceId },
-    type$: { value: type },
-  } = model.props;
+  const { sourceId$, type$ } = model.props;
+  const sourceId = sourceId$.peek();
+  const type = type$.peek();
   if (!sourceId) return null;
 
   const doc = model.doc;
-  let blob = await doc.blobSync.get(sourceId);
-
+  const blob = await doc.blobSync.get(sourceId);
   if (!blob) return null;
 
   return new Blob([blob], { type });
@@ -104,7 +102,7 @@ export async function getFileType(file: File) {
   const buffer = await file.arrayBuffer();
   const FileType = await import('file-type');
   const fileType = await FileType.fileTypeFromBuffer(buffer);
-  return fileType ? fileType.mime : '';
+  return fileType?.mime ?? '';
 }
 
 function hasExceeded(

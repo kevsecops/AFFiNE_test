@@ -18,7 +18,7 @@ import {
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { openFileOrFiles } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
+import { Bound, type IVec } from '@blocksuite/global/gfx';
 import type { BlockComponent } from '@blocksuite/std';
 import type { TemplateResult } from 'lit';
 import * as Y from 'yjs';
@@ -165,24 +165,22 @@ export const mediaRender: DraggableTool['render'] = async (bound, edgeless) => {
   }
   if (!file) return null;
 
+  const files = [file];
+  const std = edgeless.std;
+  const point: IVec = [bound.x, bound.y];
+
   // image
   if (file.type.startsWith('image/')) {
-    const [id] = await addImages(edgeless.std, [file], {
-      point: [bound.x, bound.y],
+    const [id] = await addImages(std, files, {
+      point,
       maxWidth: MAX_IMAGE_WIDTH,
       shouldTransformPoint: false,
     });
-    if (id) return id;
-    return null;
+    return id;
   }
 
   // attachment
-  const [id] = await addAttachments(
-    edgeless.std,
-    [file],
-    [bound.x, bound.y],
-    false
-  );
+  const [id] = await addAttachments(std, files, point, false);
   return id;
 };
 

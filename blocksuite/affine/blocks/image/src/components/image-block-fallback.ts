@@ -1,13 +1,14 @@
-import type { ImageBlockModel } from '@blocksuite/affine-model';
+import { getLoadingIconWith } from '@blocksuite/affine-components/icons';
+import type { ColorScheme, ImageBlockModel } from '@blocksuite/affine-model';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
 import { modelContext, ShadowlessElement } from '@blocksuite/std';
 import { consume } from '@lit/context';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import { FailedImageIcon, LoadedImageIcon, LoadingIcon } from '../styles.js';
 
 export const SURFACE_IMAGE_CARD_WIDTH = 220;
 export const SURFACE_IMAGE_CARD_HEIGHT = 122;
@@ -22,47 +23,64 @@ export class ImageBlockFallbackCard extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
       justify-content: center;
+      user-select: none;
     }
 
     .affine-image-fallback-card {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      background-color: var(--affine-background-secondary-color, #f4f4f5);
       border-radius: 8px;
-      border: 1px solid var(--affine-background-tertiary-color, #eee);
+      border: 1px solid ${unsafeCSSVarV2('layer/background/tertiary')};
+      background: ${unsafeCSSVarV2('layer/background/secondary')};
       padding: 12px;
     }
 
-    .affine-image-fallback-card-content {
+    .truncate {
+      align-self: stretch;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .affine-image-fallback-card-title {
       display: flex;
-      align-items: center;
+      flex-direction: row;
       gap: 8px;
+      align-items: center;
+      align-self: stretch;
+    }
+
+    .affine-image-fallback-card-title-icon {
+      display: flex;
+      width: 16px;
+      height: 16px;
+      align-items: center;
+      justify-content: center;
+      color: var(--affine-text-primary-color);
+    }
+
+    .affine-image-fallback-card-title-text {
       color: var(--affine-placeholder-color);
-      text-align: justify;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-sm);
       font-style: normal;
       font-weight: 600;
-      line-height: var(--affine-line-height);
-      user-select: none;
+      line-height: 22px;
     }
 
-    .affine-image-card-size {
-      overflow: hidden;
-      padding-top: 12px;
+    .affine-image-fallback-card-description {
       color: var(--affine-text-secondary-color);
-      text-overflow: ellipsis;
-      font-size: 10px;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-xs);
       font-style: normal;
       font-weight: 400;
       line-height: 20px;
-      user-select: none;
     }
   `;
 
   override render() {
-    const { mode, loading, error, model } = this;
+    const { theme, mode, loading, error, model } = this;
 
     const isEdgeless = mode === 'edgeless';
     const width = isEdgeless
@@ -81,22 +99,19 @@ export class ImageBlockFallbackCard extends WithDisposable(ShadowlessElement) {
       height,
     });
 
-    const titleIcon = loading
-      ? LoadingIcon
+    const icon = loading
+      ? getLoadingIconWith(theme)
       : error
-        ? FailedImageIcon
-        : LoadedImageIcon;
+        ? BrokenImageIcon()
+        : ImageIcon();
 
-    const titleText = loading
+    const title = loading
       ? 'Loading image...'
       : error
         ? 'Image loading failed.'
         : 'Image';
 
-    const size =
-      !!model.props.size && model.props.size > 0
-        ? humanFileSize(model.props.size, true, 0)
-        : null;
+    const description = humanFileSize(model.props.size ?? 0, true, 0);
 
     return html`
       <div class="affine-image-fallback-card-container">
@@ -104,13 +119,15 @@ export class ImageBlockFallbackCard extends WithDisposable(ShadowlessElement) {
           class="affine-image-fallback-card drag-target"
           style=${cardStyleMap}
         >
-          <div class="affine-image-fallback-card-content">
-            ${titleIcon}
-            <span class="affine-image-fallback-card-title-text"
-              >${titleText}</span
-            >
+          <div class="affine-image-fallback-card-title">
+            <div class="affine-image-fallback-card-title-icon">${icon}</div>
+            <div class="affine-image-fallback-card-title-text truncate">
+              ${title}
+            </div>
           </div>
-          <div class="affine-image-card-size">${size}</div>
+          <div class="affine-image-fallback-card-description truncate">
+            ${description}
+          </div>
         </div>
       </div>
     `;
@@ -124,6 +141,9 @@ export class ImageBlockFallbackCard extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor mode!: 'page' | 'edgeless';
+
+  @property({ attribute: false })
+  accessor theme!: ColorScheme;
 
   @consume({ context: modelContext })
   accessor model!: ImageBlockModel;

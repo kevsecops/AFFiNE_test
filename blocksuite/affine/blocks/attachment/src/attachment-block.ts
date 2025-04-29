@@ -240,7 +240,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
       <div class="affine-attachment-content">
         <div class="affine-attachment-content-title">
           <div class="affine-attachment-content-title-icon">${icon}</div>
-
           <div class="affine-attachment-content-title-text truncate">
             ${title}
           </div>
@@ -273,7 +272,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
       <div class="affine-attachment-content">
         <div class="affine-attachment-content-title">
           <div class="affine-attachment-content-title-icon">${icon}</div>
-
           <div class="affine-attachment-content-title-text truncate">
             ${title}
           </div>
