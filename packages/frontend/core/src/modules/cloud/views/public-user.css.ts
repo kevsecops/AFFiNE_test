@@ -3,7 +3,7 @@ import { style } from '@vanilla-extract/css';
 export const publicUserLabel = style({
   fontSize: 'inherit',
   display: 'inline-flex',
-  alignItems: 'center',
+  alignItems: 'baseline',
 });
 
 export const publicUserLabelLoading = style([
@@ -23,4 +23,5 @@ export const publicUserLabelRemoved = style([
 
 export const publicUserLabelAvatar = style({
   marginRight: '0.5em',
+  transform: 'translateY(4px)',
 });
