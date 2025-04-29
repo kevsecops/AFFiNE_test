@@ -52,7 +52,7 @@ export class ContextSession implements AsyncDisposable {
   }
 
   get files() {
-    return this.config.files.map(f => ({ ...f }));
+    return this.config.files.map(f => this.fulfillFile(f));
   }
 
   get sortedList(): ContextList {
@@ -130,14 +130,25 @@ export class ContextSession implements AsyncDisposable {
     return true;
   }
 
-  async addFile(blobId: string, name: string): Promise<ContextFile> {
+  private fulfillFile(file: ContextFile): Required<ContextFile> {
+    return {
+      ...file,
+      mimeType: file.mimeType || 'application/octet-stream',
+    };
+  }
+
+  async addFile(
+    blobId: string,
+    name: string,
+    mimeType: string
+  ): Promise<Required<ContextFile>> {
     let fileId = nanoid();
     const existsBlob = this.config.files.find(f => f.blobId === blobId);
     if (existsBlob) {
       // use exists file id if the blob exists
       // we assume that the file content pointed to by the same blobId is consistent.
       if (existsBlob.status === ContextEmbedStatus.finished) {
-        return existsBlob;
+        return this.fulfillFile(existsBlob);
       }
       fileId = existsBlob.id;
     } else {
@@ -146,11 +157,12 @@ export class ContextSession implements AsyncDisposable {
         blobId,
         chunkSize: 0,
         name,
+        mimeType,
         error: null,
         createdAt: Date.now(),
       }));
     }
-    return this.getFile(fileId) as ContextFile;
+    return this.fulfillFile(this.getFile(fileId) as ContextFile);
   }
 
   getFile(fileId: string): ContextFile | undefined {
@@ -178,9 +190,7 @@ export class ContextSession implements AsyncDisposable {
     signal?: AbortSignal,
     threshold: number = 0.85
   ): Promise<FileChunkSimilarity[]> {
-    const embedding = await this.client
-      .getEmbeddings([content], signal)
-      .then(r => r?.[0]?.embedding);
+    const embedding = await this.client.getEmbedding(content, signal);
     if (!embedding) return [];
 
     const [context, workspace] = await Promise.all([
@@ -220,9 +230,7 @@ export class ContextSession implements AsyncDisposable {
     signal?: AbortSignal,
     threshold: number = 0.5
   ) {
-    const embedding = await this.client
-      .getEmbeddings([content], signal)
-      .then(r => r?.[0]?.embedding);
+    const embedding = await this.client.getEmbedding(content, signal);
     if (!embedding) return [];
 
     const workspace = await this.models.copilotContext.matchWorkspaceEmbedding(

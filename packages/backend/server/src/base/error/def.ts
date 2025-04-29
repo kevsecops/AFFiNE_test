@@ -701,6 +701,12 @@ export const USER_FRIENDLY_ERRORS = {
     message: ({ contextId, content, message }) =>
       `Failed to match context ${contextId} with "${escape(content)}": ${message}`,
   },
+  copilot_failed_to_match_global_context: {
+    type: 'internal_server_error',
+    args: { workspaceId: 'string', content: 'string', message: 'string' },
+    message: ({ workspaceId, content, message }) =>
+      `Failed to match context in workspace ${workspaceId} with "${escape(content)}": ${message}`,
+  },
   copilot_embedding_disabled: {
     type: 'action_forbidden',
     message: `Embedding feature is disabled, please contact the administrator to enable it in the workspace settings.`,

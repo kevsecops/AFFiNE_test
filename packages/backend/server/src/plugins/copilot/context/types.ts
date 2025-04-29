@@ -128,6 +128,11 @@ export abstract class EmbeddingClient {
       .slice(0, topK);
   }
 
+  async getEmbedding(query: string, signal?: AbortSignal) {
+    const embedding = await this.getEmbeddings([query], signal);
+    return embedding?.[0]?.embedding;
+  }
+
   abstract getEmbeddings(
     input: string[],
     signal?: AbortSignal
