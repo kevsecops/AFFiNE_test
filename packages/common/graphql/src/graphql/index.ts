@@ -1821,12 +1821,15 @@ export const workspaceQuotaQuery = {
       historyPeriod
       memberLimit
       memberCount
+      overcapacityMemberCount
       humanReadable {
         name
         blobLimit
         storageQuota
         historyPeriod
         memberLimit
+        memberCount
+        overcapacityMemberCount
       }
     }
   }

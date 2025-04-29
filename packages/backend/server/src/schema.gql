@@ -1746,6 +1746,7 @@ type WorkspaceQuotaHumanReadableType {
   memberCount: String!
   memberLimit: String!
   name: String!
+  overcapacityMemberCount: String!
   storageQuota: String!
   storageQuotaUsed: String!
 }
@@ -1757,6 +1758,7 @@ type WorkspaceQuotaType {
   memberCount: Int!
   memberLimit: Int!
   name: String!
+  overcapacityMemberCount: Int!
   storageQuota: SafeInt!
   usedSize: SafeInt! @deprecated(reason: "use `usedStorageQuota` instead")
   usedStorageQuota: SafeInt!

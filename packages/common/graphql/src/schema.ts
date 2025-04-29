@@ -2310,6 +2310,7 @@ export interface WorkspaceQuotaHumanReadableType {
   memberCount: Scalars['String']['output'];
   memberLimit: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  overcapacityMemberCount: Scalars['String']['output'];
   storageQuota: Scalars['String']['output'];
   storageQuotaUsed: Scalars['String']['output'];
 }
@@ -2322,6 +2323,7 @@ export interface WorkspaceQuotaType {
   memberCount: Scalars['Int']['output'];
   memberLimit: Scalars['Int']['output'];
   name: Scalars['String']['output'];
+  overcapacityMemberCount: Scalars['Int']['output'];
   storageQuota: Scalars['SafeInt']['output'];
   /** @deprecated use `usedStorageQuota` instead */
   usedSize: Scalars['SafeInt']['output'];
@@ -4498,6 +4500,7 @@ export type WorkspaceQuotaQuery = {
       historyPeriod: number;
       memberLimit: number;
       memberCount: number;
+      overcapacityMemberCount: number;
       humanReadable: {
         __typename?: 'WorkspaceQuotaHumanReadableType';
         name: string;
@@ -4505,6 +4508,8 @@ export type WorkspaceQuotaQuery = {
         storageQuota: string;
         historyPeriod: string;
         memberLimit: string;
+        memberCount: string;
+        overcapacityMemberCount: string;
       };
     };
   };
