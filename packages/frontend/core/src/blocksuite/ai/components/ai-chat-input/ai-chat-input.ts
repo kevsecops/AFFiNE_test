@@ -560,7 +560,7 @@ export class AIChatInput extends SignalWatcher(WithDisposable(LitElement)) {
         isRootSession: this.isRootSession,
         where: this.trackOptions.where,
         control: this.trackOptions.control,
-        mustSearch: this._isNetworkActive,
+        webSearch: this._isNetworkActive,
         reasoning: this._isReasoningActive,
       });
 

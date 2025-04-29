@@ -10,6 +10,7 @@ import { literal } from 'lit/static-html.js';
 import { AttachmentDropOption } from './attachment-service.js';
 import { attachmentSlashMenuConfig } from './configs/slash-menu.js';
 import { createBuiltinToolbarConfigExtension } from './configs/toolbar';
+import { EdgelessClipboardAttachmentConfig } from './edgeless-clipboard-config';
 import { effects } from './effects.js';
 import {
   AttachmentEmbedConfigExtension,
@@ -41,5 +42,8 @@ export class AttachmentViewExtension extends ViewExtensionProvider {
       SlashMenuConfigExtension(flavour, attachmentSlashMenuConfig),
       ...createBuiltinToolbarConfigExtension(flavour),
     ]);
+    if (this.isEdgeless(context.scope)) {
+      context.register(EdgelessClipboardAttachmentConfig);
+    }
   }
 }

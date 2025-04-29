@@ -4,6 +4,8 @@ import { expect, type Page } from '@playwright/test';
 import { clickView } from '../utils/actions/click.js';
 import {
   createNote,
+  createShapeElement,
+  getAllSortedIds,
   getIds,
   getSelectedBound,
   getSelectedIds,
@@ -200,6 +202,22 @@ test.describe('Embed synced doc in edgeless mode', () => {
 
       const noteBound = await getSelectedBound(page);
       expect(isIntersected(embedDocBound, noteBound)).toBe(false);
+    });
+
+    test('edgeless note duplicated from embed-synced-doc should be above other elements', async ({
+      page,
+    }) => {
+      await createShapeElement(page, [0, 0], [100, 100]);
+      await page.locator('affine-embed-edgeless-synced-doc-block').click();
+      const toolbar = locateToolbar(page);
+      await toolbar.getByLabel('Duplicate as note').click();
+
+      const edgelessNotes = page.locator('affine-edgeless-note');
+      await expect(edgelessNotes).toHaveCount(2);
+      const duplicatedNoteId = (await getSelectedIds(page))[0];
+      const sortedIds = await getAllSortedIds(page);
+      //
+      expect(sortedIds[sortedIds.length - 1]).toBe(duplicatedNoteId);
     });
   });
 });

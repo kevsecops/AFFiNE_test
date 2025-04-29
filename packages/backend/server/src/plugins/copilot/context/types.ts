@@ -1,7 +1,7 @@
 import { File } from 'node:buffer';
 
 import { CopilotContextFileNotSupported } from '../../../base';
-import { Embedding } from '../../../models';
+import { ChunkSimilarity, Embedding } from '../../../models';
 import { parseDoc } from '../../../native';
 
 declare global {
@@ -36,7 +36,7 @@ declare global {
     };
 
     'copilot.embedding.files': {
-      contextId: string;
+      contextId?: string;
       userId: string;
       workspaceId: string;
       blobId: string;
@@ -112,6 +112,15 @@ export abstract class EmbeddingClient {
 
     // fix the index of the embeddings
     return embeddings.map(e => ({ ...e, index: chunks[e.index].index }));
+  }
+
+  async reRank<Chunk extends ChunkSimilarity = ChunkSimilarity>(
+    embeddings: Chunk[]
+  ): Promise<Chunk[]> {
+    // sort by distance with ascending order
+    return embeddings.sort(
+      (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)
+    );
   }
 
   abstract getEmbeddings(

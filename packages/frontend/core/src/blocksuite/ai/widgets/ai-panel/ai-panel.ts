@@ -1,7 +1,3 @@
-import {
-  AFFINE_VIEWPORT_OVERLAY_WIDGET,
-  type AffineViewportOverlayWidget,
-} from '@blocksuite/affine/blocks/root';
 import { ColorScheme } from '@blocksuite/affine/model';
 import {
   DocModeProvider,
@@ -19,6 +15,10 @@ import { WidgetComponent, WidgetViewExtension } from '@blocksuite/affine/std';
 import { GfxControllerIdentifier } from '@blocksuite/affine/std/gfx';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/affine/std/inline';
 import type { BaseSelection } from '@blocksuite/affine/store';
+import {
+  AFFINE_VIEWPORT_OVERLAY_WIDGET,
+  type AffineViewportOverlayWidget,
+} from '@blocksuite/affine/widgets/viewport-overlay';
 import {
   autoPlacement,
   autoUpdate,

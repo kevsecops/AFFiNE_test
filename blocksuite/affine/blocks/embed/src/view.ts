@@ -4,14 +4,39 @@ import {
 } from '@blocksuite/affine-ext-loader';
 
 import { effects } from './effects';
-import { EmbedFigmaViewExtensions } from './embed-figma-block';
-import { EmbedGithubViewExtensions } from './embed-github-block';
-import { EmbedHtmlViewExtensions } from './embed-html-block';
-import { EmbedIframeViewExtensions } from './embed-iframe-block';
-import { EmbedLinkedDocViewExtensions } from './embed-linked-doc-block';
-import { EmbedLoomViewExtensions } from './embed-loom-block';
-import { EmbedSyncedDocViewExtensions } from './embed-synced-doc-block';
-import { EmbedYoutubeViewExtensions } from './embed-youtube-block';
+import {
+  EdgelessClipboardEmbedFigmaConfig,
+  EmbedFigmaViewExtensions,
+} from './embed-figma-block';
+import {
+  EdgelessClipboardEmbedGithubConfig,
+  EmbedGithubViewExtensions,
+} from './embed-github-block';
+import {
+  EdgelessClipboardEmbedHtmlConfig,
+  EmbedHtmlViewExtensions,
+} from './embed-html-block';
+import {
+  EdgelessClipboardEmbedIframeConfig,
+  EmbedIframeViewExtensions,
+} from './embed-iframe-block';
+import {
+  EdgelessClipboardEmbedLinkedDocConfig,
+  EmbedLinkedDocViewExtensions,
+} from './embed-linked-doc-block';
+import {
+  EdgelessClipboardEmbedLoomConfig,
+  EmbedLoomViewExtensions,
+} from './embed-loom-block';
+import {
+  EdgelessClipboardEmbedSyncedDocConfig,
+  EmbedSyncedDocViewExtensions,
+} from './embed-synced-doc-block';
+import {
+  EdgelessClipboardEmbedYoutubeConfig,
+  EmbedYoutubeViewExtensions,
+} from './embed-youtube-block';
+
 export class EmbedViewExtension extends ViewExtensionProvider {
   override name = 'affine-embed-block';
 
@@ -30,5 +55,18 @@ export class EmbedViewExtension extends ViewExtensionProvider {
     context.register(EmbedLinkedDocViewExtensions);
     context.register(EmbedSyncedDocViewExtensions);
     context.register(EmbedIframeViewExtensions);
+    const isEdgeless = this.isEdgeless(context.scope);
+    if (isEdgeless) {
+      context.register([
+        EdgelessClipboardEmbedFigmaConfig,
+        EdgelessClipboardEmbedGithubConfig,
+        EdgelessClipboardEmbedHtmlConfig,
+        EdgelessClipboardEmbedLoomConfig,
+        EdgelessClipboardEmbedYoutubeConfig,
+        EdgelessClipboardEmbedIframeConfig,
+        EdgelessClipboardEmbedLinkedDocConfig,
+        EdgelessClipboardEmbedSyncedDocConfig,
+      ]);
+    }
   }
 }

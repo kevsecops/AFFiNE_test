@@ -1,13 +1,13 @@
+import {
+  TranscriptionBlockFlavour,
+  type TranscriptionBlockModel,
+} from '@affine/core/blocksuite/ai/blocks/transcription-block/model';
 import { insertFromMarkdown } from '@affine/core/blocksuite/utils';
 import { encodeAudioBlobToOpusSlices } from '@affine/core/utils/webm-encoding';
 import { DebugLogger } from '@affine/debug';
 import { AiJobStatus } from '@affine/graphql';
 import track from '@affine/track';
-import {
-  type AttachmentBlockModel,
-  TranscriptionBlockFlavour,
-  type TranscriptionBlockModel,
-} from '@blocksuite/affine/model';
+import type { AttachmentBlockModel } from '@blocksuite/affine/model';
 import type { AffineTextAttributes } from '@blocksuite/affine/shared/types';
 import { type DeltaInsert, Text } from '@blocksuite/affine/store';
 import { computed } from '@preact/signals-core';

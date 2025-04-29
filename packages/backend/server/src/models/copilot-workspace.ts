@@ -11,6 +11,7 @@ import type {
   CopilotWorkspaceFileMetadata,
   Embedding,
   FileChunkSimilarity,
+  IgnoredDoc,
 } from './common';
 
 @Injectable()
@@ -50,12 +51,13 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
     return added.length + ignored.size;
   }
 
+  @Transactional()
   async listIgnoredDocs(
     workspaceId: string,
     options?: {
       includeRead?: boolean;
     } & PaginationInput
-  ): Promise<{ docId: string; createdAt: Date }[]> {
+  ): Promise<IgnoredDoc[]> {
     const row = await this.db.aiWorkspaceIgnoredDocs.findMany({
       where: {
         workspaceId,
@@ -68,7 +70,29 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
       skip: options?.offset,
       take: options?.first,
     });
-    return row;
+    const ids = row.map(r => ({ workspaceId, docId: r.docId }));
+    const docs = await this.models.doc.findMetas(ids);
+    const docsMap = new Map(
+      docs.filter(r => !!r).map(r => [`${r.workspaceId}-${r.docId}`, r])
+    );
+    const authors = await this.models.doc.findAuthors(ids);
+    const authorsMap = new Map(
+      authors.filter(r => !!r).map(r => [`${r.workspaceId}-${r.id}`, r])
+    );
+
+    return row.map(r => {
+      const docMeta = docsMap.get(`${workspaceId}-${r.docId}`);
+      const docAuthor = authorsMap.get(`${workspaceId}-${r.docId}`);
+      return {
+        ...r,
+        docCreatedAt: docAuthor?.createdAt,
+        docUpdatedAt: docAuthor?.updatedAt,
+        title: docMeta?.title || undefined,
+        createdBy: docAuthor?.createdByUser?.name,
+        createdByAvatar: docAuthor?.createdByUser?.avatarUrl || undefined,
+        updatedBy: docAuthor?.updatedByUser?.name,
+      };
+    });
   }
 
   async countIgnoredDocs(workspaceId: string): Promise<number> {
@@ -138,7 +162,7 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
   }
 
   @Transactional()
-  async addFileEmbeddings(
+  async insertFileEmbeddings(
     workspaceId: string,
     fileId: string,
     embeddings: Embedding[]
@@ -151,7 +175,7 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
       `;
   }
 
-  async listWorkspaceFiles(
+  async listFiles(
     workspaceId: string,
     options?: {
       includeRead?: boolean;
@@ -168,7 +192,7 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
     return files;
   }
 
-  async countWorkspaceFiles(workspaceId: string): Promise<number> {
+  async countFiles(workspaceId: string): Promise<number> {
     const count = await this.db.aiWorkspaceFiles.count({
       where: {
         workspaceId,
@@ -177,12 +201,16 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
     return count;
   }
 
-  async matchWorkspaceFileEmbedding(
+  async matchFileEmbedding(
     workspaceId: string,
     embedding: number[],
     topK: number,
     threshold: number
   ): Promise<FileChunkSimilarity[]> {
+    if (!(await this.allowEmbedding(workspaceId))) {
+      return [];
+    }
+
     const similarityChunks = await this.db.$queryRaw<
       Array<FileChunkSimilarity>
     >`
@@ -195,7 +223,7 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
     return similarityChunks.filter(c => Number(c.distance) <= threshold);
   }
 
-  async removeWorkspaceFile(workspaceId: string, fileId: string) {
+  async removeFile(workspaceId: string, fileId: string) {
     // embeddings will be removed by foreign key constraint
     await this.db.aiWorkspaceFiles.deleteMany({
       where: {
@@ -204,5 +232,9 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
       },
     });
     return true;
+  }
+
+  private allowEmbedding(workspaceId: string) {
+    return this.models.workspace.allowEmbedding(workspaceId);
   }
 }

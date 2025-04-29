@@ -216,7 +216,8 @@ class StoreConsumer {
       'blobSync.state': () => this.blobSync.state$,
       'blobSync.blobState': blobId => this.blobSync.blobState$(blobId),
       'blobSync.downloadBlob': key => this.blobSync.downloadBlob(key),
-      'blobSync.uploadBlob': blob => this.blobSync.uploadBlob(blob),
+      'blobSync.uploadBlob': ({ blob, force }) =>
+        this.blobSync.uploadBlob(blob, force),
       'blobSync.fullDownload': peerId =>
         new Observable(subscriber => {
           const abortController = new AbortController();

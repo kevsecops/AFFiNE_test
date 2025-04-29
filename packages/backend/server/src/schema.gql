@@ -295,7 +295,13 @@ type CopilotWorkspaceFileTypeEdge {
 
 type CopilotWorkspaceIgnoredDoc {
   createdAt: DateTime!
+  createdBy: String
+  createdByAvatar: String
+  docCreatedAt: DateTime
   docId: String!
+  docUpdatedAt: DateTime
+  title: String
+  updatedBy: String
 }
 
 type CopilotWorkspaceIgnoredDocTypeEdge {

@@ -124,24 +124,38 @@ export class CopilotContextDocJob {
 
       for (const chunk of chunks) {
         const embeddings = await this.embeddingClient.generateEmbeddings(chunk);
-        await this.models.copilotContext.insertContentEmbedding(
-          contextId,
-          fileId,
-          embeddings
-        );
+        if (contextId) {
+          // for context files
+          await this.models.copilotContext.insertFileEmbedding(
+            contextId,
+            fileId,
+            embeddings
+          );
+        } else {
+          // for workspace files
+          await this.models.copilotWorkspace.insertFileEmbeddings(
+            workspaceId,
+            fileId,
+            embeddings
+          );
+        }
       }
 
-      this.event.emit('workspace.file.embed.finished', {
-        contextId,
-        fileId,
-        chunkSize: total,
-      });
+      if (contextId) {
+        this.event.emit('workspace.file.embed.finished', {
+          contextId,
+          fileId,
+          chunkSize: total,
+        });
+      }
     } catch (error: any) {
-      this.event.emit('workspace.file.embed.failed', {
-        contextId,
-        fileId,
-        error: mapAnyError(error).message,
-      });
+      if (contextId) {
+        this.event.emit('workspace.file.embed.failed', {
+          contextId,
+          fileId,
+          error: mapAnyError(error).message,
+        });
+      }
 
       // passthrough error to job queue
       throw error;

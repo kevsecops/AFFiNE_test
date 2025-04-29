@@ -9,6 +9,15 @@ import type { DeltaInsert } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 import type { Heading } from 'mdast';
 
+/**
+ * Extend the HeadingData type to include the collapsed property
+ */
+declare module 'mdast' {
+  interface HeadingData {
+    collapsed?: boolean;
+  }
+}
+
 const PARAGRAPH_MDAST_TYPE = new Set(['paragraph', 'heading', 'blockquote']);
 
 const isParagraphMDASTType = (node: MarkdownAST) =>
@@ -46,6 +55,7 @@ export const paragraphBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher =
             break;
           }
           case 'heading': {
+            const isCollapsed = !!o.node.data?.collapsed;
             walkerContext
               .openNode(
                 {
@@ -54,6 +64,7 @@ export const paragraphBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher =
                   flavour: 'affine:paragraph',
                   props: {
                     type: `h${o.node.depth}`,
+                    collapsed: isCollapsed,
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: deltaConverter.astToDelta(o.node),

@@ -15,6 +15,10 @@ export class BlobFrontend {
     return this.sync.state$;
   }
 
+  blobState$(blobId: string) {
+    return this.sync.blobState$(blobId);
+  }
+
   async get(blobId: string) {
     await this.waitForConnected();
     await using lock = await this.lock.lock('blob', blobId);

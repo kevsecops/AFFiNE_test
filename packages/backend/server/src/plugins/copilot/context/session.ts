@@ -8,6 +8,7 @@ import {
   ContextEmbedStatus,
   ContextFile,
   ContextList,
+  FileChunkSimilarity,
   Models,
 } from '../../../models';
 import { EmbeddingClient } from './types';
@@ -176,18 +177,28 @@ export class ContextSession implements AsyncDisposable {
     topK: number = 5,
     signal?: AbortSignal,
     threshold: number = 0.7
-  ) {
+  ): Promise<FileChunkSimilarity[]> {
     const embedding = await this.client
       .getEmbeddings([content], signal)
       .then(r => r?.[0]?.embedding);
     if (!embedding) return [];
 
-    return this.models.copilotContext.matchContentEmbedding(
-      embedding,
-      this.id,
-      topK,
-      threshold
-    );
+    const [context, workspace] = await Promise.all([
+      this.models.copilotContext.matchFileEmbedding(
+        embedding,
+        this.id,
+        topK,
+        threshold
+      ),
+      this.models.copilotWorkspace.matchFileEmbedding(
+        this.workspaceId,
+        embedding,
+        topK,
+        threshold
+      ),
+    ]);
+
+    return this.client.reRank([...context, ...workspace]);
   }
 
   /**

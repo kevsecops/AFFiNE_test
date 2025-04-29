@@ -105,6 +105,16 @@ export const AFFINE_FLAGS = {
     configurable: isCanaryBuild,
     defaultState: isCanaryBuild,
   },
+  enable_citation: {
+    category: 'blocksuite',
+    bsFlag: 'enable_citation',
+    displayName:
+      'com.affine.settings.workspace.experimental-features.enable-citation.name',
+    description:
+      'com.affine.settings.workspace.experimental-features.enable-citation.description',
+    configurable: isCanaryBuild,
+    defaultState: isCanaryBuild,
+  },
 
   enable_emoji_folder_icon: {
     category: 'affine',
@@ -232,7 +242,8 @@ export const AFFINE_FLAGS = {
     defaultState: false,
   },
   enable_turbo_renderer: {
-    category: 'affine',
+    category: 'blocksuite',
+    bsFlag: 'enable_turbo_renderer',
     displayName: 'Enable Turbo Renderer',
     description: 'Enable experimental edgeless turbo renderer',
     configurable: isCanaryBuild,

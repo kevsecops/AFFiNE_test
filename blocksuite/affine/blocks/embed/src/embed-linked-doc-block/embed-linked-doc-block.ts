@@ -55,6 +55,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   static override styles = styles;
 
   private readonly _load = async () => {
+    // If this is a citation linked doc block, we don't need to load the linked doc and render linked doc content in card
+    if (this.isCitation) {
+      return;
+    }
+
     const {
       loading = true,
       isError = false,
@@ -243,6 +248,17 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     return doc?.getStore({ id: this.model.props.pageId });
   }
 
+  get readonly() {
+    return this.doc.readonly;
+  }
+
+  get isCitation() {
+    return (
+      !!this.model.props.footnoteIdentifier &&
+      this.model.props.style === 'citation'
+    );
+  }
+
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
     const openDocService = this.std.get(OpenDocExtensionIdentifier);
@@ -264,105 +280,42 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
   }
 
-  protected _handleClick(event: MouseEvent) {
+  protected _handleClick = (event: MouseEvent) => {
     if (isNewTabTrigger(event)) {
       this.open({ openMode: 'open-in-new-tab', event });
     } else if (isNewViewTrigger(event)) {
       this.open({ openMode: 'open-in-new-view', event });
     }
-    this._selectBlock();
-  }
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._cardStyle = this.model.props.style;
-    this._referenceToNode = referenceToNode(this.model.props);
-
-    this._load().catch(e => {
-      console.error(e);
-      this.isError = true;
-    });
-
-    const linkedDoc = this.linkedDoc;
-    if (linkedDoc) {
-      this.disposables.add(
-        linkedDoc.workspace.slots.docListUpdated.subscribe(() => {
-          this._load().catch(e => {
-            console.error(e);
-            this.isError = true;
-          });
-        })
-      );
-      // Should throttle the blockUpdated event to avoid too many re-renders
-      // Because the blockUpdated event is triggered too frequently at some cases
-      this.disposables.add(
-        linkedDoc.slots.blockUpdated.subscribe(
-          throttle(payload => {
-            if (
-              payload.type === 'update' &&
-              ['', 'caption', 'xywh'].includes(payload.props.key)
-            ) {
-              return;
-            }
-
-            if (payload.type === 'add' && payload.init) {
-              return;
-            }
-
-            this._load().catch(e => {
-              console.error(e);
-              this.isError = true;
-            });
-          }, RENDER_CARD_THROTTLE_MS)
-        )
-      );
-
-      this._setDocUpdatedAt();
-      this.disposables.add(
-        this.doc.workspace.slots.docListUpdated.subscribe(() => {
-          this._setDocUpdatedAt();
-        })
-      );
-
-      if (this._referenceToNode) {
-        this._linkedDocMode = this.model.props.params?.mode ?? 'page';
-      } else {
-        const docMode = this.std.get(DocModeProvider);
-        this._linkedDocMode = docMode.getPrimaryMode(this.model.props.pageId);
-        this.disposables.add(
-          docMode.onPrimaryModeChange(mode => {
-            this._linkedDocMode = mode;
-          }, this.model.props.pageId)
-        );
-      }
+    if (this.readonly) {
+      return;
     }
+    this._selectBlock();
+  };
 
-    this.disposables.add(
-      this.model.propsUpdated.subscribe(({ key }) => {
-        if (key === 'style') {
-          this._cardStyle = this.model.props.style;
-        }
-        if (key === 'pageId' || key === 'style') {
-          this._load().catch(e => {
-            console.error(e);
-            this.isError = true;
-          });
-        }
-      })
-    );
-  }
+  private readonly _renderCitationView = () => {
+    const { footnoteIdentifier } = this.model.props;
+    return html`<div
+      draggable="${this.blockDraggable ? 'true' : 'false'}"
+      class=${classMap({
+        'embed-block-container': true,
+        ...this.selectedStyle$?.value,
+      })}
+      style=${styleMap({
+        ...this.embedContainerStyle,
+      })}
+    >
+      <affine-citation-card
+        .icon=${this.icon$.value}
+        .citationTitle=${this.title$.value}
+        .citationIdentifier=${footnoteIdentifier}
+        .active=${this.selected$.value}
+        .onClickCallback=${this._handleClick}
+      ></affine-citation-card>
+    </div> `;
+  };
 
-  getInitialState(): {
-    loading?: boolean;
-    isError?: boolean;
-    isNoteContentEmpty?: boolean;
-    isBannerEmpty?: boolean;
-  } {
-    return {};
-  }
-
-  override renderBlock() {
+  private readonly _renderEmbedView = () => {
     const linkedDoc = this.linkedDoc;
     const isDeleted = !linkedDoc;
     const isLoading = this._loading;
@@ -502,9 +455,107 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         </div>
       `
     );
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._cardStyle = this.model.props.style;
+    this._referenceToNode = referenceToNode(this.model.props);
+
+    this._load().catch(e => {
+      console.error(e);
+      this.isError = true;
+    });
+
+    const linkedDoc = this.linkedDoc;
+    if (linkedDoc) {
+      this.disposables.add(
+        linkedDoc.workspace.slots.docListUpdated.subscribe(() => {
+          this._load().catch(e => {
+            console.error(e);
+            this.isError = true;
+          });
+        })
+      );
+      // Should throttle the blockUpdated event to avoid too many re-renders
+      // Because the blockUpdated event is triggered too frequently at some cases
+      this.disposables.add(
+        linkedDoc.slots.blockUpdated.subscribe(
+          throttle(payload => {
+            if (
+              payload.type === 'update' &&
+              ['', 'caption', 'xywh'].includes(payload.props.key)
+            ) {
+              return;
+            }
+
+            if (payload.type === 'add' && payload.init) {
+              return;
+            }
+
+            this._load().catch(e => {
+              console.error(e);
+              this.isError = true;
+            });
+          }, RENDER_CARD_THROTTLE_MS)
+        )
+      );
+
+      this._setDocUpdatedAt();
+      this.disposables.add(
+        this.doc.workspace.slots.docListUpdated.subscribe(() => {
+          this._setDocUpdatedAt();
+        })
+      );
+
+      if (this._referenceToNode) {
+        this._linkedDocMode = this.model.props.params?.mode ?? 'page';
+      } else {
+        const docMode = this.std.get(DocModeProvider);
+        this._linkedDocMode = docMode.getPrimaryMode(this.model.props.pageId);
+        this.disposables.add(
+          docMode.onPrimaryModeChange(mode => {
+            this._linkedDocMode = mode;
+          }, this.model.props.pageId)
+        );
+      }
+    }
+
+    this.disposables.add(
+      this.model.propsUpdated.subscribe(({ key }) => {
+        if (key === 'style') {
+          this._cardStyle = this.model.props.style;
+        }
+        if (key === 'pageId' || key === 'style') {
+          this._load().catch(e => {
+            console.error(e);
+            this.isError = true;
+          });
+        }
+      })
+    );
+  }
+
+  getInitialState(): {
+    loading?: boolean;
+    isError?: boolean;
+    isNoteContentEmpty?: boolean;
+    isBannerEmpty?: boolean;
+  } {
+    return {};
+  }
+
+  override renderBlock() {
+    return this.isCitation
+      ? this._renderCitationView()
+      : this._renderEmbedView();
   }
 
   override updated() {
+    if (this.readonly) {
+      return;
+    }
     // update card style when linked doc deleted
     const linkedDoc = this.linkedDoc;
     const { xywh, style } = this.model.props;

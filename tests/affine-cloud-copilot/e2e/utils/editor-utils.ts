@@ -53,20 +53,6 @@ export class EditorUtils {
     await page.getByTestId('switch-edgeless-mode-button').click();
     await editor.waitForElementState('hidden');
     await page.waitForSelector('edgeless-editor');
-    try {
-      const edgelessNotificationClose = page.getByTestId(
-        'notification-close-button'
-      );
-      await edgelessNotificationClose.waitFor({
-        state: 'visible',
-        timeout: 2000,
-      });
-      await edgelessNotificationClose.click();
-      // Focus to the edgeless editor
-      await page.mouse.click(400, 400);
-    } catch {
-      // do nothing if the notification close button is not found
-    }
   }
 
   public static async switchToPageMode(page: Page) {

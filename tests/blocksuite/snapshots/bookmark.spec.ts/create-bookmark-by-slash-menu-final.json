@@ -10,6 +10,7 @@
           "props": {
             "caption": null,
             "description": null,
+            "footnoteIdentifier": null,
             "icon": null,
             "image": null,
             "index": "a0",

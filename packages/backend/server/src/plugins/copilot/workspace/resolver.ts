@@ -135,7 +135,7 @@ export class CopilotWorkspaceEmbeddingConfigResolver {
     @Parent() config: CopilotWorkspaceConfigType,
     @Args('pagination', PaginationInput.decode) pagination: PaginationInput
   ): Promise<PaginatedCopilotWorkspaceFileType> {
-    const [files, totalCount] = await this.copilotWorkspace.listWorkspaceFiles(
+    const [files, totalCount] = await this.copilotWorkspace.listFiles(
       config.workspaceId,
       pagination
     );
@@ -177,12 +177,12 @@ export class CopilotWorkspaceEmbeddingConfigResolver {
     }
 
     try {
-      const { blobId, file } = await this.copilotWorkspace.addWorkspaceFile(
+      const { blobId, file } = await this.copilotWorkspace.addFile(
         user.id,
         workspaceId,
         content
       );
-      await this.copilotWorkspace.addWorkspaceFileEmbeddingQueue({
+      await this.copilotWorkspace.queueFileEmbedding({
         userId: user.id,
         workspaceId,
         blobId,
@@ -219,6 +219,6 @@ export class CopilotWorkspaceEmbeddingConfigResolver {
       .workspace(workspaceId)
       .assert('Workspace.Settings.Update');
 
-    return await this.copilotWorkspace.removeWorkspaceFile(workspaceId, fileId);
+    return await this.copilotWorkspace.removeFile(workspaceId, fileId);
   }
 }

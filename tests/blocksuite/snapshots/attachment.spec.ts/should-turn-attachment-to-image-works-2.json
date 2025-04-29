@@ -10,6 +10,7 @@
           "props": {
             "caption": "",
             "embed": false,
+            "footnoteIdentifier": null,
             "index": "a0",
             "lockedBySelf": false,
             "name": "test-card-1.png",

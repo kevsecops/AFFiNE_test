@@ -6,6 +6,7 @@ import {
 import { getInternalStoreExtensions } from '@blocksuite/affine/extensions/store';
 
 import { AIChatBlockSchemaExtension } from '../ai/blocks/ai-chat-block/model';
+import { TranscriptionBlockSchemaExtension } from '../ai/blocks/transcription-block/model';
 
 class MigratingAffineStoreExtension extends StoreExtensionProvider {
   override name = 'affine-store-extensions';
@@ -13,6 +14,7 @@ class MigratingAffineStoreExtension extends StoreExtensionProvider {
   override setup(context: StoreExtensionContext) {
     super.setup(context);
     context.register(AIChatBlockSchemaExtension);
+    context.register(TranscriptionBlockSchemaExtension);
   }
 }
 

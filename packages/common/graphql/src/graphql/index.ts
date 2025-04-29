@@ -830,6 +830,12 @@ export const getWorkspaceEmbeddingIgnoredDocsQuery = {
           node {
             docId
             createdAt
+            docCreatedAt
+            docUpdatedAt
+            title
+            createdBy
+            createdByAvatar
+            updatedBy
           }
         }
       }

@@ -399,7 +399,13 @@ export interface CopilotWorkspaceFileTypeEdge {
 export interface CopilotWorkspaceIgnoredDoc {
   __typename?: 'CopilotWorkspaceIgnoredDoc';
   createdAt: Scalars['DateTime']['output'];
+  createdBy: Maybe<Scalars['String']['output']>;
+  createdByAvatar: Maybe<Scalars['String']['output']>;
+  docCreatedAt: Maybe<Scalars['DateTime']['output']>;
   docId: Scalars['String']['output'];
+  docUpdatedAt: Maybe<Scalars['DateTime']['output']>;
+  title: Maybe<Scalars['String']['output']>;
+  updatedBy: Maybe<Scalars['String']['output']>;
 }
 
 export interface CopilotWorkspaceIgnoredDocTypeEdge {
@@ -3374,6 +3380,12 @@ export type GetWorkspaceEmbeddingIgnoredDocsQuery = {
             __typename?: 'CopilotWorkspaceIgnoredDoc';
             docId: string;
             createdAt: string;
+            docCreatedAt: string | null;
+            docUpdatedAt: string | null;
+            title: string | null;
+            createdBy: string | null;
+            createdByAvatar: string | null;
+            updatedBy: string | null;
           };
         }>;
       };

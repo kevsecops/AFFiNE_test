@@ -1,4 +1,5 @@
 import { splitElements } from '@blocksuite/affine/blocks/root';
+import type * as PointerEffect from '@blocksuite/affine/gfx/pointer';
 import {
   CodeBlockModel,
   EdgelessTextBlockModel,
@@ -47,6 +48,8 @@ import {
   actionToResponse,
   getToolbar,
 } from './edgeless-response';
+
+declare type _GLOBAL_ = typeof PointerEffect;
 
 async function getContentFromEmbedSyncedDocModel(
   host: EditorHost,
@@ -196,7 +199,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
             host,
             docId: host.doc.id,
             workspaceId: host.doc.workspace.id,
-            mustSearch: visible?.value && enabled?.value,
+            webSearch: visible?.value && enabled?.value,
           } as Parameters<typeof action>[0];
 
           const content = ctx.get().content;

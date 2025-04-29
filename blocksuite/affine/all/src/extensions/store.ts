@@ -16,6 +16,7 @@ import { ParagraphStoreExtension } from '@blocksuite/affine-block-paragraph/stor
 import { SurfaceStoreExtension } from '@blocksuite/affine-block-surface/store';
 import { SurfaceRefStoreExtension } from '@blocksuite/affine-block-surface-ref/store';
 import { TableStoreExtension } from '@blocksuite/affine-block-table/store';
+import { FoundationStoreExtension } from '@blocksuite/affine-foundation/store';
 import { BrushStoreExtension } from '@blocksuite/affine-gfx-brush/store';
 import { ConnectorStoreExtension } from '@blocksuite/affine-gfx-connector/store';
 import { GroupStoreExtension } from '@blocksuite/affine-gfx-group/store';
@@ -32,6 +33,8 @@ import { MigratingStoreExtension } from './migrating-store';
 
 export function getInternalStoreExtensions() {
   return [
+    FoundationStoreExtension,
+
     AttachmentStoreExtension,
     BookmarkStoreExtension,
     CalloutStoreExtension,

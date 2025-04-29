@@ -51,7 +51,8 @@
             "index": "a0",
             "xywh": "[0,0,0,0]",
             "lockedBySelf": false,
-            "rotate": 0
+            "rotate": 0,
+            "footnoteIdentifier": null
           },
           "children": []
         }

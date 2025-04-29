@@ -16,11 +16,14 @@ import { ParagraphViewExtension } from '@blocksuite/affine-block-paragraph/view'
 import { SurfaceViewExtension } from '@blocksuite/affine-block-surface/view';
 import { SurfaceRefViewExtension } from '@blocksuite/affine-block-surface-ref/view';
 import { TableViewExtension } from '@blocksuite/affine-block-table/view';
+import { FoundationViewExtension } from '@blocksuite/affine-foundation/view';
 import { BrushViewExtension } from '@blocksuite/affine-gfx-brush/view';
 import { ConnectorViewExtension } from '@blocksuite/affine-gfx-connector/view';
 import { GroupViewExtension } from '@blocksuite/affine-gfx-group/view';
+import { LinkViewExtension as GfxLinkViewExtension } from '@blocksuite/affine-gfx-link/view';
 import { MindmapViewExtension } from '@blocksuite/affine-gfx-mindmap/view';
 import { NoteViewExtension as GfxNoteViewExtension } from '@blocksuite/affine-gfx-note/view';
+import { PointerViewExtension } from '@blocksuite/affine-gfx-pointer/view';
 import { ShapeViewExtension } from '@blocksuite/affine-gfx-shape/view';
 import { TemplateViewExtension } from '@blocksuite/affine-gfx-template/view';
 import { TextViewExtension } from '@blocksuite/affine-gfx-text/view';
@@ -31,12 +34,27 @@ import { MentionViewExtension } from '@blocksuite/affine-inline-mention/view';
 import { InlinePresetViewExtension } from '@blocksuite/affine-inline-preset/view';
 import { ReferenceViewExtension } from '@blocksuite/affine-inline-reference/view';
 import { DragHandleViewExtension } from '@blocksuite/affine-widget-drag-handle/view';
+import { EdgelessAutoConnectViewExtension } from '@blocksuite/affine-widget-edgeless-auto-connect/view';
+import { EdgelessToolbarViewExtension } from '@blocksuite/affine-widget-edgeless-toolbar/view';
+import { EdgelessZoomToolbarViewExtension } from '@blocksuite/affine-widget-edgeless-zoom-toolbar/view';
+import { FrameTitleViewExtension } from '@blocksuite/affine-widget-frame-title/view';
+import { KeyboardToolbarViewExtension } from '@blocksuite/affine-widget-keyboard-toolbar/view';
+import { LinkedDocViewExtension } from '@blocksuite/affine-widget-linked-doc/view';
+import { PageDraggingAreaViewExtension } from '@blocksuite/affine-widget-page-dragging-area/view';
+import { RemoteSelectionViewExtension } from '@blocksuite/affine-widget-remote-selection/view';
+import { ScrollAnchoringViewExtension } from '@blocksuite/affine-widget-scroll-anchoring/view';
+import { SlashMenuViewExtension } from '@blocksuite/affine-widget-slash-menu/view';
+import { ToolbarViewExtension } from '@blocksuite/affine-widget-toolbar/view';
+import { ViewportOverlayViewExtension } from '@blocksuite/affine-widget-viewport-overlay/view';
 
 import { MigratingViewExtension } from './migrating-view';
 
 export function getInternalViewExtensions() {
   return [
+    FoundationViewExtension,
+
     // Gfx
+    PointerViewExtension,
     GfxNoteViewExtension,
     BrushViewExtension,
     ShapeViewExtension,
@@ -45,6 +63,7 @@ export function getInternalViewExtensions() {
     GroupViewExtension,
     TextViewExtension,
     TemplateViewExtension,
+    GfxLinkViewExtension,
 
     // Block
     AttachmentViewExtension,
@@ -76,7 +95,18 @@ export function getInternalViewExtensions() {
 
     // Widget
     DragHandleViewExtension,
-
+    EdgelessAutoConnectViewExtension,
+    EdgelessToolbarViewExtension,
     MigratingViewExtension,
+    FrameTitleViewExtension,
+    KeyboardToolbarViewExtension,
+    LinkedDocViewExtension,
+    RemoteSelectionViewExtension,
+    ScrollAnchoringViewExtension,
+    SlashMenuViewExtension,
+    ToolbarViewExtension,
+    ViewportOverlayViewExtension,
+    EdgelessZoomToolbarViewExtension,
+    PageDraggingAreaViewExtension,
   ];
 }

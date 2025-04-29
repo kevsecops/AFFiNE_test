@@ -3,12 +3,14 @@ import {
   ViewExtensionProvider,
 } from '@blocksuite/affine-ext-loader';
 
+import { EdgelessClipboardFrameConfig } from './edgeless-clipboard-config';
 import { frameQuickTool } from './edgeless-toolbar';
 import { effects } from './effects';
 import { FrameHighlightManager } from './frame-highlight-manager';
 import { FrameBlockSpec } from './frame-spec';
 import { FrameTool } from './frame-tool';
 import { frameToolbarExtension } from './frame-toolbar';
+import { edgelessNavigatorBgWidget } from './present/navigator-bg-widget';
 import { PresentTool } from './preset-tool';
 
 export class FrameViewExtension extends ViewExtensionProvider {
@@ -28,6 +30,8 @@ export class FrameViewExtension extends ViewExtensionProvider {
       context.register(PresentTool);
       context.register(frameQuickTool);
       context.register(frameToolbarExtension);
+      context.register(edgelessNavigatorBgWidget);
+      context.register(EdgelessClipboardFrameConfig);
     }
   }
 }

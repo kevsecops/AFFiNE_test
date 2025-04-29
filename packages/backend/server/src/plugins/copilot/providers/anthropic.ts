@@ -134,9 +134,7 @@ export class AnthropicProvider
         providerOptions: {
           anthropic: this.getAnthropicOptions(options),
         },
-        tools: {
-          webSearch: createExaTool(this.AFFiNEConfig),
-        },
+        tools: this.getTools(options),
         maxSteps: this.MAX_STEPS,
         experimental_continueSteps: true,
       });
@@ -168,9 +166,7 @@ export class AnthropicProvider
         providerOptions: {
           anthropic: this.getAnthropicOptions(options),
         },
-        tools: {
-          webSearch: createExaTool(this.AFFiNEConfig),
-        },
+        tools: this.getTools(options),
         maxSteps: this.MAX_STEPS,
         experimental_continueSteps: true,
       });
@@ -182,7 +178,7 @@ export class AnthropicProvider
             break;
           }
           case 'tool-result': {
-            if (message.toolName === 'webSearch') {
+            if (message.toolName === 'web_search') {
               this.toolResults.push(this.getWebSearchLinks(message.result));
             }
             break;
@@ -212,6 +208,15 @@ export class AnthropicProvider
       metrics.ai.counter('chat_text_stream_errors').add(1, { model });
       throw this.handleError(e);
     }
+  }
+
+  private getTools(options: CopilotChatOptions) {
+    if (options?.webSearch) {
+      return {
+        web_search: createExaTool(this.AFFiNEConfig),
+      };
+    }
+    return undefined;
   }
 
   private getAnthropicOptions(

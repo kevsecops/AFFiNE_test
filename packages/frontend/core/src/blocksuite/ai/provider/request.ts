@@ -20,6 +20,7 @@ export type TextToTextOptions = {
   isRootSession?: boolean;
   postfix?: (text: string) => string;
   reasoning?: boolean;
+  webSearch?: boolean;
 };
 
 export type ToImageOptions = TextToTextOptions & {
@@ -115,6 +116,7 @@ export function textToText({
   workflow = false,
   postfix,
   reasoning,
+  webSearch,
 }: TextToTextOptions) {
   let messageId: string | undefined;
 
@@ -135,6 +137,7 @@ export function textToText({
             sessionId,
             messageId,
             reasoning,
+            webSearch,
           },
           workflow ? 'workflow' : undefined
         );
@@ -195,6 +198,7 @@ export function textToText({
           sessionId,
           messageId,
           reasoning,
+          webSearch,
         });
       })(),
     ]);

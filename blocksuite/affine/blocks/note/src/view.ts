@@ -8,6 +8,7 @@ import { literal } from 'lit/static-html.js';
 
 import { NoteSlashMenuConfigExtension } from './configs/slash-menu';
 import { createBuiltinToolbarConfigExtension } from './configs/toolbar';
+import { EdgelessClipboardNoteConfig } from './edgeless-clipboard-config';
 import { effects } from './effects';
 import { NoteKeymapExtension } from './note-keymap';
 
@@ -29,17 +30,14 @@ export class NoteViewExtension extends ViewExtensionProvider {
       NoteKeymapExtension,
     ]);
 
-    const scope = context.scope;
-    const isEdgeless =
-      scope === 'edgeless' ||
-      scope === 'preview-edgeless' ||
-      scope === 'mobile-edgeless';
+    const isEdgeless = this.isEdgeless(context.scope);
 
     if (isEdgeless) {
       context.register(
         BlockViewExtension(flavour, literal`affine-edgeless-note`)
       );
       context.register(createBuiltinToolbarConfigExtension(flavour));
+      context.register(EdgelessClipboardNoteConfig);
     } else {
       context.register(BlockViewExtension(flavour, literal`affine-note`));
     }

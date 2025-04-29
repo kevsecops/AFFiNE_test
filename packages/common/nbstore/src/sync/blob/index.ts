@@ -97,7 +97,7 @@ export class BlobSyncImpl implements BlobSync {
     return combineLatest(
       this.peers.map(peer => peer.blobPeerState$(blobId))
     ).pipe(
-      throttleTime(1000),
+      throttleTime(1000, undefined, { leading: true, trailing: true }),
       map(
         peers =>
           ({

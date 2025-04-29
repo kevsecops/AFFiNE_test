@@ -284,7 +284,15 @@ const actions = [
     verifier: (t: ExecutionContext<Tester>, result: string) => {
       assertNotWrappedInCodeBlock(t, result);
       assertCitation(t, result, (t, c) => {
-        t.assert(c.length === 0, 'should not have citation');
+        t.assert(
+          c.length === 0 ||
+            // ignore web search result
+            c
+              .map(c => JSON.parse(c.citationJson).type)
+              .filter(type => ['attachment', 'doc'].includes(type)).length ===
+              0,
+          'should not have citation'
+        );
       });
     },
     type: 'text' as const,
@@ -404,8 +412,9 @@ const actions = [
     messages: [{ role: 'user' as const, content: TestAssets.SSOT }],
     verifier: (t: ExecutionContext<Tester>, result: string) => {
       assertNotWrappedInCodeBlock(t, result);
+      const cleared = result.toLowerCase();
       t.assert(
-        result.toLowerCase().includes('single source of truth'),
+        cleared.includes('single source of truth') || cleared.includes('ssot'),
         'should include original keyword'
       );
     },

@@ -1402,6 +1402,8 @@
   "com.affine.settings.workspace.experimental-features.enable-block-meta.description": "Once enabled, all blocks will have created time, updated time, created by and updated by.",
   "com.affine.settings.workspace.experimental-features.enable-callout.name": "Callout",
   "com.affine.settings.workspace.experimental-features.enable-callout.description": "Let your words stand out. This also include the callout in the transcription block.",
+  "com.affine.settings.workspace.experimental-features.enable-citation.name": "Citation",
+  "com.affine.settings.workspace.experimental-features.enable-citation.description": "Enable citation feature.",
   "com.affine.settings.workspace.experimental-features.enable-embed-iframe-block.name": "Embed Iframe Block",
   "com.affine.settings.workspace.experimental-features.enable-embed-iframe-block.description": "Enables Embed Iframe Block.",
   "com.affine.settings.workspace.experimental-features.enable-emoji-folder-icon.name": "Emoji Folder Icon",

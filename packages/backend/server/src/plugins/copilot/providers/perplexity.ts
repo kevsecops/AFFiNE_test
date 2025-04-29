@@ -82,7 +82,7 @@ export class PerplexityProvider
     try {
       metrics.ai.counter('chat_text_calls').add(1, { model });
 
-      const [system, msgs] = await chatToGPTMessage(messages);
+      const [system, msgs] = await chatToGPTMessage(messages, false);
 
       const modelInstance = this.#instance(model);
 
@@ -119,7 +119,7 @@ export class PerplexityProvider
     try {
       metrics.ai.counter('chat_text_stream_calls').add(1, { model });
 
-      const [system, msgs] = await chatToGPTMessage(messages);
+      const [system, msgs] = await chatToGPTMessage(messages, false);
 
       const modelInstance = this.#instance(model);
 

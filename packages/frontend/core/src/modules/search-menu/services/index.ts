@@ -2,7 +2,6 @@ import type {
   CollectionMeta,
   TagMeta,
 } from '@affine/core/components/page-list';
-import { fuzzyMatch } from '@affine/core/utils/fuzzy-match';
 import { I18n } from '@affine/i18n';
 import { createSignalFromObservable } from '@blocksuite/affine/shared/utils';
 import type { DocMeta } from '@blocksuite/affine/store';
@@ -108,8 +107,7 @@ export class SearchMenuService extends Service {
                     ...meta,
                     highlights,
                   },
-                  action,
-                  query
+                  action
                 );
               })
               .filter(m => !!m);
@@ -184,18 +182,13 @@ export class SearchMenuService extends Service {
 
   private toDocMenuItem(
     meta: DocMetaWithHighlights,
-    action: SearchDocMenuAction,
-    query?: string
+    action: SearchDocMenuAction
   ): LinkedMenuItem | null {
     const title = this.docDisplayMetaService.title$(meta.id, {
       reference: true,
     }).value;
 
     if (meta.trash) {
-      return null;
-    }
-
-    if (query && !fuzzyMatch(title, query)) {
       return null;
     }
 

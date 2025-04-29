@@ -4,6 +4,7 @@ import {
 } from '@blocksuite/affine-components/caption';
 import type { BookmarkBlockModel } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import { BlockSelection } from '@blocksuite/std';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
@@ -27,6 +28,14 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
 
   protected containerStyleMap!: ReturnType<typeof styleMap>;
 
+  selectBlock = () => {
+    const selectionManager = this.std.selection;
+    const blockSelection = selectionManager.create(BlockSelection, {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  };
+
   open = () => {
     let link = this.model.props.url;
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
@@ -39,6 +48,37 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
     refreshBookmarkUrlData(this, this._fetchAbortController?.signal).catch(
       console.error
     );
+  };
+
+  get isCitation() {
+    return (
+      !!this.model.props.footnoteIdentifier &&
+      this.model.props.style === 'citation'
+    );
+  }
+
+  private readonly _renderCitationView = () => {
+    const { title, description, url, icon, footnoteIdentifier } =
+      this.model.props;
+    return html`
+      <affine-citation-card
+        .icon=${icon}
+        .citationTitle=${title || url}
+        .citationContent=${description}
+        .citationIdentifier=${footnoteIdentifier}
+        .onClickCallback=${this.selectBlock}
+        .onDoubleClickCallback=${this.open}
+        .active=${this.selected$.value}
+      ></affine-citation-card>
+    `;
+  };
+
+  private readonly _renderCardView = () => {
+    return html`<bookmark-card
+      .bookmark=${this}
+      .loading=${this.loading}
+      .error=${this.error}
+    ></bookmark-card>`;
   };
 
   override connectedCallback() {
@@ -58,6 +98,9 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
     this.contentEditable = 'false';
 
     if (!this.model.props.description && !this.model.props.title) {
+      if (this.doc.readonly) {
+        return;
+      }
       this.refreshData();
     }
 
@@ -85,11 +128,7 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
         })}
         style=${this.containerStyleMap}
       >
-        <bookmark-card
-          .bookmark=${this}
-          .loading=${this.loading}
-          .error=${this.error}
-        ></bookmark-card>
+        ${this.isCitation ? this._renderCitationView() : this._renderCardView()}
       </div>
     `;
   }

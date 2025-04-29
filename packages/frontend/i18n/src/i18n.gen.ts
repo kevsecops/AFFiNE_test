@@ -5618,6 +5618,14 @@ export function useAFFiNEI18N(): {
       */
     ["com.affine.settings.workspace.experimental-features.enable-callout.description"](): string;
     /**
+      * `Citation`
+      */
+    ["com.affine.settings.workspace.experimental-features.enable-citation.name"](): string;
+    /**
+      * `Enable citation feature.`
+      */
+    ["com.affine.settings.workspace.experimental-features.enable-citation.description"](): string;
+    /**
       * `Embed Iframe Block`
       */
     ["com.affine.settings.workspace.experimental-features.enable-embed-iframe-block.name"](): string;

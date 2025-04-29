@@ -1,5 +1,5 @@
 import { difference } from 'lodash-es';
-import { Observable, ReplaySubject, share, Subject } from 'rxjs';
+import { filter, Observable, ReplaySubject, share, Subject } from 'rxjs';
 
 import type { BlobRecord, BlobStorage } from '../../storage';
 import { OverCapacityError, OverSizeError } from '../../storage';
@@ -412,11 +412,13 @@ class BlobSyncPeerStatus {
         });
       };
       next();
-      const dispose = this.statusUpdatedSubject$.subscribe(updatedBlobId => {
-        if (updatedBlobId === blobId || updatedBlobId === true) {
-          next();
-        }
-      });
+      const dispose = this.statusUpdatedSubject$
+        .pipe(
+          filter(
+            updatedBlobId => updatedBlobId === blobId || updatedBlobId === true
+          )
+        )
+        .subscribe(() => next());
       return () => {
         dispose.unsubscribe();
       };

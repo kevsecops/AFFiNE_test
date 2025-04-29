@@ -9,6 +9,7 @@ import { effects } from './effects';
 import {
   EdgelessCRUDExtension,
   EdgelessLegacySlotExtension,
+  EditPropsMiddlewareBuilder,
 } from './extensions';
 import { ExportManagerExtension } from './extensions/export-manager/export-manager';
 
@@ -32,6 +33,7 @@ export class SurfaceViewExtension extends ViewExtensionProvider {
       context.register(
         BlockViewExtension('affine:surface', literal`affine-surface`)
       );
+      context.register(EditPropsMiddlewareBuilder);
     } else {
       context.register(
         BlockViewExtension('affine:surface', literal`affine-surface-void`)

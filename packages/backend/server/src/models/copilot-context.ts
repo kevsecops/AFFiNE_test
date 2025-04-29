@@ -153,7 +153,7 @@ export class CopilotContextModel extends BaseModel {
     return Prisma.join(groups.map(row => Prisma.sql`(${Prisma.join(row)})`));
   }
 
-  async insertContentEmbedding(
+  async insertFileEmbedding(
     contextId: string,
     fileId: string,
     embeddings: Embedding[]
@@ -168,7 +168,7 @@ export class CopilotContextModel extends BaseModel {
   `;
   }
 
-  async matchContentEmbedding(
+  async matchFileEmbedding(
     embedding: number[],
     contextId: string,
     topK: number,

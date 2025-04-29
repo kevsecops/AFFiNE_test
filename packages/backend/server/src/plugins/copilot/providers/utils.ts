@@ -58,7 +58,9 @@ async function inferMimeType(url: string) {
 }
 
 export async function chatToGPTMessage(
-  messages: PromptMessage[]
+  messages: PromptMessage[],
+  // TODO(@darkskygit): move this logic in interface refactoring
+  withAttachment: boolean = true
 ): Promise<[string | undefined, ChatMessage[], any]> {
   const system = messages[0]?.role === 'system' ? messages.shift() : undefined;
   const schema = system?.params?.schema;
@@ -77,26 +79,31 @@ export async function chatToGPTMessage(
         contents.push({ type: 'text', text: content });
       }
 
-      for (let attachment of attachments) {
-        let mimeType: string;
-        if (typeof attachment === 'string') {
-          mimeType =
-            typeof mimetype === 'string'
-              ? mimetype
-              : await inferMimeType(attachment);
-        } else {
-          ({ attachment, mimeType } = attachment);
-        }
-        if (SIMPLE_IMAGE_URL_REGEX.test(attachment)) {
-          if (mimeType.startsWith('image/')) {
-            contents.push({ type: 'image', image: attachment, mimeType });
+      if (withAttachment) {
+        for (let attachment of attachments) {
+          let mimeType: string;
+          if (typeof attachment === 'string') {
+            mimeType =
+              typeof mimetype === 'string'
+                ? mimetype
+                : await inferMimeType(attachment);
           } else {
-            const data = attachment.startsWith('data:')
-              ? await fetch(attachment).then(r => r.arrayBuffer())
-              : new URL(attachment);
-            contents.push({ type: 'file' as const, data, mimeType });
+            ({ attachment, mimeType } = attachment);
+          }
+          if (SIMPLE_IMAGE_URL_REGEX.test(attachment)) {
+            if (mimeType.startsWith('image/')) {
+              contents.push({ type: 'image', image: attachment, mimeType });
+            } else {
+              const data = attachment.startsWith('data:')
+                ? await fetch(attachment).then(r => r.arrayBuffer())
+                : new URL(attachment);
+              contents.push({ type: 'file' as const, data, mimeType });
+            }
           }
         }
+      } else if (!content.length) {
+        // temp fix for pplx
+        contents.push({ type: 'text', text: '[no content]' });
       }
 
       msgs.push({ role, content: contents } as ChatMessage);

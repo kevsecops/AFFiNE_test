@@ -121,10 +121,6 @@ export class TextRenderer extends WithDisposable(ShadowlessElement) {
       font-weight: 400;
     }
 
-    .affine-paragraph-block-container {
-      line-height: 22px;
-    }
-
     .ai-answer-text-editor {
       .affine-note-block-container {
         > .affine-block-children-container {
@@ -135,6 +131,23 @@ export class TextRenderer extends WithDisposable(ShadowlessElement) {
           > :last-child,
           > :last-child * {
             margin-bottom: 0 !important;
+          }
+        }
+      }
+
+      .affine-paragraph-block-container {
+        line-height: 22px;
+
+        .h6 {
+          padding-left: 16px;
+          color: ${unsafeCSSVarV2('text/link')};
+          font-size: var(--affine-font-base);
+
+          .toggle-icon {
+            transform: translateX(0);
+            svg {
+              color: ${unsafeCSSVarV2('text/link')};
+            }
           }
         }
       }
@@ -216,6 +229,9 @@ export class TextRenderer extends WithDisposable(ShadowlessElement) {
       'affine:list',
       'affine:divider',
       'affine:latex',
+      'affine:bookmark',
+      'affine:attachment',
+      'affine:embed-linked-doc',
     ].map(flavour => ({ flavour, viewType: 'display' })),
   };
 

@@ -26,6 +26,7 @@ import { edgelessCopilotWidget } from '../ai/widgets/edgeless-copilot';
 import { buildDocDisplayMetaExtension } from '../extensions/display-meta';
 import { getEditorConfigExtension } from '../extensions/editor-config';
 import { getPagePreviewThemeExtension } from '../extensions/entry/enable-preview';
+import { patchFileSizeLimitExtension } from '../extensions/file-size-limit';
 import { getFontConfigExtension } from '../extensions/font-config';
 import { patchPeekViewService } from '../extensions/peek-view-service';
 import { getTelemetryExtension } from '../extensions/telemetry';
@@ -58,6 +59,7 @@ class MigratingAffineViewExtension extends ViewExtensionProvider<
       if (context.scope === 'page' || context.scope === 'edgeless') {
         context.register(getTelemetryExtension());
         context.register(getEditorConfigExtension(framework));
+        context.register(patchFileSizeLimitExtension(framework));
       }
       if (
         context.scope === 'preview-page' ||

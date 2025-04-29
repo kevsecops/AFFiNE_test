@@ -5,11 +5,7 @@ import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { OpenInNewIcon } from '@blocksuite/icons/lit';
-import {
-  BlockSelection,
-  isGfxBlockComponent,
-  ShadowlessElement,
-} from '@blocksuite/std';
+import { isGfxBlockComponent, ShadowlessElement } from '@blocksuite/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -27,21 +23,13 @@ export class BookmarkCard extends SignalWatcher(
     const model = this.bookmark.model;
 
     if (model.parent?.flavour !== 'affine:surface') {
-      this._selectBlock();
+      this.bookmark.selectBlock();
     }
   }
 
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
     this.bookmark.open();
-  }
-
-  private _selectBlock() {
-    const selectionManager = this.bookmark.host.selection;
-    const blockSelection = selectionManager.create(BlockSelection, {
-      blockId: this.bookmark.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
   }
 
   override connectedCallback(): void {

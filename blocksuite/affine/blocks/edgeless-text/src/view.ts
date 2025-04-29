@@ -5,6 +5,7 @@ import {
 import { BlockViewExtension } from '@blocksuite/std';
 import { literal } from 'lit/static-html.js';
 
+import { EdgelessClipboardEdgelessTextConfig } from './edgeless-clipboard-config';
 import { edgelessTextToolbarExtension } from './edgeless-toolbar';
 import { effects } from './effects';
 
@@ -28,6 +29,7 @@ export class EdgelessTextViewExtension extends ViewExtensionProvider {
         ),
       ]);
       context.register(edgelessTextToolbarExtension);
+      context.register(EdgelessClipboardEdgelessTextConfig);
     }
   }
 }

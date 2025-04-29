@@ -120,3 +120,15 @@ export type CopilotWorkspaceFile = CopilotWorkspaceFileMetadata & {
   fileId: string;
   createdAt: Date;
 };
+
+export type IgnoredDoc = {
+  docId: string;
+  createdAt: Date;
+  // metadata
+  docCreatedAt: Date | undefined;
+  docUpdatedAt: Date | undefined;
+  title: string | undefined;
+  createdBy: string | undefined;
+  createdByAvatar: string | undefined;
+  updatedBy: string | undefined;
+};

@@ -8,6 +8,7 @@ import { literal } from 'lit/static-html.js';
 
 import { BookmarkSlashMenuConfigExtension } from './configs/slash-menu';
 import { createBuiltinToolbarConfigExtension } from './configs/toolbar';
+import { EdgelessClipboardBookmarkConfig } from './edgeless-clipboard-config';
 import { effects } from './effects';
 
 const flavour = BookmarkBlockSchema.model.flavour;
@@ -32,5 +33,9 @@ export class BookmarkViewExtension extends ViewExtensionProvider {
       BookmarkSlashMenuConfigExtension,
     ]);
     context.register(createBuiltinToolbarConfigExtension(flavour));
+    const isEdgeless = this.isEdgeless(context.scope);
+    if (isEdgeless) {
+      context.register(EdgelessClipboardBookmarkConfig);
+    }
   }
 }

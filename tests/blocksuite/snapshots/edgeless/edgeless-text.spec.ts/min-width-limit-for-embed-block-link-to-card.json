@@ -11,6 +11,7 @@
               "id": "11",
               "props": {
                 "caption": null,
+                "footnoteIdentifier": null,
                 "index": "a0",
                 "lockedBySelf": false,
                 "pageId": "6",

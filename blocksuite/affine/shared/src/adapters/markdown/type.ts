@@ -1,4 +1,4 @@
-import type { Root, RootContentMap } from 'mdast';
+import type { FootnoteDefinition, Root, RootContentMap } from 'mdast';
 
 export type Markdown = string;
 
@@ -15,6 +15,18 @@ export const isMarkdownAST = (node: unknown): node is MarkdownAST =>
   !Array.isArray(node) &&
   'type' in (node as object) &&
   (node as MarkdownAST).type !== undefined;
+
+export const isFootnoteDefinitionNode = (
+  node: MarkdownAST
+): node is FootnoteDefinition => node.type === 'footnoteDefinition';
+
+export const getFootnoteDefinitionText = (node: FootnoteDefinition) => {
+  const childNode = node.children[0];
+  if (childNode.type !== 'paragraph') return '';
+  const paragraph = childNode.children[0];
+  if (paragraph.type !== 'text') return '';
+  return paragraph.value;
+};
 
 export const FOOTNOTE_DEFINITION_PREFIX = 'footnoteDefinition:';
 export const IN_PARAGRAPH_NODE_CONTEXT_KEY = 'mdast:paragraph';

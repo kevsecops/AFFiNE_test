@@ -194,11 +194,11 @@ export class DocRendererController {
     ${Object.entries(envMeta)
       .map(([key, val]) => `<meta name="env:${key}" content="${val}" />`)
       .join('\n')}
-    ${assets.css.map(url => `<link rel="stylesheet" href="${url}" />`).join('\n')}
+    ${assets.css.map(url => `<link rel="stylesheet" href="${url}" crossorigin />`).join('\n')}
   </head>
   <body>
     <div id="app" data-version="${assets.gitHash}"></div>
-    ${assets.js.map(url => `<script src="${url}"></script>`).join('\n')}
+    ${assets.js.map(url => `<script src="${url}" crossorigin></script>`).join('\n')}
   </body>
 </html>
     `;

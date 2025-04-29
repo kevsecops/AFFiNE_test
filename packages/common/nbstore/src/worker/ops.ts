@@ -110,7 +110,7 @@ interface GroupedWorkerOps {
     state: [void, BlobSyncState];
     blobState: [string, BlobSyncBlobState];
     downloadBlob: [string, boolean];
-    uploadBlob: [BlobRecord, true];
+    uploadBlob: [{ blob: BlobRecord; force?: boolean }, true];
     fullDownload: [string | null, void];
   };
 

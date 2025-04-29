@@ -53,11 +53,11 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
     doc.deleteBlock(this.model);
   };
 
-  protected override _handleClick(evt: MouseEvent): void {
+  protected override _handleClick = (evt: MouseEvent): void => {
     if (isNewTabTrigger(evt)) {
       this.open({ openMode: 'open-in-new-tab', event: evt });
     } else if (isNewViewTrigger(evt)) {
       this.open({ openMode: 'open-in-new-view', event: evt });
     }
-  }
+  };
 }

@@ -373,6 +373,29 @@ export class DocModel extends BaseModel {
     });
   }
 
+  async findAuthors(ids: { workspaceId: string; docId: string }[]) {
+    const rows = await this.db.snapshot.findMany({
+      where: {
+        workspaceId: { in: ids.map(id => id.workspaceId) },
+        id: { in: ids.map(id => id.docId) },
+      },
+      select: {
+        workspaceId: true,
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        createdByUser: { select: publicUserSelect },
+        updatedByUser: { select: publicUserSelect },
+      },
+    });
+    const resultMap = new Map(
+      rows.map(row => [`${row.workspaceId}-${row.id}`, row])
+    );
+    return ids.map(
+      id => resultMap.get(`${id.workspaceId}-${id.docId}`) ?? null
+    );
+  }
+
   async findMetas(ids: { workspaceId: string; docId: string }[]) {
     const rows = await this.db.workspaceDoc.findMany({
       where: {

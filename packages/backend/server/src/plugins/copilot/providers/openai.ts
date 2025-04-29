@@ -178,8 +178,8 @@ export class OpenAIProvider
     }
   }
 
-  private getToolUse(options: CopilotChatOptions = {}) {
-    if (options.webSearch) {
+  private getTools(options: CopilotChatOptions) {
+    if (options?.webSearch) {
       return {
         web_search_preview: openai.tools.webSearchPreview(),
       };
@@ -224,6 +224,7 @@ export class OpenAIProvider
             providerOptions: {
               openai: options.user ? { user: options.user } : {},
             },
+            tools: this.getTools(options),
           });
 
       return text.trim();
@@ -245,18 +246,16 @@ export class OpenAIProvider
 
       const [system, msgs] = await chatToGPTMessage(messages);
 
-      const modelInstance = options.webSearch
-        ? this.#instance.responses(model)
-        : this.#instance(model, {
-            structuredOutputs: Boolean(options.jsonMode),
-            user: options.user,
-          });
+      const modelInstance = this.#instance(model, {
+        structuredOutputs: Boolean(options.jsonMode),
+        user: options.user,
+      });
 
       const { fullStream } = streamText({
         model: modelInstance,
         system,
         messages: msgs,
-        tools: this.getToolUse(options),
+        tools: this.getTools(options),
         frequencyPenalty: options.frequencyPenalty || 0,
         presencePenalty: options.presencePenalty || 0,
         temperature: options.temperature || 0,

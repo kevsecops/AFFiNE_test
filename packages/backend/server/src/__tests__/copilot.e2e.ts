@@ -120,7 +120,7 @@ test.before(async t => {
   t.context.jobs = jobs;
 });
 
-const promptName = 'prompt';
+const textPromptName = 'prompt';
 test.beforeEach(async t => {
   Sinon.restore();
   const { app, prompt } = t.context;
@@ -128,7 +128,7 @@ test.beforeEach(async t => {
   await prompt.onApplicationBootstrap();
   t.context.u1 = await app.signupV1('u1@affine.pro');
 
-  await prompt.set(promptName, 'test', [
+  await prompt.set(textPromptName, 'test', [
     { role: 'system', content: 'hello {{word}}' },
   ]);
 });
@@ -150,7 +150,7 @@ test('should create session correctly', async t => {
     }
   ) => {
     await asserter(
-      createCopilotSession(app, workspaceId, randomUUID(), promptName)
+      createCopilotSession(app, workspaceId, randomUUID(), textPromptName)
     );
   };
 
@@ -202,7 +202,7 @@ test('should update session correctly', async t => {
       t.truthy(await x, error);
     }
   ) => {
-    await asserter(updateCopilotSession(app, sessionId, promptName));
+    await asserter(updateCopilotSession(app, sessionId, textPromptName));
   };
 
   {
@@ -212,7 +212,7 @@ test('should update session correctly', async t => {
       app,
       workspaceId,
       docId,
-      promptName
+      textPromptName
     );
     await assertUpdateSession(
       sessionId,
@@ -225,7 +225,7 @@ test('should update session correctly', async t => {
       app,
       randomUUID(),
       randomUUID(),
-      promptName
+      textPromptName
     );
     await assertUpdateSession(
       sessionId,
@@ -244,7 +244,7 @@ test('should update session correctly', async t => {
       app,
       workspaceId,
       randomUUID(),
-      promptName
+      textPromptName
     );
     await assertUpdateSession(
       sessionId,
@@ -294,7 +294,7 @@ test('should fork session correctly', async t => {
     app,
     id,
     randomUUID(),
-    promptName
+    textPromptName
   );
 
   let forkedSessionId: string;
@@ -363,7 +363,7 @@ test('should be able to use test provider', async t => {
 
   const { id } = await createWorkspace(app);
   t.truthy(
-    await createCopilotSession(app, id, randomUUID(), promptName),
+    await createCopilotSession(app, id, randomUUID(), textPromptName),
     'failed to create session'
   );
 });
@@ -379,7 +379,7 @@ test('should create message correctly', async t => {
       app,
       id,
       randomUUID(),
-      promptName
+      textPromptName
     );
     const messageId = await createCopilotMessage(app, sessionId);
     t.truthy(messageId, 'should be able to create message with valid session');
@@ -393,7 +393,7 @@ test('should create message correctly', async t => {
         app,
         id,
         randomUUID(),
-        promptName
+        textPromptName
       );
       const messageId = await createCopilotMessage(app, sessionId, undefined, [
         'http://example.com/cat.jpg',
@@ -408,7 +408,7 @@ test('should create message correctly', async t => {
         app,
         id,
         randomUUID(),
-        promptName
+        textPromptName
       );
       const smallestPng =
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII';
@@ -445,7 +445,7 @@ test('should be able to chat with api', async t => {
     app,
     id,
     randomUUID(),
-    promptName
+    textPromptName
   );
   const messageId = await createCopilotMessage(app, sessionId);
   const ret = await chatWithText(app, sessionId, messageId);
@@ -543,7 +543,7 @@ test('should be able to retry with api', async t => {
       app,
       id,
       randomUUID(),
-      promptName
+      textPromptName
     );
     const messageId = await createCopilotMessage(app, sessionId);
     // chat 2 times
@@ -565,7 +565,7 @@ test('should be able to retry with api', async t => {
       app,
       id,
       randomUUID(),
-      promptName
+      textPromptName
     );
     const messageId = await createCopilotMessage(app, sessionId);
     await chatWithText(app, sessionId, messageId);
@@ -587,7 +587,7 @@ test('should be able to retry with api', async t => {
       app,
       id,
       randomUUID(),
-      promptName
+      textPromptName
     );
     const messageId = await createCopilotMessage(app, sessionId);
     await chatWithText(app, sessionId, messageId);
@@ -614,13 +614,13 @@ test('should reject message from different session', async t => {
     app,
     id,
     randomUUID(),
-    promptName
+    textPromptName
   );
   const anotherSessionId = await createCopilotSession(
     app,
     id,
     randomUUID(),
-    promptName
+    textPromptName
   );
   const anotherMessageId = await createCopilotMessage(app, anotherSessionId);
   await t.throwsAsync(
@@ -639,7 +639,7 @@ test('should reject request from different user', async t => {
     app,
     id,
     randomUUID(),
-    promptName
+    textPromptName
   );
 
   // should reject message from different user
@@ -677,7 +677,7 @@ test('should be able to list history', async t => {
     app,
     workspaceId,
     randomUUID(),
-    promptName
+    textPromptName
   );
 
   const messageId = await createCopilotMessage(app, sessionId, 'hello');
@@ -740,7 +740,7 @@ test('should reject request that user have not permission', async t => {
       app,
       workspaceId,
       randomUUID(),
-      promptName
+      textPromptName
     );
 
     const messageId = await createCopilotMessage(app, sessionId);
@@ -777,7 +777,7 @@ test('should be able to manage context', async t => {
     app,
     workspaceId,
     randomUUID(),
-    promptName
+    textPromptName
   );
 
   // use mocked embedding client
@@ -859,7 +859,7 @@ test('should be able to manage context', async t => {
       app,
       workspaceId,
       randomUUID(),
-      promptName
+      textPromptName
     );
     const contextId = await createCopilotContext(app, workspaceId, sessionId);
 

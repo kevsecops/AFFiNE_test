@@ -1,3 +1,4 @@
+import { AttachmentBlockMarkdownAdapterExtension } from '@blocksuite/affine-block-attachment';
 import { BookmarkBlockMarkdownAdapterExtension } from '@blocksuite/affine-block-bookmark';
 import { CodeBlockMarkdownAdapterExtension } from '@blocksuite/affine-block-code';
 import { DatabaseBlockMarkdownAdapterExtension } from '@blocksuite/affine-block-database';
@@ -38,4 +39,5 @@ export const defaultBlockMarkdownAdapterMatchers = [
   DividerBlockMarkdownAdapterExtension,
   ImageBlockMarkdownAdapterExtension,
   LatexBlockMarkdownAdapterExtension,
+  AttachmentBlockMarkdownAdapterExtension,
 ];

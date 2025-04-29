@@ -340,11 +340,6 @@ export const FontFamilyIcon = icons.FontIcon({
   height: '20',
 });
 
-export const AttachmentIcon16 = icons.AttachmentIcon({
-  width: '16',
-  height: '16',
-});
-
 export const TextBackgroundDuotoneIcon = html` <svg
   xmlns="http://www.w3.org/2000/svg"
   width="20"

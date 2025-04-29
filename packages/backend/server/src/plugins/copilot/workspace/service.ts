@@ -53,11 +53,7 @@ export class CopilotWorkspaceService implements OnApplicationBootstrap {
     ]);
   }
 
-  async addWorkspaceFile(
-    userId: string,
-    workspaceId: string,
-    content: FileUpload
-  ) {
+  async addFile(userId: string, workspaceId: string, content: FileUpload) {
     const fileName = content.filename;
     const buffer = await readStream(content.createReadStream());
     const blobId = createHash('sha256').update(buffer).digest('base64url');
@@ -70,29 +66,25 @@ export class CopilotWorkspaceService implements OnApplicationBootstrap {
     return { blobId, file };
   }
 
-  async getWorkspaceFile(workspaceId: string, fileId: string) {
+  async getFile(workspaceId: string, fileId: string) {
     return await this.models.copilotWorkspace.getFile(workspaceId, fileId);
   }
 
-  async listWorkspaceFiles(
+  async listFiles(
     workspaceId: string,
     pagination?: {
       includeRead?: boolean;
     } & PaginationInput
   ) {
     return await Promise.all([
-      this.models.copilotWorkspace.listWorkspaceFiles(workspaceId, pagination),
-      this.models.copilotWorkspace.countIgnoredDocs(workspaceId),
+      this.models.copilotWorkspace.listFiles(workspaceId, pagination),
+      this.models.copilotWorkspace.countFiles(workspaceId),
     ]);
   }
 
-  async addWorkspaceFileEmbeddingQueue(
-    file: Jobs['copilot.workspace.embedding.files']
-  ) {
-    if (!this.supportEmbedding) return;
-
+  async queueFileEmbedding(file: Jobs['copilot.embedding.files']) {
     const { userId, workspaceId, blobId, fileId, fileName } = file;
-    await this.queue.add('copilot.workspace.embedding.files', {
+    await this.queue.add('copilot.embedding.files', {
       userId,
       workspaceId,
       blobId,
@@ -101,10 +93,7 @@ export class CopilotWorkspaceService implements OnApplicationBootstrap {
     });
   }
 
-  async removeWorkspaceFile(workspaceId: string, fileId: string) {
-    return await this.models.copilotWorkspace.removeWorkspaceFile(
-      workspaceId,
-      fileId
-    );
+  async removeFile(workspaceId: string, fileId: string) {
+    return await this.models.copilotWorkspace.removeFile(workspaceId, fileId);
   }
 }

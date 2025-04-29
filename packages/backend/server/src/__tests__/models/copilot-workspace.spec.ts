@@ -110,16 +110,20 @@ test('should insert and search embedding', async t => {
       mimeType: 'text/plain',
       size: 1,
     });
-    await t.context.copilotWorkspace.addFileEmbeddings(workspace.id, fileId, [
-      {
-        index: 0,
-        content: 'content',
-        embedding: Array.from({ length: 1024 }, () => 1),
-      },
-    ]);
+    await t.context.copilotWorkspace.insertFileEmbeddings(
+      workspace.id,
+      fileId,
+      [
+        {
+          index: 0,
+          content: 'content',
+          embedding: Array.from({ length: 1024 }, () => 1),
+        },
+      ]
+    );
 
     {
-      const ret = await t.context.copilotWorkspace.matchWorkspaceFileEmbedding(
+      const ret = await t.context.copilotWorkspace.matchFileEmbedding(
         workspace.id,
         Array.from({ length: 1024 }, () => 0.9),
         1,

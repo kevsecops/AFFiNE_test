@@ -179,12 +179,16 @@ export class CopilotController implements BeforeApplicationShutdown {
     const reasoning = Array.isArray(params.reasoning)
       ? Boolean(params.reasoning[0])
       : Boolean(params.reasoning);
+    const webSearch = Array.isArray(params.webSearch)
+      ? Boolean(params.webSearch[0])
+      : Boolean(params.webSearch);
 
     delete params.messageId;
     delete params.retry;
     delete params.reasoning;
+    delete params.webSearch;
 
-    return { messageId, retry, reasoning, params };
+    return { messageId, retry, reasoning, webSearch, params };
   }
 
   private getSignal(req: Request) {
@@ -232,7 +236,8 @@ export class CopilotController implements BeforeApplicationShutdown {
     const info: any = { sessionId, params };
 
     try {
-      const { messageId, retry, reasoning } = this.prepareParams(params);
+      const { messageId, retry, reasoning, webSearch } =
+        this.prepareParams(params);
 
       const provider = await this.chooseTextProvider(
         user.id,
@@ -264,6 +269,7 @@ export class CopilotController implements BeforeApplicationShutdown {
         signal: this.getSignal(req),
         user: user.id,
         reasoning,
+        webSearch,
       });
 
       session.push({
@@ -296,7 +302,8 @@ export class CopilotController implements BeforeApplicationShutdown {
     const info: any = { sessionId, params, throwInStream: false };
 
     try {
-      const { messageId, retry, reasoning } = this.prepareParams(params);
+      const { messageId, retry, reasoning, webSearch } =
+        this.prepareParams(params);
 
       const provider = await this.chooseTextProvider(
         user.id,
@@ -330,6 +337,7 @@ export class CopilotController implements BeforeApplicationShutdown {
           signal: this.getSignal(req),
           user: user.id,
           reasoning,
+          webSearch,
         })
       ).pipe(
         connect(shared$ =>

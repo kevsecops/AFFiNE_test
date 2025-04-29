@@ -109,7 +109,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
         where,
         docId: host.doc.id,
         workspaceId: host.doc.workspace.id,
-        mustSearch: visible?.value && enabled?.value,
+        webSearch: visible?.value && enabled?.value,
       } as Parameters<typeof action>[0];
       // @ts-expect-error TODO(@Peng): maybe fix this
       stream = await action(options);

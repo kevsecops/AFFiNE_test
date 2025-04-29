@@ -322,7 +322,7 @@ test(`support dragging attachment block directly`, async ({
   await page.mouse.move(rect.x + 40, rect.y + rect.height + 80, { steps: 20 });
   await page.mouse.up();
 
-  const rects = page.locator('affine-block-selection').locator('visible=true');
+  const rects = page.locator('.affine-attachment-container.focused');
   await expect(rects).toHaveCount(1);
   expect(await getPageSnapshot(page, true)).toMatchSnapshot(
     `${testInfo.title}_3.json`

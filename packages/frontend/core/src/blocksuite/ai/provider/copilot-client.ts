@@ -351,17 +351,20 @@ export class CopilotClient {
     sessionId,
     messageId,
     reasoning,
+    webSearch,
     signal,
   }: {
     sessionId: string;
     messageId?: string;
     reasoning?: boolean;
+    webSearch?: boolean;
     signal?: AbortSignal;
   }) {
     let url = `/api/copilot/chat/${sessionId}`;
     const queryString = this.paramsToQueryString({
       messageId,
       reasoning,
+      webSearch,
     });
     if (queryString) {
       url += `?${queryString}`;
@@ -376,10 +379,12 @@ export class CopilotClient {
       sessionId,
       messageId,
       reasoning,
+      webSearch,
     }: {
       sessionId: string;
       messageId?: string;
       reasoning?: boolean;
+      webSearch?: boolean;
     },
     endpoint = 'stream'
   ) {
@@ -387,6 +392,7 @@ export class CopilotClient {
     const queryString = this.paramsToQueryString({
       messageId,
       reasoning,
+      webSearch,
     });
     if (queryString) {
       url += `?${queryString}`;

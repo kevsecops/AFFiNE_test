@@ -14,6 +14,7 @@
     "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-block-table": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/affine-ext-loader": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/global": "workspace:*",
@@ -29,7 +30,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts"
+    "./effects": "./src/effects.ts",
+    "./view": "./src/view.ts"
   },
   "files": [
     "src",
@@ -37,12 +39,5 @@
     "!src/__tests__",
     "!dist/__tests__"
   ],
-  "version": "0.21.0",
-  "devDependencies": {
-    "@types/lodash.groupby": "^4",
-    "@types/lodash.mergewith": "^4",
-    "@types/lodash.orderby": "^4",
-    "@types/lodash.partition": "^4",
-    "@types/lodash.topairs": "^4"
-  }
+  "version": "0.21.0"
 }

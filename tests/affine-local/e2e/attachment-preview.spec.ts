@@ -306,7 +306,9 @@ test('should enable pointer event in pdf viewer', async ({ page }) => {
   const attachment = page.locator('affine-attachment');
   await attachment.click();
 
-  const attachmentSelection = attachment.locator('affine-block-selection');
+  const attachmentSelection = attachment.locator(
+    '.affine-attachment-container.focused'
+  );
 
   const toolbar = locateToolbar(page);
 

@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { Readable } from 'node:stream';
 
 import { ProjectRoot } from '@affine-tools/utils/path';
 import { PrismaClient } from '@prisma/client';
@@ -6,11 +7,11 @@ import type { TestFn } from 'ava';
 import ava from 'ava';
 import Sinon from 'sinon';
 
-import { EventBus } from '../base';
+import { EventBus, JobQueue } from '../base';
 import { ConfigModule } from '../base/config';
 import { AuthService } from '../core/auth';
 import { QuotaModule } from '../core/quota';
-import { ContextCategories } from '../models';
+import { ContextCategories, WorkspaceModel } from '../models';
 import { CopilotModule } from '../plugins/copilot';
 import {
   CopilotContextDocJob,
@@ -47,6 +48,7 @@ import {
 } from '../plugins/copilot/workflow/executor';
 import { AutoRegisteredWorkflowExecutor } from '../plugins/copilot/workflow/executor/utils';
 import { WorkflowGraphList } from '../plugins/copilot/workflow/graph';
+import { CopilotWorkspaceService } from '../plugins/copilot/workspace';
 import { MockCopilotProvider } from './mocks';
 import { createTestingModule, TestingModule } from './utils';
 import { WorkflowTestCases } from './utils/copilot';
@@ -56,9 +58,11 @@ const test = ava as TestFn<{
   module: TestingModule;
   db: PrismaClient;
   event: EventBus;
+  workspace: WorkspaceModel;
   context: CopilotContextService;
   prompt: PromptService;
   transcript: CopilotTranscriptionService;
+  workspaceEmbedding: CopilotWorkspaceService;
   factory: CopilotProviderFactory;
   session: ChatSessionService;
   jobs: CopilotContextDocJob;
@@ -88,6 +92,12 @@ test.before(async t => {
             perplexity: {
               apiKey: process.env.COPILOT_PERPLEXITY_API_KEY ?? '1',
             },
+            anthropic: {
+              apiKey: process.env.COPILOT_ANTHROPIC_API_KEY ?? '1',
+            },
+          },
+          exa: {
+            key: process.env.COPILOT_EXA_API_KEY ?? '1',
           },
         },
       }),
@@ -95,6 +105,8 @@ test.before(async t => {
       CopilotModule,
     ],
     tapModule: builder => {
+      // use real JobQueue for testing
+      builder.overrideProvider(JobQueue).useClass(JobQueue);
       builder.overrideProvider(OpenAIProvider).useClass(MockCopilotProvider);
     },
   });
@@ -102,6 +114,7 @@ test.before(async t => {
   const auth = module.get(AuthService);
   const db = module.get(PrismaClient);
   const event = module.get(EventBus);
+  const workspace = module.get(WorkspaceModel);
   const prompt = module.get(PromptService);
   const factory = module.get(CopilotProviderFactory);
 
@@ -112,11 +125,13 @@ test.before(async t => {
   const context = module.get(CopilotContextService);
   const jobs = module.get(CopilotContextDocJob);
   const transcript = module.get(CopilotTranscriptionService);
+  const workspaceEmbedding = module.get(CopilotWorkspaceService);
 
   t.context.module = module;
   t.context.auth = auth;
   t.context.db = db;
   t.context.event = event;
+  t.context.workspace = workspace;
   t.context.prompt = prompt;
   t.context.factory = factory;
   t.context.session = session;
@@ -125,6 +140,7 @@ test.before(async t => {
   t.context.context = context;
   t.context.jobs = jobs;
   t.context.transcript = transcript;
+  t.context.workspaceEmbedding = workspaceEmbedding;
 
   t.context.executors = {
     image: module.get(CopilotChatImageExecutor),
@@ -1424,5 +1440,72 @@ test('should be able to manage context', async t => {
       );
       t.deepEqual(session.collections, [], 'should remove collection id');
     }
+  }
+});
+
+// ==================== workspace embedding ====================
+test('should be able to manage workspace embedding', async t => {
+  const { db, jobs, workspace, workspaceEmbedding, context, prompt, session } =
+    t.context;
+
+  // use mocked embedding client
+  Sinon.stub(context, 'embeddingClient').get(() => new MockEmbeddingClient());
+  Sinon.stub(jobs, 'embeddingClient').get(() => new MockEmbeddingClient());
+
+  const ws = await workspace.create(userId);
+
+  // should create workspace embedding
+  {
+    const { blobId, file } = await workspaceEmbedding.addFile(userId, ws.id, {
+      filename: 'test.txt',
+      mimetype: 'text/plain',
+      encoding: 'utf-8',
+      createReadStream: () => {
+        return new Readable({
+          read() {
+            this.push(Buffer.from('content'));
+            this.push(null);
+          },
+        });
+      },
+    });
+    await workspaceEmbedding.queueFileEmbedding({
+      userId,
+      workspaceId: ws.id,
+      blobId,
+      fileId: file.fileId,
+      fileName: file.fileName,
+    });
+
+    let ret = 0;
+    while (!ret) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      ret = await db.aiWorkspaceFileEmbedding.count({
+        where: { workspaceId: ws.id, fileId: file.fileId },
+      });
+    }
+  }
+
+  // should create workspace embedding with file
+  {
+    await prompt.set('prompt', 'model', [
+      { role: 'system', content: 'hello {{word}}' },
+    ]);
+    const sessionId = await session.create({
+      docId: 'test',
+      workspaceId: ws.id,
+      userId,
+      promptName: 'prompt',
+    });
+    const contextSession = await context.create(sessionId);
+
+    const ret = await contextSession.matchFileChunks('test', 1, undefined, 1);
+    t.is(ret.length, 1, 'should match workspace context');
+    t.is(ret[0].content, 'content', 'should match content');
+
+    await workspace.update(ws.id, { enableDocEmbedding: false });
+
+    const ret2 = await contextSession.matchFileChunks('test', 1, undefined, 1);
+    t.is(ret2.length, 0, 'should not match workspace context');
   }
 });

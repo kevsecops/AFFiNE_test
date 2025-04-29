@@ -375,6 +375,7 @@ const builtinSurfaceToolbarConfig = {
                     DEFAULT_NOTE_WIDTH,
                     DEFAULT_NOTE_HEIGHT
                   ).serialize(),
+                  index: gfx.layer.generateIndex(),
                   displayMode: NoteDisplayMode.EdgelessOnly,
                 } satisfies Partial<NoteProps>,
                 ctx.store.root

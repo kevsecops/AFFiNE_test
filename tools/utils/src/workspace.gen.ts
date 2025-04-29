@@ -26,14 +26,17 @@ export const PackageList = [
       'blocksuite/affine/blocks/table',
       'blocksuite/affine/components',
       'blocksuite/affine/ext-loader',
+      'blocksuite/affine/foundation',
       'blocksuite/affine/fragments/doc-title',
       'blocksuite/affine/fragments/frame-panel',
       'blocksuite/affine/fragments/outline',
       'blocksuite/affine/gfx/brush',
       'blocksuite/affine/gfx/connector',
       'blocksuite/affine/gfx/group',
+      'blocksuite/affine/gfx/link',
       'blocksuite/affine/gfx/mindmap',
       'blocksuite/affine/gfx/note',
+      'blocksuite/affine/gfx/pointer',
       'blocksuite/affine/gfx/shape',
       'blocksuite/affine/gfx/template',
       'blocksuite/affine/gfx/text',
@@ -50,13 +53,16 @@ export const PackageList = [
       'blocksuite/affine/widgets/drag-handle',
       'blocksuite/affine/widgets/edgeless-auto-connect',
       'blocksuite/affine/widgets/edgeless-toolbar',
+      'blocksuite/affine/widgets/edgeless-zoom-toolbar',
       'blocksuite/affine/widgets/frame-title',
       'blocksuite/affine/widgets/keyboard-toolbar',
       'blocksuite/affine/widgets/linked-doc',
+      'blocksuite/affine/widgets/page-dragging-area',
       'blocksuite/affine/widgets/remote-selection',
       'blocksuite/affine/widgets/scroll-anchoring',
       'blocksuite/affine/widgets/slash-menu',
       'blocksuite/affine/widgets/toolbar',
+      'blocksuite/affine/widgets/viewport-overlay',
       'blocksuite/affine/data-view',
       'blocksuite/framework/global',
       'blocksuite/framework/std',
@@ -337,19 +343,14 @@ export const PackageList = [
       'blocksuite/affine/gfx/group',
       'blocksuite/affine/gfx/mindmap',
       'blocksuite/affine/gfx/note',
+      'blocksuite/affine/gfx/pointer',
       'blocksuite/affine/gfx/shape',
       'blocksuite/affine/gfx/text',
       'blocksuite/affine/inlines/preset',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
-      'blocksuite/affine/widgets/edgeless-auto-connect',
       'blocksuite/affine/widgets/edgeless-toolbar',
-      'blocksuite/affine/widgets/frame-title',
-      'blocksuite/affine/widgets/keyboard-toolbar',
-      'blocksuite/affine/widgets/linked-doc',
-      'blocksuite/affine/widgets/remote-selection',
-      'blocksuite/affine/widgets/scroll-anchoring',
       'blocksuite/affine/widgets/slash-menu',
       'blocksuite/affine/widgets/toolbar',
       'blocksuite/affine/data-view',
@@ -433,6 +434,20 @@ export const PackageList = [
     name: '@blocksuite/affine-ext-loader',
     workspaceDependencies: [
       'blocksuite/framework/global',
+      'blocksuite/framework/store',
+    ],
+  },
+  {
+    location: 'blocksuite/affine/foundation',
+    name: '@blocksuite/affine-foundation',
+    workspaceDependencies: [
+      'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
+      'blocksuite/affine/rich-text',
+      'blocksuite/affine/shared',
+      'blocksuite/affine/data-view',
+      'blocksuite/framework/global',
+      'blocksuite/framework/std',
       'blocksuite/framework/store',
     ],
   },
@@ -533,6 +548,25 @@ export const PackageList = [
     ],
   },
   {
+    location: 'blocksuite/affine/gfx/link',
+    name: '@blocksuite/affine-gfx-link',
+    workspaceDependencies: [
+      'blocksuite/affine/blocks/bookmark',
+      'blocksuite/affine/blocks/embed',
+      'blocksuite/affine/blocks/surface',
+      'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
+      'blocksuite/affine/gfx/pointer',
+      'blocksuite/affine/model',
+      'blocksuite/affine/rich-text',
+      'blocksuite/affine/shared',
+      'blocksuite/affine/widgets/edgeless-toolbar',
+      'blocksuite/framework/global',
+      'blocksuite/framework/std',
+      'blocksuite/framework/store',
+    ],
+  },
+  {
     location: 'blocksuite/affine/gfx/mindmap',
     name: '@blocksuite/affine-gfx-mindmap',
     workspaceDependencies: [
@@ -561,6 +595,22 @@ export const PackageList = [
       'blocksuite/affine/blocks/attachment',
       'blocksuite/affine/blocks/bookmark',
       'blocksuite/affine/blocks/image',
+      'blocksuite/affine/blocks/surface',
+      'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
+      'blocksuite/affine/model',
+      'blocksuite/affine/rich-text',
+      'blocksuite/affine/shared',
+      'blocksuite/affine/widgets/edgeless-toolbar',
+      'blocksuite/framework/global',
+      'blocksuite/framework/std',
+      'blocksuite/framework/store',
+    ],
+  },
+  {
+    location: 'blocksuite/affine/gfx/pointer',
+    name: '@blocksuite/affine-gfx-pointer',
+    workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
       'blocksuite/affine/ext-loader',
@@ -777,6 +827,7 @@ export const PackageList = [
       'blocksuite/affine/blocks/note',
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
@@ -789,8 +840,22 @@ export const PackageList = [
     workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
+      'blocksuite/affine/shared',
+      'blocksuite/framework/global',
+      'blocksuite/framework/std',
+    ],
+  },
+  {
+    location: 'blocksuite/affine/widgets/edgeless-zoom-toolbar',
+    name: '@blocksuite/affine-widget-edgeless-zoom-toolbar',
+    workspaceDependencies: [
+      'blocksuite/affine/blocks/surface',
+      'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
+      'blocksuite/affine/model',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
       'blocksuite/framework/std',
@@ -801,6 +866,7 @@ export const PackageList = [
     name: '@blocksuite/affine-widget-frame-title',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
@@ -823,6 +889,7 @@ export const PackageList = [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/blocks/surface-ref',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/fragments/doc-title',
       'blocksuite/affine/inlines/latex',
       'blocksuite/affine/inlines/link',
@@ -854,11 +921,25 @@ export const PackageList = [
     ],
   },
   {
+    location: 'blocksuite/affine/widgets/page-dragging-area',
+    name: '@blocksuite/affine-widget-page-dragging-area',
+    workspaceDependencies: [
+      'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
+      'blocksuite/affine/model',
+      'blocksuite/affine/shared',
+      'blocksuite/framework/global',
+      'blocksuite/framework/std',
+      'blocksuite/framework/store',
+    ],
+  },
+  {
     location: 'blocksuite/affine/widgets/remote-selection',
     name: '@blocksuite/affine-widget-remote-selection',
     workspaceDependencies: [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
@@ -869,6 +950,7 @@ export const PackageList = [
     location: 'blocksuite/affine/widgets/scroll-anchoring',
     name: '@blocksuite/affine-widget-scroll-anchoring',
     workspaceDependencies: [
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
@@ -880,6 +962,7 @@ export const PackageList = [
     name: '@blocksuite/affine-widget-slash-menu',
     workspaceDependencies: [
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/rich-text',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
@@ -895,6 +978,19 @@ export const PackageList = [
       'blocksuite/affine/blocks/surface',
       'blocksuite/affine/blocks/table',
       'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
+      'blocksuite/affine/model',
+      'blocksuite/affine/shared',
+      'blocksuite/framework/global',
+      'blocksuite/framework/std',
+    ],
+  },
+  {
+    location: 'blocksuite/affine/widgets/viewport-overlay',
+    name: '@blocksuite/affine-widget-viewport-overlay',
+    workspaceDependencies: [
+      'blocksuite/affine/components',
+      'blocksuite/affine/ext-loader',
       'blocksuite/affine/model',
       'blocksuite/affine/shared',
       'blocksuite/framework/global',
@@ -1294,14 +1390,17 @@ export type PackageName =
   | '@blocksuite/affine-components'
   | '@blocksuite/data-view'
   | '@blocksuite/affine-ext-loader'
+  | '@blocksuite/affine-foundation'
   | '@blocksuite/affine-fragment-doc-title'
   | '@blocksuite/affine-fragment-frame-panel'
   | '@blocksuite/affine-fragment-outline'
   | '@blocksuite/affine-gfx-brush'
   | '@blocksuite/affine-gfx-connector'
   | '@blocksuite/affine-gfx-group'
+  | '@blocksuite/affine-gfx-link'
   | '@blocksuite/affine-gfx-mindmap'
   | '@blocksuite/affine-gfx-note'
+  | '@blocksuite/affine-gfx-pointer'
   | '@blocksuite/affine-gfx-shape'
   | '@blocksuite/affine-gfx-template'
   | '@blocksuite/affine-gfx-text'
@@ -1318,13 +1417,16 @@ export type PackageName =
   | '@blocksuite/affine-widget-drag-handle'
   | '@blocksuite/affine-widget-edgeless-auto-connect'
   | '@blocksuite/affine-widget-edgeless-toolbar'
+  | '@blocksuite/affine-widget-edgeless-zoom-toolbar'
   | '@blocksuite/affine-widget-frame-title'
   | '@blocksuite/affine-widget-keyboard-toolbar'
   | '@blocksuite/affine-widget-linked-doc'
+  | '@blocksuite/affine-widget-page-dragging-area'
   | '@blocksuite/affine-widget-remote-selection'
   | '@blocksuite/affine-widget-scroll-anchoring'
   | '@blocksuite/affine-widget-slash-menu'
   | '@blocksuite/affine-widget-toolbar'
+  | '@blocksuite/affine-widget-viewport-overlay'
   | '@blocksuite/bs-docs'
   | '@blocksuite/global'
   | '@blocksuite/std'

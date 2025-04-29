@@ -1,4 +1,3 @@
-import { DatabaseSelectionExtension } from '@blocksuite/affine-block-database';
 import {
   RootBlockHtmlAdapterExtension,
   RootBlockMarkdownAdapterExtension,
@@ -8,44 +7,8 @@ import {
   type StoreExtensionContext,
   StoreExtensionProvider,
 } from '@blocksuite/affine-ext-loader';
-import {
-  RootBlockSchemaExtension,
-  TranscriptionBlockSchemaExtension,
-} from '@blocksuite/affine-model';
-import {
-  HtmlAdapterFactoryExtension,
-  ImageProxyService,
-  MarkdownAdapterFactoryExtension,
-  MixTextAdapterFactoryExtension,
-  NotionHtmlAdapterFactoryExtension,
-  NotionTextAdapterFactoryExtension,
-  PlainTextAdapterFactoryExtension,
-} from '@blocksuite/affine-shared/adapters';
-import { HighlightSelectionExtension } from '@blocksuite/affine-shared/selection';
-import {
-  BlockMetaService,
-  FeatureFlagService,
-  FileSizeLimitService,
-  LinkPreviewerService,
-} from '@blocksuite/affine-shared/services';
-import {
-  BlockSelectionExtension,
-  CursorSelectionExtension,
-  SurfaceSelectionExtension,
-  TextSelectionExtension,
-} from '@blocksuite/std';
+import { RootBlockSchemaExtension } from '@blocksuite/affine-model';
 import type { ExtensionType } from '@blocksuite/store';
-
-function getAdapterFactoryExtensions(): ExtensionType[] {
-  return [
-    MarkdownAdapterFactoryExtension,
-    PlainTextAdapterFactoryExtension,
-    HtmlAdapterFactoryExtension,
-    NotionTextAdapterFactoryExtension,
-    NotionHtmlAdapterFactoryExtension,
-    MixTextAdapterFactoryExtension,
-  ];
-}
 
 const defaultBlockHtmlAdapterMatchers = [RootBlockHtmlAdapterExtension];
 
@@ -69,27 +32,10 @@ function getNotionHtmlAdapterExtensions(): ExtensionType[] {
 
 const MigratingStoreExtensions: ExtensionType[] = [
   RootBlockSchemaExtension,
-  TranscriptionBlockSchemaExtension,
-
-  BlockSelectionExtension,
-  TextSelectionExtension,
-  SurfaceSelectionExtension,
-  CursorSelectionExtension,
-  HighlightSelectionExtension,
-  DatabaseSelectionExtension,
 
   getHtmlAdapterExtensions(),
   getMarkdownAdapterExtensions(),
   getNotionHtmlAdapterExtensions(),
-  getAdapterFactoryExtensions(),
-
-  FeatureFlagService,
-  BlockMetaService,
-
-  // TODO(@mirone): maybe merge these services into a file setting service
-  LinkPreviewerService,
-  FileSizeLimitService,
-  ImageProxyService,
 ].flat();
 
 export class MigratingStoreExtension extends StoreExtensionProvider {
