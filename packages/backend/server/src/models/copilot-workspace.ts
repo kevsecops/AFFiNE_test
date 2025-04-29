@@ -216,7 +216,7 @@ export class CopilotWorkspaceConfigModel extends BaseModel {
     >`
       SELECT
         e."file_id" as "fileId",
-        f."file_name" as "fileName",
+        f."file_name" as "name",
         f."mime_type" as "mimeType",
         e."chunk",
         e."content",

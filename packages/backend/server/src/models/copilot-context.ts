@@ -173,9 +173,9 @@ export class CopilotContextModel extends BaseModel {
     contextId: string,
     topK: number,
     threshold: number
-  ): Promise<FileChunkSimilarity[]> {
+  ): Promise<Omit<FileChunkSimilarity, 'name' | 'mimeType'>[]> {
     const similarityChunks = await this.db.$queryRaw<
-      Array<FileChunkSimilarity>
+      Array<Omit<FileChunkSimilarity, 'name' | 'mimeType'>>
     >`
       SELECT "file_id" as "fileId", "chunk", "content", "embedding" <=> ${embedding}::vector as "distance" 
       FROM "ai_context_embeddings"

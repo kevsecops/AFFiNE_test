@@ -207,10 +207,21 @@ export class ContextSession implements AsyncDisposable {
         threshold
       ),
     ]);
+    const files = new Map(this.files.map(f => [f.id, f]));
 
     return this.client.reRank(
       content,
-      [...context, ...workspace],
+      [
+        ...context
+          .filter(f => files.has(f.fileId))
+          .map(c => {
+            const { name, mimeType } = files.get(
+              c.fileId
+            ) as Required<ContextFile>;
+            return { ...c, name, mimeType };
+          }),
+        ...workspace,
+      ],
       topK,
       signal
     );
