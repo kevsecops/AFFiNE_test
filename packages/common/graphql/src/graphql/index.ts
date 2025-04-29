@@ -752,6 +752,7 @@ export const addWorkspaceEmbeddingFilesMutation = {
   addWorkspaceEmbeddingFiles(workspaceId: $workspaceId, blob: $blob) {
     fileId
     fileName
+    blobId
     mimeType
     size
     createdAt
@@ -776,6 +777,7 @@ export const getWorkspaceEmbeddingFilesQuery = {
           node {
             fileId
             fileName
+            blobId
             mimeType
             size
             createdAt

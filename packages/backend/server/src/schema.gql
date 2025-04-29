@@ -289,6 +289,7 @@ type CopilotWorkspaceConfig {
 }
 
 type CopilotWorkspaceFile {
+  blobId: String!
   createdAt: DateTime!
   fileId: String!
   fileName: String!

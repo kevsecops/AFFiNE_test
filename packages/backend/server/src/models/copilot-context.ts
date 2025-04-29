@@ -173,7 +173,7 @@ export class CopilotContextModel extends BaseModel {
     contextId: string,
     topK: number,
     threshold: number
-  ): Promise<Omit<FileChunkSimilarity, 'name' | 'mimeType'>[]> {
+  ): Promise<Omit<FileChunkSimilarity, 'blobId' | 'name' | 'mimeType'>[]> {
     const similarityChunks = await this.db.$queryRaw<
       Array<Omit<FileChunkSimilarity, 'name' | 'mimeType'>>
     >`

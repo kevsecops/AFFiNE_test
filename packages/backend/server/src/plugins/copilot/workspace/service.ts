@@ -60,6 +60,7 @@ export class CopilotWorkspaceService implements OnApplicationBootstrap {
     await this.storage.put(userId, workspaceId, blobId, buffer);
     const file = await this.models.copilotWorkspace.addFile(workspaceId, {
       fileName,
+      blobId,
       mimeType: content.mimetype,
       size: buffer.length,
     });

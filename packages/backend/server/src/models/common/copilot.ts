@@ -111,6 +111,7 @@ export type DocChunkSimilarity = ChunkSimilarity & {
 
 export const CopilotWorkspaceFileSchema = z.object({
   fileName: z.string(),
+  blobId: z.string(),
   mimeType: z.string(),
   size: z.number(),
 });

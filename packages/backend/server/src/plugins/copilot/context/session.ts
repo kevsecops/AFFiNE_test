@@ -215,10 +215,10 @@ export class ContextSession implements AsyncDisposable {
         ...context
           .filter(f => files.has(f.fileId))
           .map(c => {
-            const { name, mimeType } = files.get(
+            const { blobId, name, mimeType } = files.get(
               c.fileId
             ) as Required<ContextFile>;
-            return { ...c, name, mimeType };
+            return { ...c, blobId, name, mimeType };
           }),
         ...workspace,
       ],

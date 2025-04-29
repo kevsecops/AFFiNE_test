@@ -498,6 +498,7 @@ model AiWorkspaceIgnoredDocs {
 model AiWorkspaceFiles {
   workspaceId String @map("workspace_id") @db.VarChar
   fileId      String @map("file_id") @db.VarChar
+  blobId      String @map("blob_id") @db.VarChar @default("")
   fileName    String @map("file_name") @db.VarChar
   mimeType    String @map("mime_type") @db.VarChar
   size        Int    @db.Integer

@@ -107,6 +107,7 @@ test('should insert and search embedding', async t => {
   {
     const { fileId } = await t.context.copilotWorkspace.addFile(workspace.id, {
       fileName: 'file1',
+      blobId: 'blob1',
       mimeType: 'text/plain',
       size: 1,
     });

@@ -392,6 +392,7 @@ export interface CopilotWorkspaceConfigIgnoredDocsArgs {
 
 export interface CopilotWorkspaceFile {
   __typename?: 'CopilotWorkspaceFile';
+  blobId: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
   fileId: Scalars['String']['output'];
   fileName: Scalars['String']['output'];
@@ -3293,6 +3294,7 @@ export type AddWorkspaceEmbeddingFilesMutation = {
     __typename?: 'CopilotWorkspaceFile';
     fileId: string;
     fileName: string;
+    blobId: string;
     mimeType: string;
     size: number;
     createdAt: string;
@@ -3324,6 +3326,7 @@ export type GetWorkspaceEmbeddingFilesQuery = {
             __typename?: 'CopilotWorkspaceFile';
             fileId: string;
             fileName: string;
+            blobId: string;
             mimeType: string;
             size: number;
             createdAt: string;
