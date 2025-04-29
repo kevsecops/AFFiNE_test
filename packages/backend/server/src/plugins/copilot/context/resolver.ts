@@ -119,7 +119,7 @@ class RemoveContextFileInput {
 @ObjectType('CopilotContext')
 export class CopilotContextType {
   @Field(() => ID, { nullable: true })
-  id!: string | null;
+  id!: string | undefined;
 
   @Field(() => String)
   workspaceId!: string;

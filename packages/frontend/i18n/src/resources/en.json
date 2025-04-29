@@ -2034,6 +2034,7 @@
   "error.COPILOT_CONTEXT_FILE_NOT_SUPPORTED": "File {{fileName}} is not supported to use as context: {{message}}",
   "error.COPILOT_FAILED_TO_MODIFY_CONTEXT": "Failed to modify context {{contextId}}: {{message}}",
   "error.COPILOT_FAILED_TO_MATCH_CONTEXT": "Failed to match context {{contextId}} with \"%7B%7Bcontent%7D%7D\": {{message}}",
+  "error.COPILOT_FAILED_TO_MATCH_GLOBAL_CONTEXT": "Failed to match context in workspace {{workspaceId}} with \"%7B%7Bcontent%7D%7D\": {{message}}",
   "error.COPILOT_EMBEDDING_DISABLED": "Embedding feature is disabled, please contact the administrator to enable it in the workspace settings.",
   "error.COPILOT_EMBEDDING_UNAVAILABLE": "Embedding feature not available, you may need to install pgvector extension to your database",
   "error.COPILOT_TRANSCRIPTION_JOB_EXISTS": "Transcription job already exists",

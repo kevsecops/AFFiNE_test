@@ -8224,6 +8224,13 @@ export function useAFFiNEI18N(): {
         message: string;
     }>): string;
     /**
+      * `Failed to match context in workspace {{workspaceId}} with "%7B%7Bcontent%7D%7D": {{message}}`
+      */
+    ["error.COPILOT_FAILED_TO_MATCH_GLOBAL_CONTEXT"](options: Readonly<{
+        workspaceId: string;
+        message: string;
+    }>): string;
+    /**
       * `Embedding feature is disabled, please contact the administrator to enable it in the workspace settings.`
       */
     ["error.COPILOT_EMBEDDING_DISABLED"](): string;
