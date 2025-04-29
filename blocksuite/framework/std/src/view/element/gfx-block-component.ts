@@ -9,9 +9,13 @@ import type {
   BoxSelectionContext,
   DragMoveContext,
   GfxViewTransformInterface,
+  ResizeEndContext,
+  ResizeMoveContext,
+  ResizeStartContext,
   SelectedContext,
 } from '../../gfx/interactivity/index.js';
-import { type GfxBlockElementModel } from '../../gfx/model/gfx-block-model.js';
+import type { RotateMoveContext } from '../../gfx/interactivity/types/view.js';
+import type { GfxBlockElementModel } from '../../gfx/model/gfx-block-model.js';
 import { SurfaceSelection } from '../../selection/index.js';
 import { BlockComponent } from './block-component.js';
 
@@ -83,6 +87,13 @@ export abstract class GfxBlockComponent<
 
   readonly transformState$ = signal<'idle' | 'active'>('active');
 
+  get minSize() {
+    return {
+      w: 6,
+      h: 6,
+    };
+  }
+
   get gfx() {
     return this.std.get(GfxControllerIdentifier);
   }
@@ -116,9 +127,29 @@ export abstract class GfxBlockComponent<
 
   onBoxSelected(_: BoxSelectionContext) {}
 
-  onRotate() {}
+  onRotateStart() {}
 
-  onResize() {}
+  onRotateMove(_: RotateMoveContext) {}
+
+  onRotateEnd() {}
+
+  onResizeStart(_: ResizeStartContext) {
+    this.model.stash('xywh');
+  }
+
+  onResizeMove(context: ResizeMoveContext) {
+    const { newBound } = context;
+    const minSize = this.minSize;
+
+    newBound.w = Math.max(newBound.w, minSize.w);
+    newBound.h = Math.max(newBound.h, minSize.h);
+
+    this.model.xywh = newBound.serialize();
+  }
+
+  onResizeEnd(_: ResizeEndContext) {
+    this.model.pop('xywh');
+  }
 
   getCSSTransform() {
     const viewport = this.gfx.viewport;
@@ -203,6 +234,14 @@ export function toGfxBlockComponent<
 
     readonly transformState$ = signal<'idle' | 'active'>('active');
 
+    // eslint-disable-next-line sonarjs/no-identical-functions
+    get minSize() {
+      return {
+        w: 6,
+        h: 6,
+      };
+    }
+
     override selected$ = computed(() => {
       const selection = this.std.selection.value.find(
         selection => selection.blockId === this.model?.id
@@ -238,7 +277,30 @@ export function toGfxBlockComponent<
 
     onRotate() {}
 
-    onResize() {}
+    onRotateStart() {}
+
+    onRotateMove(_: RotateMoveContext) {}
+
+    onRotateEnd() {}
+
+    onResizeStart(_: ResizeStartContext) {
+      this.model.stash('xywh');
+    }
+
+    // eslint-disable-next-line sonarjs/no-identical-functions
+    onResizeMove(context: ResizeMoveContext) {
+      const { newBound } = context;
+      const minSize = this.minSize;
+
+      newBound.w = Math.max(newBound.w, minSize.w);
+      newBound.h = Math.max(newBound.h, minSize.h);
+
+      this.model.xywh = newBound.serialize();
+    }
+
+    onResizeEnd(_: ResizeEndContext) {
+      this.model.pop('xywh');
+    }
 
     get gfx() {
       return this.std.get(GfxControllerIdentifier);

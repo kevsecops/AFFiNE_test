@@ -55,6 +55,7 @@ import {
   GfxControllerIdentifier,
   type GfxModel,
   type GfxPrimitiveElementModel,
+  InteractivityIdentifier,
 } from '@blocksuite/std/gfx';
 import { css, html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
@@ -954,10 +955,10 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
   constructor() {
     super();
     this._resizeManager = new HandleResizeManager(
-      this._onDragStart,
-      this._onDragMove,
-      this._onDragRotate,
-      this._onDragEnd
+      () => {},
+      () => {},
+      () => {},
+      () => {}
     );
     this.addEventListener('pointerdown', stopPropagation);
   }
@@ -1439,6 +1440,10 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
     this._updateMode();
   }
 
+  private get _interaction() {
+    return this.std.getOptional(InteractivityIdentifier);
+  }
+
   override render() {
     if (!this.isConnected) return nothing;
 
@@ -1468,14 +1473,34 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
           ? ResizeHandles(
               resizeMode,
               (e: PointerEvent, direction: HandleDirection) => {
-                const target = e.target as HTMLElement;
-                if (target.classList.contains('rotate') && !this._canRotate()) {
+                if (!this._interaction) {
                   return;
                 }
-                const proportional = elements.some(
-                  el => el instanceof TextElementModel
+
+                const interaction = this._interaction;
+                const isRotate = (e.target as HTMLElement).classList.contains(
+                  'rotate'
                 );
-                _resizeManager.onPointerDown(e, direction, proportional);
+
+                if (isRotate) {
+                  if (this._canRotate()) {
+                    interaction.handleElementRotate({
+                      elements: this.selection.selectedElements,
+                      event: e,
+                    });
+                  }
+                } else {
+                  const proportional = elements.some(
+                    el => el instanceof TextElementModel
+                  );
+
+                  interaction.handleElementResize({
+                    elements: this.selection.selectedElements,
+                    handle: direction,
+                    proportion: proportional,
+                    event: e,
+                  });
+                }
               },
               (
                 dragging: boolean,

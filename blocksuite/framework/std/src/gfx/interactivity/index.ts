@@ -15,5 +15,8 @@ export type {
   DragMoveContext,
   DragStartContext,
   GfxViewTransformInterface,
+  ResizeEndContext,
+  ResizeMoveContext,
+  ResizeStartContext,
   SelectedContext,
 } from './types/view.js';

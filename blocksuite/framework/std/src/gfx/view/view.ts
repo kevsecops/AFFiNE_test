@@ -13,8 +13,12 @@ import type {
   DragMoveContext,
   DragStartContext,
   GfxViewTransformInterface,
+  ResizeEndContext,
+  ResizeMoveContext,
+  ResizeStartContext,
   SelectedContext,
 } from '../interactivity/index.js';
+import type { RotateMoveContext } from '../interactivity/types/view.js';
 import type { GfxElementGeometry, PointTestOptions } from '../model/base.js';
 import { GfxPrimitiveElementModel } from '../model/surface/element-model.js';
 import type { GfxLocalElementModel } from '../model/surface/local-element-model.js';
@@ -61,6 +65,13 @@ export class GfxElementModelView<
 
   get isConnected() {
     return this._isConnected;
+  }
+
+  get minSize() {
+    return {
+      w: 6,
+      h: 6,
+    };
   }
 
   get rotate() {
@@ -194,12 +205,56 @@ export class GfxElementModelView<
 
   onCreated() {}
 
+  onRotateStart() {
+    if (this.model instanceof GfxPrimitiveElementModel) {
+      this.model.stash('xywh');
+      this.model.stash('rotate');
+    }
+  }
+
+  onRotateMove(context: RotateMoveContext) {
+    const { newBound, newRotate } = context;
+
+    this.model.rotate = newRotate;
+    this.model.xywh = newBound.serialize();
+  }
+
+  onRotateEnd() {
+    if (this.model instanceof GfxPrimitiveElementModel) {
+      this.model.pop('xywh');
+      this.model.pop('rotate');
+    }
+  }
+
+  onResizeStart(_: ResizeStartContext) {
+    if (this.model instanceof GfxPrimitiveElementModel) {
+      this.model.stash('xywh');
+    }
+  }
+
+  onResizeMove(context: ResizeMoveContext) {
+    const { newBound } = context;
+    const minSize = this.minSize;
+
+    newBound.w = Math.max(newBound.w, minSize.w);
+    newBound.h = Math.max(newBound.h, minSize.h);
+    this.model.xywh = newBound.serialize();
+  }
+
+  onResizeEnd(_: ResizeEndContext) {
+    if (this.model instanceof GfxPrimitiveElementModel) {
+      this.model.pop('xywh');
+    }
+  }
+
+  // eslint-disable-next-line sonarjs/no-identical-functions
   onDragStart(_: DragStartContext) {
     if (this.model instanceof GfxPrimitiveElementModel) {
       this.model.stash('xywh');
     }
   }
 
+  // eslint-disable-next-line sonarjs/no-identical-functions
   onDragEnd(_: DragEndContext) {
     if (this.model instanceof GfxPrimitiveElementModel) {
       this.model.pop('xywh');

@@ -13,6 +13,11 @@ import {
   InteractivityExtensionIdentifier,
 } from './extension/base.js';
 import { GfxViewEventManager } from './gfx-view-event-handler.js';
+import {
+  type OptionResize,
+  ResizeController,
+  type RotateOption,
+} from './resize/manager.js';
 import type { RequestElementsCloneContext } from './types/clone.js';
 import type {
   DragExtensionInitializeContext,
@@ -314,6 +319,81 @@ export class InteractivityManager extends GfxExtension {
 
     listenEvent();
     dragStart();
+  }
+
+  handleElementRotate(
+    options: Omit<
+      RotateOption,
+      'onRotateStart' | 'onRotateEnd' | 'onRotateUpdate'
+    >
+  ) {
+    const handler = new ResizeController({ gfx: this.gfx });
+    const views = options.elements
+      .map(model => this.gfx.view.get(model))
+      .filter(model => model);
+
+    handler.startRotate({
+      ...options,
+      onRotateStart: () => {
+        views.forEach(view => {
+          view?.onRotateStart();
+        });
+      },
+      onRotateUpdate: ({
+        model,
+        newBound,
+        newRotate,
+        originalBound,
+        originalRotate,
+      }) => {
+        const view = this.gfx.view.get(model);
+
+        view?.onRotateMove({
+          originalBound,
+          newBound,
+          originalRotate,
+          newRotate,
+        });
+      },
+      onRotateEnd: () => {
+        views.forEach(view => {
+          view?.onRotateEnd();
+        });
+      },
+    });
+  }
+
+  handleElementResize(
+    options: Omit<
+      OptionResize,
+      'onResizeStart' | 'onResizeEnd' | 'onResizeUpdate'
+    >
+  ) {
+    const handler = new ResizeController({ gfx: this.gfx });
+
+    handler.startResize({
+      ...options,
+      onResizeStart: ({ model }) => {
+        const view = this.gfx.view.get(model);
+
+        view?.onResizeStart({
+          originalBound: Bound.deserialize(model.xywh),
+        });
+      },
+      onResizeUpdate: ({ model, newBound, originalBound }) => {
+        const view = this.gfx.view.get(model);
+
+        view?.onResizeMove({
+          newBound,
+          originalBound,
+        });
+      },
+      onResizeEnd: ({ model }) => {
+        const view = this.gfx.view.get(model);
+
+        view?.onResizeEnd({});
+      },
+    });
   }
 
   requestElementClone(options: RequestElementsCloneContext) {

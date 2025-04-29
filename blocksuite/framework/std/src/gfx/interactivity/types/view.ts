@@ -34,6 +34,29 @@ export type DragMoveContext = DragStartContext & {
 
 export type DragEndContext = DragMoveContext;
 
+export type ResizeStartContext = {
+  /**
+   * The element bound when resize starts
+   */
+  originalBound: Bound;
+};
+
+export type ResizeMoveContext = ResizeStartContext & {
+  newBound: Bound;
+};
+
+export type ResizeEndContext = {};
+
+export type RotateMoveContext = {
+  newBound: Bound;
+
+  originalBound: Bound;
+
+  newRotate: number;
+
+  originalRotate: number;
+};
+
 export type SelectedContext = {
   /**
    * The selected state of the element
@@ -76,11 +99,22 @@ export type BoxSelectionContext = {
 };
 
 export type GfxViewTransformInterface = {
+  readonly minSize: {
+    w: number;
+    h: number;
+  };
+
   onDragStart: (context: DragStartContext) => void;
   onDragMove: (context: DragMoveContext) => void;
   onDragEnd: (context: DragEndContext) => void;
-  onRotate: (context: {}) => void;
-  onResize: (context: {}) => void;
+
+  onRotateStart: (context: {}) => void;
+  onRotateMove: (context: RotateMoveContext) => void;
+  onRotateEnd: (context: {}) => void;
+
+  onResizeStart: (context: ResizeStartContext) => void;
+  onResizeMove: (context: ResizeMoveContext) => void;
+  onResizeEnd: (context: ResizeEndContext) => void;
 
   /**
    * When the element is selected by the pointer
