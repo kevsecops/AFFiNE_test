@@ -57,7 +57,7 @@
     "idb": "^8.0.0",
     "idb-keyval": "^6.2.1",
     "image-blob-reduce": "^4.1.0",
-    "is-svg": "^5.1.0",
+    "is-svg": "^6.0.0",
     "jotai": "^2.10.3",
     "jotai-scope": "^0.7.2",
     "lib0": "^0.2.99",

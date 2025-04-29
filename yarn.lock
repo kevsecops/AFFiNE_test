@@ -450,7 +450,7 @@ __metadata:
     idb: "npm:^8.0.0"
     idb-keyval: "npm:^6.2.1"
     image-blob-reduce: "npm:^4.1.0"
-    is-svg: "npm:^5.1.0"
+    is-svg: "npm:^6.0.0"
     jotai: "npm:^2.10.3"
     jotai-scope: "npm:^0.7.2"
     lib0: "npm:^0.2.99"
@@ -6001,6 +6001,16 @@ __metadata:
   peerDependencies:
     commander: ^11.1.0
   checksum: 10/61381d17fca38063be45f8fbeee13d7a518abe2f2adb1f8c92d624515529c290aa34111347af5ca92a5de4605208db26e1acaa04c4b3e802f2ce23bcd0fa876b
+  languageName: node
+  linkType: hard
+
+"@file-type/xml@npm:^0.4.3":
+  version: 0.4.3
+  resolution: "@file-type/xml@npm:0.4.3"
+  dependencies:
+    sax: "npm:^1.4.1"
+    strtok3: "npm:^10.2.2"
+  checksum: 10/35e2b2453e51c7a4249bf95d1b9313a076c4ada58214c6f97876bbd79f2b226edcb128a4e656df04c2b4e948bd2474f7e1374853f765baa4c32cce9d0b039365
   languageName: node
   linkType: hard
 
@@ -21549,17 +21559,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-parser@npm:^4.4.1":
-  version: 4.5.3
-  resolution: "fast-xml-parser@npm:4.5.3"
-  dependencies:
-    strnum: "npm:^1.1.1"
-  bin:
-    fxparser: src/cli/cli.js
-  checksum: 10/ca22bf9d65c10b8447c1034c13403e90ecee210e2b3852690df3d8a42b8a46ec655fae7356096abd98a15b89ddaf11878587b1773e0c3be4cbc2ac4af4c7bf95
-  languageName: node
-  linkType: hard
-
 "fast-xml-parser@npm:^5.0.0":
   version: 5.2.1
   resolution: "fast-xml-parser@npm:5.2.1"
@@ -24184,12 +24183,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-svg@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "is-svg@npm:5.1.0"
+"is-svg@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "is-svg@npm:6.0.0"
   dependencies:
-    fast-xml-parser: "npm:^4.4.1"
-  checksum: 10/9ea9a076cce6c77fd4b2d7422be7e411f253f25c013eff8d6c21b324dfc31e27c1d31ed4dde993970e091f1317263a0470fcc02e8c0e876157fcc9efcce31389
+    "@file-type/xml": "npm:^0.4.3"
+  checksum: 10/b95519cf7b0dde12c014a65c865aecf2a03fc6565ab50b34eceda0a3029d10450ea1e9a55f9961dc650493aa8bb13a8a5a0f6d8f47cddc7eb22b14a10f477c8b
   languageName: node
   linkType: hard
 
@@ -30821,7 +30820,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sax@npm:>=0.6.0, sax@npm:^1.2.4":
+"sax@npm:>=0.6.0, sax@npm:^1.2.4, sax@npm:^1.4.1":
   version: 1.4.1
   resolution: "sax@npm:1.4.1"
   checksum: 10/b1c784b545019187b53a0c28edb4f6314951c971e2963a69739c6ce222bfbc767e54d320e689352daba79b7d5e06d22b5d7113b99336219d6e93718e2f99d335
@@ -32106,7 +32105,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strnum@npm:^1.0.5, strnum@npm:^1.1.1":
+"strnum@npm:^1.0.5":
   version: 1.1.2
   resolution: "strnum@npm:1.1.2"
   checksum: 10/ccd6297a1fdaf0fc8ea0ea904acdae76878d49a4b0d98a70155df4bc081fd88eac5ec99fb150f3d1d1af065c1898d38420705259ba6c39aa850c671bcd54e35d
@@ -32120,7 +32119,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strtok3@npm:^10.2.0":
+"strtok3@npm:^10.2.0, strtok3@npm:^10.2.2":
   version: 10.2.2
   resolution: "strtok3@npm:10.2.2"
   dependencies:
