@@ -40,6 +40,8 @@ describe('viewport turbo renderer', () => {
   test('should render 6 notes in viewport', async () => {
     addSampleNotes(doc, 6);
     const renderer = getRenderer();
+    await renderer.refresh();
+    await wait(FRAME);
     await firstValueFrom(renderer.state$.pipe(filter(s => s === 'ready')));
 
     const notes = document.querySelectorAll('affine-edgeless-note');
@@ -61,6 +63,8 @@ describe('viewport turbo renderer', () => {
   test('zooming should change internal state and populate optimized block ids', async () => {
     const renderer = getRenderer();
     addSampleNotes(doc, 1);
+    await renderer.refresh();
+    await wait(FRAME);
     await firstValueFrom(renderer.state$.pipe(filter(s => s === 'ready')));
     expect(renderer.optimizedBlockIds.length).toBe(0);
 
@@ -85,11 +89,16 @@ describe('viewport turbo renderer', () => {
     const renderer = getRenderer();
 
     addSampleNotes(doc, 1);
+    await renderer.refresh();
+    await wait(FRAME);
     await firstValueFrom(renderer.state$.pipe(filter(s => s === 'pending')));
     expect(renderer.state$.value).toBe('pending');
 
     renderer.viewport.zooming$.next(false);
+    await renderer.refresh();
+    await wait(FRAME);
     await firstValueFrom(renderer.state$.pipe(filter(s => s === 'ready')));
+
     expect(renderer.state$.value).toBe('ready');
   });
 
@@ -103,14 +112,14 @@ describe('viewport turbo renderer', () => {
     addSampleNotes(doc, 1);
     await wait(100);
 
-    // Access getter to populate cache
     const _cache = renderer.layoutCache;
     noop(_cache);
     expect(renderer.layoutCacheData).not.toBeNull();
 
-    // Invalidate
     addSampleNotes(doc, 1);
     await wait(100);
+    await renderer.refresh();
+    await wait(FRAME);
 
     expect(renderer.layoutCacheData).toBeNull();
   });
@@ -118,6 +127,7 @@ describe('viewport turbo renderer', () => {
   test('accessing layoutCache getter should populate cache data', async () => {
     const renderer = getRenderer();
     addSampleNotes(doc, 1);
+    await renderer.refresh();
     await wait(FRAME);
     expect(renderer.layoutCacheData).toBeNull();
 
