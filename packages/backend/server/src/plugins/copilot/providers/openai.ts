@@ -10,6 +10,7 @@ import {
   generateObject,
   generateText,
   streamText,
+  ToolSet,
 } from 'ai';
 
 import {
@@ -178,12 +179,20 @@ export class OpenAIProvider
     }
   }
 
-  private getTools(options: CopilotChatOptions) {
-    if (options?.webSearch) {
-      return {
-        web_search_preview: openai.tools.webSearchPreview(),
-      };
+  private getTools(options: CopilotChatOptions): ToolSet | undefined {
+    if (options?.tools?.length) {
+      const tools: ToolSet = {};
+      for (const tool of options.tools) {
+        switch (tool) {
+          case 'webSearch': {
+            tools.web_search_preview = openai.tools.webSearchPreview();
+            break;
+          }
+        }
+      }
+      return tools;
     }
+
     return undefined;
   }
 
@@ -224,6 +233,7 @@ export class OpenAIProvider
             providerOptions: {
               openai: options.user ? { user: options.user } : {},
             },
+            toolChoice: options.webSearch ? 'required' : 'auto',
             tools: this.getTools(options),
           });
 
@@ -246,16 +256,16 @@ export class OpenAIProvider
 
       const [system, msgs] = await chatToGPTMessage(messages);
 
-      const modelInstance = this.#instance(model, {
-        structuredOutputs: Boolean(options.jsonMode),
-        user: options.user,
-      });
+      const modelInstance = this.#instance.responses(model);
 
       const { fullStream } = streamText({
         model: modelInstance,
         system,
         messages: msgs,
         tools: this.getTools(options),
+        providerOptions: {
+          openai: options.user ? { user: options.user } : {},
+        },
         frequencyPenalty: options.frequencyPenalty || 0,
         presencePenalty: options.presencePenalty || 0,
         temperature: options.temperature || 0,

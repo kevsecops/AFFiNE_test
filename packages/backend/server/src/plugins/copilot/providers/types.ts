@@ -20,6 +20,7 @@ export enum CopilotCapability {
 }
 
 export const PromptConfigStrictSchema = z.object({
+  tools: z.enum(['webSearch']).array().nullable().optional(),
   // openai
   jsonMode: z.boolean().nullable().optional(),
   frequencyPenalty: z.number().nullable().optional(),
