@@ -3588,7 +3588,7 @@ bbb
       props: {
         xywh: '[0,0,800,95]',
         background: {
-          dark: '#000000',
+          dark: '#252525',
           light: '#ffffff',
         },
         index: 'a0',

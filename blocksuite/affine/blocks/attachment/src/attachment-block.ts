@@ -35,7 +35,9 @@ import { when } from 'lit/directives/when.js';
 import { AttachmentEmbedProvider } from './embed';
 import { styles } from './styles';
 import { downloadAttachmentBlob, refreshData } from './utils';
+
 type State = 'loading' | 'uploading' | 'warning' | 'oversize' | 'none';
+
 @Peekable({
   enableOn: ({ model }: AttachmentBlockComponent) => {
     return !model.doc.readonly && model.props.type.endsWith('pdf');
@@ -102,7 +104,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   }
 
   determineState = (
-    loading: boolean,
+    downloading: boolean,
     uploading: boolean,
     overSize: boolean,
     error: boolean
@@ -110,7 +112,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     if (overSize) return 'oversize';
     if (error) return 'warning';
     if (uploading) return 'uploading';
-    if (loading) return 'loading';
+    if (downloading) return 'loading';
     return 'none';
   };
 
@@ -306,8 +308,8 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     } = blobState;
     const warning = !overSize && Boolean(errorMessage);
     const error = overSize || warning;
-    const loading = !error && downloading;
-    const state = this.determineState(loading, uploading, overSize, error);
+    const state = this.determineState(downloading, uploading, overSize, error);
+    const loading = state === 'loading' || state === 'uploading';
 
     const classInfo = {
       'affine-attachment-card': true,

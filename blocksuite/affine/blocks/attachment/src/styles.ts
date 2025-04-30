@@ -117,6 +117,11 @@ export const styles = css`
     }
   }
 
+  .affine-attachment-card.loading,
+  .affine-attachment-card.error {
+    background: ${unsafeCSSVarV2('layer/background/secondary')};
+  }
+
   .affine-attachment-card.cubeThick {
     flex-direction: column-reverse;
 

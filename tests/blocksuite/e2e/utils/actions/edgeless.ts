@@ -970,6 +970,25 @@ export async function getZoomLevel(page: Page) {
   return Number(text.replace('%', ''));
 }
 
+export async function getViewportCenter(page: Page): Promise<[number, number]> {
+  return page.evaluate(() => {
+    const target = document.querySelector('affine-edgeless-root');
+    if (!target) {
+      throw new Error('Missing edgeless page');
+    }
+    return [target.gfx.viewport.centerX, target.gfx.viewport.centerY];
+  });
+}
+export async function setViewportCenter(page: Page, center: [number, number]) {
+  await page.evaluate(center => {
+    const target = document.querySelector('affine-edgeless-root');
+    if (!target) {
+      throw new Error('Missing edgeless page');
+    }
+    target.gfx.viewport.setCenter(center[0], center[1]);
+  }, center);
+}
+
 export async function optionMouseDrag(
   page: Page,
   start: number[],

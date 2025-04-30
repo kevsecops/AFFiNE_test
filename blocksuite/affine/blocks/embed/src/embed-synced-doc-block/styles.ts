@@ -2,8 +2,8 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
-import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html, unsafeCSS } from 'lit';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { css, html } from 'lit';
 
 import { embedNoteContentStyles } from '../common/embed-note-content-styles.js';
 
@@ -101,7 +101,7 @@ export const blockStyles = css`
   }
   .affine-embed-synced-doc-icon {
     line-height: 0;
-    color: ${unsafeCSS(cssVarV2.icon.primary)};
+    color: ${unsafeCSSVarV2('icon/primary')};
   }
   .affine-embed-synced-doc-title {
     font-size: 14px;
@@ -151,8 +151,8 @@ export const blockStyles = css`
   }
 
   .affine-embed-synced-doc-container.surface {
-    border-color: var(--affine-border-color);
-    background: var(--affine-background-primary-color);
+    border-color: ${unsafeCSSVarV2('layer/insideBorder/border')};
+    background: ${unsafeCSSVarV2('layer/background/linkedDocOnEdgeless')};
 
     affine-preview-root {
       padding: 0 24px;
@@ -476,9 +476,6 @@ export const cardStyles = css`
     width: ${EMBED_CARD_WIDTH.vertical}px;
     height: ${EMBED_CARD_HEIGHT.vertical}px;
     flex-direction: column-reverse;
-    margin-top: calc(
-      (${EMBED_CARD_HEIGHT.syncedDoc}px - ${EMBED_CARD_HEIGHT.vertical}px) / 2
-    );
 
     .affine-embed-synced-doc-card-content {
       width: 100%;
@@ -532,6 +529,11 @@ export const cardStyles = css`
       flex-grow: unset;
       align-items: center;
     }
+  }
+
+  .affine-embed-synced-doc-edgeless-header-wrapper {
+    position: relative;
+    z-index: 2; // Make sure the header is above the overlay
   }
 `;
 

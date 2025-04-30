@@ -1094,7 +1094,19 @@ export const createCustomToolbarExtension = (
         actions: [
           embedSyncedDocToolbarConfig.actions,
           createOpenDocActionGroup(EmbedSyncedDocBlockComponent, settings),
-          createEdgelessOpenDocActionGroup(EmbedSyncedDocBlockComponent),
+        ].flat(),
+      },
+    }),
+
+    ToolbarModuleExtension({
+      id: BlockFlavourIdentifier('custom:affine:surface:embed-synced-doc'),
+      config: {
+        actions: [
+          // the open actions are provided by the header of embed-edgeless-synced-doc-block
+          {
+            id: 'A.open-doc',
+            when: () => false,
+          },
         ].flat(),
       },
     }),

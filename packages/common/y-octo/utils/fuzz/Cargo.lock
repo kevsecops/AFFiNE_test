@@ -705,13 +705,12 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3779b94aeb87e8bd4e834cee3650289ee9e0d5677f976ecdb6d219e5f4f6cd94"
+checksum = "9fbfd9d094a40bf3ae768db9361049ace4c0e04a4fd6b359518bd7b73a73dd97"
 dependencies = [
  "rand_chacha 0.9.0",
  "rand_core 0.9.3",
- "zerocopy 0.8.24",
 ]
 
 [[package]]
@@ -778,7 +777,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8615d50dcf34fa31f7ab52692afec947c4dd0ab803cc87cb3b0b4570ff7463"
 dependencies = [
  "num-traits",
- "rand 0.9.0",
+ "rand 0.9.1",
 ]
 
 [[package]]
@@ -1362,7 +1361,7 @@ dependencies = [
  "nanoid",
  "nom",
  "ordered-float",
- "rand 0.9.0",
+ "rand 0.9.1",
  "rand_chacha 0.9.0",
  "rand_distr",
  "serde",
@@ -1377,11 +1376,11 @@ version = "0.0.0"
 dependencies = [
  "lib0",
  "libfuzzer-sys",
- "rand 0.9.0",
+ "rand 0.9.1",
  "rand_chacha 0.9.0",
  "y-octo",
  "y-octo-utils",
- "yrs 0.23.0",
+ "yrs 0.23.1",
 ]
 
 [[package]]
@@ -1392,11 +1391,11 @@ dependencies = [
  "clap",
  "lib0",
  "phf",
- "rand 0.9.0",
+ "rand 0.9.1",
  "rand_chacha 0.9.0",
  "y-octo",
  "y-sync",
- "yrs 0.23.0",
+ "yrs 0.23.1",
 ]
 
 [[package]]
@@ -1426,9 +1425,9 @@ dependencies = [
 
 [[package]]
 name = "yrs"
-version = "0.23.0"
+version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0189b51d8ab1283e7c1f1f515c610875262e629cf258bec530da5cd4aa115d59"
+checksum = "4a7cab84724ae7f361a8c92465f5160922cbb941a499e1a8cacd103351ab9c78"
 dependencies = [
  "arc-swap",
  "async-lock",

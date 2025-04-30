@@ -44,7 +44,7 @@
     "@radix-ui/react-toast": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.1.5",
     "@radix-ui/react-visually-hidden": "^1.1.1",
-    "@toeverything/theme": "^1.1.12",
+    "@toeverything/theme": "^1.1.14",
     "@vanilla-extract/dynamic": "^2.1.2",
     "bytes": "^3.1.2",
     "check-password-strength": "^3.0.0",
@@ -87,7 +87,7 @@
     "typescript": "^5.7.2",
     "unplugin-swc": "^1.5.1",
     "vite": "^6.0.3",
-    "vitest": "3.1.1"
+    "vitest": "3.1.2"
   },
   "version": "0.21.0"
 }

@@ -1,10 +1,7 @@
 import { IconButton } from '@affine/component';
-import { useSharingUrl } from '@affine/core/components/hooks/affine/use-share-url';
-import { WorkspaceDialogService } from '@affine/core/modules/dialogs';
 import { DocService } from '@affine/core/modules/doc';
 import { EditorService } from '@affine/core/modules/editor';
 import { useInsidePeekView } from '@affine/core/modules/peek-view/view/modal-container';
-import { WorkspaceService } from '@affine/core/modules/workspace';
 import { extractEmojiIcon } from '@affine/core/utils';
 import { useI18n } from '@affine/i18n';
 import { track } from '@affine/track';
@@ -12,16 +9,15 @@ import { Bound } from '@blocksuite/affine/global/gfx';
 import { type NoteBlockModel } from '@blocksuite/affine/model';
 import { GfxControllerIdentifier } from '@blocksuite/affine/std/gfx';
 import {
-  InformationIcon,
   LinkedPageIcon,
-  LinkIcon,
   ToggleDownIcon,
   ToggleRightIcon,
 } from '@blocksuite/icons/rc';
-import { useLiveData, useService, useServices } from '@toeverything/infra';
+import { useLiveData, useService } from '@toeverything/infra';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import * as styles from './edgeless-note-header.css';
+import { CopyLinkButton, DocInfoButton } from './common';
+import * as styles from './edgeless-block-header.css';
 
 const EdgelessNoteToggleButton = ({ note }: { note: NoteBlockModel }) => {
   const t = useI18n();
@@ -97,11 +93,11 @@ const EdgelessNoteToggleButton = ({ note }: { note: NoteBlockModel }) => {
       >
         {collapsed ? <ToggleRightIcon /> : <ToggleDownIcon />}
       </IconButton>
-      <div className={styles.title} data-testid="edgeless-note-title">
+      <div className={styles.titleContainer} data-testid="edgeless-note-title">
         {collapsed && (
           <>
             {emoji && <span>{emoji}</span>}
-            <span>{titleWithoutEmoji}</span>
+            <span className={styles.noteTitle}>{titleWithoutEmoji}</span>
           </>
         )}
       </div>
@@ -131,55 +127,33 @@ const ViewInPageButton = () => {
   );
 };
 
-const InfoButton = ({ note }: { note: NoteBlockModel }) => {
-  const t = useI18n();
-  const workspaceDialogService = useService(WorkspaceDialogService);
-
-  const onOpenInfoModal = useCallback(() => {
+const PageBlockInfoButton = ({ note }: { note: NoteBlockModel }) => {
+  const trackFn = useCallback(() => {
     track.edgeless.pageBlock.headerToolbar.openDocInfo();
-    workspaceDialogService.open('doc-info', { docId: note.doc.id });
-  }, [note.doc.id, workspaceDialogService]);
+  }, []);
 
   return (
-    <IconButton
-      className={styles.button}
-      size={styles.iconSize}
-      tooltip={t['com.affine.page-properties.page-info.view']()}
+    <DocInfoButton
+      docId={note.doc.id}
+      trackFn={trackFn}
       data-testid="edgeless-note-info-button"
-      onClick={onOpenInfoModal}
-    >
-      <InformationIcon />
-    </IconButton>
+    />
   );
 };
 
-const LinkButton = ({ note }: { note: NoteBlockModel }) => {
-  const t = useI18n();
-  const { workspaceService, editorService } = useServices({
-    WorkspaceService,
-    EditorService,
-  });
-
-  const { onClickCopyLink } = useSharingUrl({
-    workspaceId: workspaceService.workspace.id,
-    pageId: editorService.editor.doc.id,
-  });
-
-  const copyLink = useCallback(() => {
+const NoteCopyLinkButton = ({ note }: { note: NoteBlockModel }) => {
+  const trackFn = useCallback(() => {
     track.edgeless.pageBlock.headerToolbar.copyBlockToLink();
-    onClickCopyLink('edgeless', [note.id]);
-  }, [note.id, onClickCopyLink]);
+  }, []);
 
   return (
-    <IconButton
-      className={styles.button}
-      size={styles.iconSize}
-      tooltip={t['com.affine.share-menu.copy']()}
+    <CopyLinkButton
+      pageId={note.doc.id}
+      blockId={note.id}
+      mode="edgeless"
+      trackFn={trackFn}
       data-testid="edgeless-note-link-button"
-      onClick={copyLink}
-    >
-      <LinkIcon />
-    </IconButton>
+    />
   );
 };
 
@@ -192,8 +166,8 @@ export const EdgelessNoteHeader = ({ note }: { note: NoteBlockModel }) => {
     <div className={styles.header} data-testid="edgeless-page-block-header">
       <EdgelessNoteToggleButton note={note} />
       <ViewInPageButton />
-      {!insidePeekView && <InfoButton note={note} />}
-      <LinkButton note={note} />
+      {!insidePeekView && <PageBlockInfoButton note={note} />}
+      <NoteCopyLinkButton note={note} />
     </div>
   );
 };

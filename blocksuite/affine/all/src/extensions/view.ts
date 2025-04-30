@@ -13,10 +13,14 @@ import { LatexViewExtension } from '@blocksuite/affine-block-latex/view';
 import { ListViewExtension } from '@blocksuite/affine-block-list/view';
 import { NoteViewExtension } from '@blocksuite/affine-block-note/view';
 import { ParagraphViewExtension } from '@blocksuite/affine-block-paragraph/view';
+import { RootViewExtension } from '@blocksuite/affine-block-root/view';
 import { SurfaceViewExtension } from '@blocksuite/affine-block-surface/view';
 import { SurfaceRefViewExtension } from '@blocksuite/affine-block-surface-ref/view';
 import { TableViewExtension } from '@blocksuite/affine-block-table/view';
 import { FoundationViewExtension } from '@blocksuite/affine-foundation/view';
+import { DocTitleViewExtension } from '@blocksuite/affine-fragment-doc-title/view';
+import { FramePanelViewExtension } from '@blocksuite/affine-fragment-frame-panel/view';
+import { OutlineViewExtension } from '@blocksuite/affine-fragment-outline/view';
 import { BrushViewExtension } from '@blocksuite/affine-gfx-brush/view';
 import { ConnectorViewExtension } from '@blocksuite/affine-gfx-connector/view';
 import { GroupViewExtension } from '@blocksuite/affine-gfx-group/view';
@@ -46,8 +50,6 @@ import { ScrollAnchoringViewExtension } from '@blocksuite/affine-widget-scroll-a
 import { SlashMenuViewExtension } from '@blocksuite/affine-widget-slash-menu/view';
 import { ToolbarViewExtension } from '@blocksuite/affine-widget-toolbar/view';
 import { ViewportOverlayViewExtension } from '@blocksuite/affine-widget-viewport-overlay/view';
-
-import { MigratingViewExtension } from './migrating-view';
 
 export function getInternalViewExtensions() {
   return [
@@ -84,6 +86,7 @@ export function getInternalViewExtensions() {
     SurfaceRefViewExtension,
     TableViewExtension,
     SurfaceViewExtension,
+    RootViewExtension,
 
     // Inline
     FootnoteViewExtension,
@@ -97,7 +100,6 @@ export function getInternalViewExtensions() {
     DragHandleViewExtension,
     EdgelessAutoConnectViewExtension,
     EdgelessToolbarViewExtension,
-    MigratingViewExtension,
     FrameTitleViewExtension,
     KeyboardToolbarViewExtension,
     LinkedDocViewExtension,
@@ -108,5 +110,10 @@ export function getInternalViewExtensions() {
     ViewportOverlayViewExtension,
     EdgelessZoomToolbarViewExtension,
     PageDraggingAreaViewExtension,
+
+    // Fragment
+    DocTitleViewExtension,
+    FramePanelViewExtension,
+    OutlineViewExtension,
   ];
 }

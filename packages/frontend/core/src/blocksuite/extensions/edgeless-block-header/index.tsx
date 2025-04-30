@@ -1,5 +1,6 @@
 import type { ElementOrFactory } from '@affine/component';
 import { JournalService } from '@affine/core/modules/journal';
+import { EmbedSyncedDocConfigExtension } from '@blocksuite/affine/blocks/embed';
 import { NoteConfigExtension } from '@blocksuite/affine/blocks/note';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine/blocks/root';
 import { Bound, Vec } from '@blocksuite/affine/global/gfx';
@@ -12,6 +13,7 @@ import type { FrameworkProvider } from '@toeverything/infra';
 import { html, type TemplateResult } from 'lit';
 
 import { BlocksuiteEditorJournalDocTitle } from '../../block-suite-editor/journal-doc-title';
+import { EdgelessEmbedSyncedDocHeader } from './edgeless-embed-synced-doc-header';
 import { EdgelessNoteHeader } from './edgeless-note-header';
 
 export function patchForEdgelessNoteConfig(
@@ -95,5 +97,14 @@ export function patchForEdgelessNoteConfig(
 
           return true;
         },
+  });
+}
+
+export function patchForEmbedSyncedDocConfig(
+  reactToLit: (element: ElementOrFactory) => TemplateResult
+) {
+  return EmbedSyncedDocConfigExtension({
+    edgelessHeader: ({ model, std }) =>
+      reactToLit(<EdgelessEmbedSyncedDocHeader model={model} std={std} />),
   });
 }

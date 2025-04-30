@@ -167,7 +167,7 @@ test('should undo/redo works for attachment', async ({ page }, testInfo) => {
   );
 
   await undoByKeyboard(page);
-  await waitNextFrame(page);
+  await page.locator('affine-attachment').waitFor({ state: 'detached' });
 
   // The loading/error state should not be restored after undo
   expect(await getPageSnapshot(page, true)).toMatchSnapshot(

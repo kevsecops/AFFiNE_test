@@ -139,7 +139,9 @@
     "./blocks/paragraph": "./src/blocks/paragraph/index.ts",
     "./blocks/paragraph/store": "./src/blocks/paragraph/store.ts",
     "./blocks/paragraph/view": "./src/blocks/paragraph/view.ts",
-    "./blocks/root": "./src/blocks/root.ts",
+    "./blocks/root": "./src/blocks/root/index.ts",
+    "./blocks/root/store": "./src/blocks/root/store.ts",
+    "./blocks/root/view": "./src/blocks/root/view.ts",
     "./blocks/surface": "./src/blocks/surface/index.ts",
     "./blocks/surface/store": "./src/blocks/surface/store.ts",
     "./blocks/surface/view": "./src/blocks/surface/view.ts",
@@ -192,9 +194,12 @@
     "./widgets/viewport-overlay/view": "./src/widgets/viewport-overlay/view.ts",
     "./widgets/page-dragging-area": "./src/widgets/page-dragging-area/index.ts",
     "./widgets/page-dragging-area/view": "./src/widgets/page-dragging-area/view.ts",
-    "./fragments/doc-title": "./src/fragments/doc-title.ts",
-    "./fragments/frame-panel": "./src/fragments/frame-panel.ts",
-    "./fragments/outline": "./src/fragments/outline.ts",
+    "./fragments/doc-title": "./src/fragments/doc-title/index.ts",
+    "./fragments/doc-title/view": "./src/fragments/doc-title/view.ts",
+    "./fragments/frame-panel": "./src/fragments/frame-panel/index.ts",
+    "./fragments/frame-panel/view": "./src/fragments/frame-panel/view.ts",
+    "./fragments/outline": "./src/fragments/outline/index.ts",
+    "./fragments/outline/view": "./src/fragments/outline/view.ts",
     "./gfx/text": "./src/gfx/text/index.ts",
     "./gfx/text/store": "./src/gfx/text/store.ts",
     "./gfx/text/view": "./src/gfx/text/view.ts",
@@ -275,6 +280,6 @@
   "version": "0.21.0",
   "devDependencies": {
     "@vanilla-extract/vite-plugin": "^5.0.0",
-    "vitest": "3.1.1"
+    "vitest": "3.1.2"
   }
 }

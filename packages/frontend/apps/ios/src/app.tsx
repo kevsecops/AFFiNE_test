@@ -53,6 +53,7 @@ import { Keyboard, KeyboardStyle } from '@capacitor/keyboard';
 import { Framework, FrameworkRoot, getCurrentStore } from '@toeverything/infra';
 import { OpClient } from '@toeverything/infra/op';
 import { AsyncCall } from 'async-call-rpc';
+import { AppTrackingTransparency } from 'capacitor-plugin-app-tracking-transparency';
 import { useTheme } from 'next-themes';
 import { Suspense, useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
@@ -375,6 +376,10 @@ CapacitorApp.addListener('appUrlOpen', ({ url }) => {
   }
 }).catch(e => {
   console.error(e);
+});
+
+AppTrackingTransparency.requestPermission().catch(e => {
+  console.error('Failed to request app tracking transparency permission', e);
 });
 
 const KeyboardThemeProvider = () => {

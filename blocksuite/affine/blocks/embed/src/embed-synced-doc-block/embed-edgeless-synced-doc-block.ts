@@ -18,8 +18,10 @@ import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { when } from 'lit/directives/when.js';
 
 import { toEdgelessEmbedBlock } from '../common/to-edgeless-embed-block.js';
+import { EmbedSyncedDocConfigExtension } from './configs/index.js';
 import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';
 
 export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
@@ -89,6 +91,14 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
       ]);
     };
 
+    const header =
+      this.std
+        .getOptional(EmbedSyncedDocConfigExtension.identifier)
+        ?.edgelessHeader({
+          model: this.model,
+          std: this.std,
+        }) ?? nothing;
+
     return this.renderEmbed(
       () => html`
         <div
@@ -103,18 +113,25 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
           style=${containerStyleMap}
           ?data-scale=${scale}
         >
-          <div class="affine-embed-synced-doc-editor">
-            ${this.isPageMode && this._isEmptySyncedDoc
-              ? html`
-                  <div class="affine-embed-synced-doc-editor-empty">
-                    <span>
-                      This is a linked doc, you can add content here.
-                    </span>
-                  </div>
-                `
-              : guard([editorMode, syncedDoc], renderEditor)}
+          <div class="affine-embed-synced-doc-edgeless-header-wrapper">
+            ${header}
           </div>
-          <div class="affine-embed-synced-doc-editor-overlay"></div>
+          ${when(
+            !this.model.isFolded,
+            () =>
+              html`<div class="affine-embed-synced-doc-editor">
+                  ${this.isPageMode && this._isEmptySyncedDoc
+                    ? html`
+                        <div class="affine-embed-synced-doc-editor-empty">
+                          <span>
+                            This is a linked doc, you can add content here.
+                          </span>
+                        </div>
+                      `
+                    : guard([editorMode, syncedDoc], renderEditor)}
+                </div>
+                <div class="affine-embed-synced-doc-editor-overlay"></div>`
+          )}
         </div>
       `
     );
@@ -156,8 +173,8 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
   };
 
   override renderGfxBlock() {
-    const { style, xywh } = this.model.props;
-    const bound = Bound.deserialize(xywh);
+    const { style, xywh$ } = this.model.props;
+    const bound = Bound.deserialize(xywh$.value);
 
     this.embedContainerStyle.width = `${bound.w}px`;
     this.embedContainerStyle.height = `${bound.h}px`;

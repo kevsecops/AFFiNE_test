@@ -58,11 +58,14 @@ import {
 import { patchDatabaseBlockConfigService } from '../extensions/database-block-config-service';
 import { patchDocModeService } from '../extensions/doc-mode-service';
 import { patchDocUrlExtensions } from '../extensions/doc-url';
+import {
+  patchForEdgelessNoteConfig,
+  patchForEmbedSyncedDocConfig,
+} from '../extensions/edgeless-block-header';
 import { EdgelessClipboardAIChatConfig } from '../extensions/edgeless-clipboard';
 import { patchForClipboardInElectron } from '../extensions/electron-clipboard';
 import { enableEditorExtension } from '../extensions/entry/enable-editor';
 import { enableMobileExtension } from '../extensions/entry/enable-mobile';
-import { patchForEdgelessNoteConfig } from '../extensions/note-config';
 import { patchNotificationService } from '../extensions/notification-service';
 import { patchOpenDocExtension } from '../extensions/open-doc';
 import { patchPeekViewService } from '../extensions/peek-view-service';
@@ -162,6 +165,7 @@ const usePatchSpecs = (mode: DocMode) => {
       [
         patchReferenceRenderer(reactToLit, referenceRenderer),
         patchForEdgelessNoteConfig(framework, reactToLit, insidePeekView),
+        patchForEmbedSyncedDocConfig(reactToLit),
         patchNotificationService(confirmModal),
         patchPeekViewService(peekViewService),
         patchOpenDocExtension(),

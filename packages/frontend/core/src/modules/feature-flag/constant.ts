@@ -26,15 +26,6 @@ export const AFFINE_FLAGS = {
     configurable: false,
     defaultState: true,
   },
-  enable_block_query: {
-    category: 'blocksuite',
-    bsFlag: 'enable_block_query',
-    displayName:
-      'com.affine.settings.workspace.experimental-features.enable-block-query.name',
-    description:
-      'com.affine.settings.workspace.experimental-features.enable-block-query.description',
-    configurable: isCanaryBuild,
-  },
   enable_edgeless_text: {
     category: 'blocksuite',
     bsFlag: 'enable_edgeless_text',
@@ -256,6 +247,16 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-edgeless-scribbled-style.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-edgeless-scribbled-style.description',
+    configurable: isCanaryBuild,
+    defaultState: false,
+  },
+  enable_table_virtual_scroll: {
+    category: 'blocksuite',
+    bsFlag: 'enable_table_virtual_scroll',
+    displayName:
+      'com.affine.settings.workspace.experimental-features.enable-table-virtual-scroll.name',
+    description:
+      'com.affine.settings.workspace.experimental-features.enable-table-virtual-scroll.description',
     configurable: isCanaryBuild,
     defaultState: false,
   },

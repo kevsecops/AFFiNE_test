@@ -289,7 +289,6 @@ const builtinToolbarConfig = {
 
 const builtinSurfaceToolbarConfig = {
   actions: [
-    // TODO(@L-Sun): remove this after impl header toolbar for embed-edgeless-synced-doc
     openDocActionGroup,
     conversionsActionGroup,
     {

@@ -16,6 +16,7 @@
     { "path": "../../widgets/slash-menu" },
     { "path": "../../../framework/global" },
     { "path": "../../../framework/std" },
-    { "path": "../../../framework/store" }
+    { "path": "../../../framework/store" },
+    { "path": "../../../framework/sync" }
   ]
 }

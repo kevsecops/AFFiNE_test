@@ -13,6 +13,7 @@ import { LatexStoreExtension } from '@blocksuite/affine-block-latex/store';
 import { ListStoreExtension } from '@blocksuite/affine-block-list/store';
 import { NoteStoreExtension } from '@blocksuite/affine-block-note/store';
 import { ParagraphStoreExtension } from '@blocksuite/affine-block-paragraph/store';
+import { RootStoreExtension } from '@blocksuite/affine-block-root/store';
 import { SurfaceStoreExtension } from '@blocksuite/affine-block-surface/store';
 import { SurfaceRefStoreExtension } from '@blocksuite/affine-block-surface-ref/store';
 import { TableStoreExtension } from '@blocksuite/affine-block-table/store';
@@ -28,8 +29,6 @@ import { LatexStoreExtension as InlineLatexStoreExtension } from '@blocksuite/af
 import { LinkStoreExtension } from '@blocksuite/affine-inline-link/store';
 import { InlinePresetStoreExtension } from '@blocksuite/affine-inline-preset/store';
 import { ReferenceStoreExtension } from '@blocksuite/affine-inline-reference/store';
-
-import { MigratingStoreExtension } from './migrating-store';
 
 export function getInternalStoreExtensions() {
   return [
@@ -53,6 +52,7 @@ export function getInternalStoreExtensions() {
     SurfaceRefStoreExtension,
     TableStoreExtension,
     SurfaceStoreExtension,
+    RootStoreExtension,
 
     FootnoteStoreExtension,
     LinkStoreExtension,
@@ -66,7 +66,5 @@ export function getInternalStoreExtensions() {
     ConnectorStoreExtension,
     GroupStoreExtension,
     TextStoreExtension,
-
-    MigratingStoreExtension,
   ];
 }

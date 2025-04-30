@@ -3,6 +3,8 @@ import { css, html } from 'lit';
 
 import { embedNoteContentStyles } from '../common/embed-note-content-styles.js';
 
+unsafeCSSVarV2('layer/background/linkedDocOnEdgeless');
+
 export const styles = css`
   .affine-embed-linked-doc-block {
     box-sizing: border-box;
@@ -11,9 +13,13 @@ export const styles = css`
     height: 100%;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
-    background: var(--affine-background-primary-color);
     user-select: none;
     position: relative;
+  }
+
+  .affine-embed-linked-doc-block.in-canvas {
+    border: 1px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
+    background: ${unsafeCSSVarV2('layer/background/linkedDocOnEdgeless')};
   }
 
   .affine-embed-linked-doc-content {
