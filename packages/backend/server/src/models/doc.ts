@@ -3,6 +3,7 @@ import { Transactional } from '@nestjs-cls/transactional';
 import type { Update } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 
+import { PaginationInput } from '../base';
 import { DocIsNotPublic } from '../base/error';
 import { BaseModel } from './base';
 import { Doc, DocRole, PublicDocMode, publicUserSelect } from './common';
@@ -479,6 +480,89 @@ export class DocModel extends BaseModel {
       },
     });
     return docMeta?.public ?? false;
+  }
+
+  async getDocInfo(workspaceId: string, docId: string) {
+    const rows = await this.db.$queryRaw<
+      {
+        workspaceId: string;
+        docId: string;
+        mode: PublicDocMode;
+        public: boolean;
+        defaultRole: DocRole;
+        createdAt: Date;
+        updatedAt: Date;
+        creatorId?: string;
+        lastUpdaterId?: string;
+      }[]
+    >`
+    SELECT
+     "workspace_pages"."workspace_id" as "workspaceId",
+     "workspace_pages"."page_id" as "docId",
+     "workspace_pages"."mode" as "mode",
+     "workspace_pages"."public" as "public",
+     "workspace_pages"."defaultRole" as "defaultRole",
+     "snapshots"."created_at" as "createdAt",
+     "snapshots"."updated_at" as "updatedAt",
+     "snapshots"."created_by" as "creatorId",
+     "snapshots"."updated_by" as "lastUpdaterId"
+    FROM "workspace_pages"
+    INNER JOIN "snapshots"
+    ON "workspace_pages"."workspace_id" = "snapshots"."workspace_id"
+    AND "workspace_pages"."page_id" = "snapshots"."guid"
+    WHERE
+      "workspace_pages"."workspace_id" = ${workspaceId}
+      AND "workspace_pages"."page_id" = ${docId}
+    LIMIT 1;
+  `;
+
+    return rows.at(0) ?? null;
+  }
+
+  async paginateDocInfo(workspaceId: string, pagination: PaginationInput) {
+    const count = await this.db.workspaceDoc.count({
+      where: {
+        workspaceId,
+      },
+    });
+
+    const rows = await this.db.$queryRaw<
+      {
+        workspaceId: string;
+        docId: string;
+        mode: PublicDocMode;
+        public: boolean;
+        defaultRole: DocRole;
+        createdAt: Date;
+        updatedAt: Date;
+        creatorId?: string;
+        lastUpdaterId?: string;
+      }[]
+    >`
+      SELECT
+       "workspace_pages"."workspace_id" as "workspaceId",
+       "workspace_pages"."page_id" as "docId",
+       "workspace_pages"."mode" as "mode",
+       "workspace_pages"."public" as "public",
+       "workspace_pages"."defaultRole" as "defaultRole",
+       "snapshots"."created_at" as "createdAt",
+       "snapshots"."updated_at" as "updatedAt",
+       "snapshots"."created_by" as "creatorId",
+       "snapshots"."updated_by" as "lastUpdaterId"
+      FROM "workspace_pages"
+      INNER JOIN "snapshots"
+      ON "workspace_pages"."workspace_id" = "snapshots"."workspace_id"
+      AND "workspace_pages"."page_id" = "snapshots"."guid"
+      WHERE
+        "workspace_pages"."workspace_id" = ${workspaceId}
+        ${Prisma.raw(pagination.after ? `AND "snapshots"."created_at" > '${pagination.after}'` : '')}
+      ORDER BY
+        "snapshots"."created_at" ASC
+      LIMIT ${pagination.first}
+      OFFSET ${pagination.offset}
+    `;
+
+    return [count, rows] as const;
   }
   // #endregion
 }

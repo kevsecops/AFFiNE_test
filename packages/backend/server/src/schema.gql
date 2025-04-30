@@ -425,18 +425,33 @@ enum DocRole {
 }
 
 type DocType {
+  createdAt: DateTime
+
+  """Doc create user"""
+  createdBy: PublicUserType
+  creatorId: String
   defaultRole: DocRole!
 
   """paginated doc granted users list"""
   grantedUsersList(pagination: PaginationInput!): PaginatedGrantedDocUserType!
   id: String!
 
+  """Doc last updated user"""
+  lastUpdatedBy: PublicUserType
+  lastUpdaterId: String
+
   """Doc metadata"""
   meta: WorkspaceDocMeta!
   mode: PublicDocMode!
   permissions: DocPermissions!
   public: Boolean!
+  updatedAt: DateTime
   workspaceId: String!
+}
+
+type DocTypeEdge {
+  cursor: String!
+  node: DocType!
 }
 
 type DocUpdateBlockedDataType {
@@ -1189,6 +1204,12 @@ type PaginatedCopilotWorkspaceFileType {
   totalCount: Int!
 }
 
+type PaginatedDocType {
+  edges: [DocTypeEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
 type PaginatedGrantedDocUserType {
   edges: [GrantedDocUserTypeEdge!]!
   pageInfo: PageInfo!
@@ -1779,6 +1800,7 @@ type WorkspaceType {
 
   """Get get with given id"""
   doc(docId: String!): DocType!
+  docs(pagination: PaginationInput!): PaginatedDocType!
   embedding: CopilotWorkspaceConfig!
 
   """Enable AI"""
@@ -1815,7 +1837,7 @@ type WorkspaceType {
   owner: UserType!
 
   """Cloud page metadata of workspace"""
-  pageMeta(pageId: String!): WorkspaceDocMeta! @deprecated(reason: "use [WorkspaceType.doc.meta] instead")
+  pageMeta(pageId: String!): WorkspaceDocMeta! @deprecated(reason: "use [WorkspaceType.doc] instead")
 
   """map of action permissions"""
   permissions: WorkspacePermissions!

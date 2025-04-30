@@ -10,7 +10,6 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import type { WorkspaceDoc as PrismaWorkspaceDoc } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 
 import {
@@ -37,7 +36,7 @@ import {
   DocAction,
   DocRole,
 } from '../../permission';
-import { WorkspaceUserType } from '../../user';
+import { PublicUserType, WorkspaceUserType } from '../../user';
 import { WorkspaceType } from '../types';
 import {
   DotToUnderline,
@@ -50,7 +49,7 @@ registerEnumType(PublicDocMode, {
 });
 
 @ObjectType()
-class DocType implements Partial<PrismaWorkspaceDoc> {
+class DocType {
   @Field(() => String, { name: 'id' })
   docId!: string;
 
@@ -65,6 +64,18 @@ class DocType implements Partial<PrismaWorkspaceDoc> {
 
   @Field(() => DocRole)
   defaultRole!: DocRole;
+
+  @Field(() => Date, { nullable: true })
+  createdAt?: Date;
+
+  @Field(() => Date, { nullable: true })
+  updatedAt?: Date;
+
+  @Field(() => String, { nullable: true })
+  creatorId?: string;
+
+  @Field(() => String, { nullable: true })
+  lastUpdaterId?: string;
 }
 
 @InputType()
@@ -133,6 +144,9 @@ class GrantedDocUserType {
 @ObjectType()
 class PaginatedGrantedDocUserType extends Paginated(GrantedDocUserType) {}
 
+@ObjectType()
+class PaginatedDocType extends Paginated(DocType) {}
+
 const DocPermissions = registerObjectType<
   Record<DotToUnderline<DocAction>, boolean>
 >(
@@ -173,6 +187,7 @@ class WorkspaceDocMeta {
   @Field(() => EditorType, { nullable: true })
   updatedBy!: EditorType | null;
 }
+
 @Resolver(() => WorkspaceType)
 export class WorkspaceDocResolver {
   private readonly logger = new Logger(WorkspaceDocResolver.name);
@@ -190,7 +205,7 @@ export class WorkspaceDocResolver {
   @ResolveField(() => WorkspaceDocMeta, {
     description: 'Cloud page metadata of workspace',
     complexity: 2,
-    deprecationReason: 'use [WorkspaceType.doc.meta] instead',
+    deprecationReason: 'use [WorkspaceType.doc] instead',
   })
   async pageMeta(
     @Parent() workspace: WorkspaceType,
@@ -238,6 +253,19 @@ export class WorkspaceDocResolver {
     return this.doc(workspace, pageId);
   }
 
+  @ResolveField(() => PaginatedDocType)
+  async docs(
+    @Parent() workspace: WorkspaceType,
+    @Args('pagination', PaginationInput.decode) pagination: PaginationInput
+  ): Promise<PaginatedDocType> {
+    const [count, rows] = await this.models.doc.paginateDocInfo(
+      workspace.id,
+      pagination
+    );
+
+    return paginate(rows, 'createdAt', pagination, count);
+  }
+
   @ResolveField(() => DocType, {
     description: 'Get get with given id',
     complexity: 2,
@@ -246,7 +274,7 @@ export class WorkspaceDocResolver {
     @Parent() workspace: WorkspaceType,
     @Args('docId') docId: string
   ): Promise<DocType> {
-    const doc = await this.models.doc.getMeta(workspace.id, docId);
+    const doc = await this.models.doc.getDocInfo(workspace.id, docId);
     if (doc) {
       return doc;
     }
@@ -410,6 +438,30 @@ export class DocResolver {
     private readonly ac: AccessController,
     private readonly models: Models
   ) {}
+
+  @ResolveField(() => PublicUserType, {
+    nullable: true,
+    description: 'Doc create user',
+  })
+  async createdBy(@Parent() doc: DocType): Promise<PublicUserType | null> {
+    if (!doc.creatorId) {
+      return null;
+    }
+
+    return await this.models.user.get(doc.creatorId);
+  }
+
+  @ResolveField(() => PublicUserType, {
+    nullable: true,
+    description: 'Doc last updated user',
+  })
+  async lastUpdatedBy(@Parent() doc: DocType): Promise<PublicUserType | null> {
+    if (!doc.lastUpdaterId) {
+      return null;
+    }
+
+    return await this.models.user.get(doc.lastUpdaterId);
+  }
 
   @ResolveField(() => WorkspaceDocMeta, {
     description: 'Doc metadata',
