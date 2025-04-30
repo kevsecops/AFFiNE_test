@@ -1145,6 +1145,7 @@
   "com.affine.rootAppSidebar.organize.folder-rm-favorite": "Remove from favorites",
   "com.affine.rootAppSidebar.organize.folder.add-collections": "Add Collections",
   "com.affine.rootAppSidebar.organize.folder.new-doc": "New doc",
+  "com.affine.rootAppSidebar.organize.folder.add-docs": "Add docs",
   "com.affine.rootAppSidebar.organize.folder.add-others": "Add others",
   "com.affine.rootAppSidebar.organize.folder.add-tags": "Add tags",
   "com.affine.rootAppSidebar.organize.folder.create-subfolder": "Create a subfolder",
