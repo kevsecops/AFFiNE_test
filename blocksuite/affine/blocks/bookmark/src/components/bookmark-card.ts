@@ -18,20 +18,6 @@ export class BookmarkCard extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    const model = this.bookmark.model;
-
-    if (model.parent?.flavour !== 'affine:surface') {
-      this.bookmark.selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.bookmark.open();
-  }
-
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -49,8 +35,9 @@ export class BookmarkCard extends SignalWatcher(
   }
 
   override render() {
-    const { icon, title, url, description, image, style } =
-      this.bookmark.model.props;
+    const { url, style } = this.bookmark.model.props;
+    const { icon, title, description, image } =
+      this.bookmark.linkPreview$.value;
 
     const cardClassMap = classMap({
       loading: this.loading,
@@ -98,8 +85,8 @@ export class BookmarkCard extends SignalWatcher(
     return html`
       <div
         class="affine-bookmark-card ${cardClassMap}"
-        @click=${this._handleClick}
-        @dblclick=${this._handleDoubleClick}
+        @click=${this.bookmark.handleClick}
+        @dblclick=${this.bookmark.handleDoubleClick}
       >
         <div class="affine-bookmark-content">
           <div class="affine-bookmark-content-title">
