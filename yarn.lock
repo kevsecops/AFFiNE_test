@@ -431,6 +431,7 @@ __metadata:
     "@types/lodash-es": "npm:^4.17.12"
     "@vanilla-extract/css": "npm:^1.17.0"
     "@vanilla-extract/dynamic": "npm:^2.1.2"
+    "@webcontainer/api": "npm:^1.6.1"
     animejs: "npm:^4.0.0"
     bytes: "npm:^3.1.2"
     clsx: "npm:^2.1.1"
@@ -2510,7 +2511,6 @@ __metadata:
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.14"
     "@types/mdast": "npm:^4.0.4"
-    "@webcontainer/api": "npm:^1.6.0"
     lit: "npm:^3.2.0"
     minimatch: "npm:^10.0.1"
     rxjs: "npm:^7.8.1"
@@ -16405,10 +16405,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webcontainer/api@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "@webcontainer/api@npm:1.6.0"
-  checksum: 10/0a328235089b1c9a94e175451caa84020d3b899334c04324d0fac82d94b634c0fa70d05407eedba9af330abc2373455c58ff9b6af8c3b005982c10f92a01ecce
+"@webcontainer/api@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "@webcontainer/api@npm:1.6.1"
+  checksum: 10/c5502da3a86425199f1171665f4c32bdb73cc5b8291abdee3a934023c2f276bb35382e0a36b067f9bd41d96a722419048ee89847852dcc3f60cba70bccf51ca6
   languageName: node
   linkType: hard
 

@@ -32,7 +32,7 @@ import { bundledLanguagesInfo, type ThemedToken } from 'shiki';
 import { CodeBlockConfigExtension } from './code-block-config.js';
 import { CodeBlockInlineManagerExtension } from './code-block-inline.js';
 import { CodeBlockHighlighter } from './code-block-service.js';
-import { CodeBlockPreviewIdentifier } from './preview/code-preview-extension.js';
+import { CodeBlockPreviewIdentifier } from './code-preview-extension.js';
 import { codeBlockStyles } from './styles.js';
 
 export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> {

@@ -31,6 +31,7 @@ import { getFontConfigExtension } from '../extensions/font-config';
 import { patchPeekViewService } from '../extensions/peek-view-service';
 import { getTelemetryExtension } from '../extensions/telemetry';
 import { getThemeExtension } from '../extensions/theme';
+import { CodeBlockPreviewExtensionProvider } from './code-block-preview';
 
 const optionsSchema = z.object({
   enableAI: z.boolean().optional(),
@@ -133,6 +134,7 @@ const manager = new ViewExtensionManager([
   ...getInternalViewExtensions(),
 
   MigratingAffineViewExtension,
+  CodeBlockPreviewExtensionProvider,
 ]);
 
 export function getViewManager(

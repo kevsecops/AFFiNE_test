@@ -1,12 +1,12 @@
-import type { CodeBlockModel } from '@blocksuite/affine-model';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { CodeBlockPreviewExtension } from '@blocksuite/affine/blocks/code';
+import { SignalWatcher, WithDisposable } from '@blocksuite/affine/global/lit';
+import type { CodeBlockModel } from '@blocksuite/affine/model';
+import { unsafeCSSVarV2 } from '@blocksuite/affine/shared/theme';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { CodeBlockPreviewExtension } from '../../code-preview-extension';
 import { linkWebContainer } from './web-container';
 
 export const CodeBlockHtmlPreview = CodeBlockPreviewExtension(
@@ -109,5 +109,15 @@ export class HTMLPreview extends SignalWatcher(WithDisposable(LitElement)) {
         ></iframe>
       </div>
     `;
+  }
+}
+
+export function effects() {
+  customElements.define('html-preview', HTMLPreview);
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'html-preview': HTMLPreview;
   }
 }

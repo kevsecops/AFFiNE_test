@@ -5,7 +5,7 @@ import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { CodeBlockComponent } from '../../code-block';
-import { CodeBlockPreviewIdentifier } from '../../preview/code-preview-extension';
+import { CodeBlockPreviewIdentifier } from '../../code-preview-extension';
 
 export class PreviewButton extends WithDisposable(SignalWatcher(LitElement)) {
   static override styles = css`
