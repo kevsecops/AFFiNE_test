@@ -8,6 +8,7 @@ import {
   ViewportTurboRendererExtension,
 } from '@blocksuite/affine-gfx-turbo-renderer';
 import { firstValueFrom } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -38,7 +39,8 @@ describe('viewport turbo renderer', () => {
 
   test('should render 6 notes in viewport', async () => {
     addSampleNotes(doc, 6);
-    await wait(FRAME);
+    const renderer = getRenderer();
+    await firstValueFrom(renderer.state$.pipe(filter(s => s === 'ready')));
 
     const notes = document.querySelectorAll('affine-edgeless-note');
     expect(notes.length).toBe(6);
@@ -59,12 +61,11 @@ describe('viewport turbo renderer', () => {
   test('zooming should change internal state and populate optimized block ids', async () => {
     const renderer = getRenderer();
     addSampleNotes(doc, 1);
-    await wait(FRAME);
+    await firstValueFrom(renderer.state$.pipe(filter(s => s === 'ready')));
     expect(renderer.optimizedBlockIds.length).toBe(0);
 
     renderer.viewport.zooming$.next(true);
-    const nextState = await firstValueFrom(renderer.state$);
-    expect(nextState).toBe('zooming');
+    await firstValueFrom(renderer.state$.pipe(filter(s => s === 'zooming')));
 
     const canUseCache = renderer.canUseBitmapCache();
     expect(canUseCache).toBe(false);
@@ -74,9 +75,9 @@ describe('viewport turbo renderer', () => {
     expect(renderer.optimizedBlockIds.length).toBe(1);
 
     renderer.viewport.zooming$.next(false);
-    await wait(renderer.options.debounceTime + 100);
+    await firstValueFrom(renderer.state$.pipe(filter(s => s === 'ready')));
 
-    expect(renderer.state$.value).not.toBe('zooming');
+    expect(renderer.state$.value).toBe('ready');
     expect(renderer.optimizedBlockIds.length).toBe(0);
   });
 
@@ -84,12 +85,11 @@ describe('viewport turbo renderer', () => {
     const renderer = getRenderer();
 
     addSampleNotes(doc, 1);
-    await wait(FRAME);
+    await firstValueFrom(renderer.state$.pipe(filter(s => s === 'pending')));
     expect(renderer.state$.value).toBe('pending');
 
-    // Ensure zooming is off and wait for debounce + buffer
     renderer.viewport.zooming$.next(false);
-    await wait(renderer.options.debounceTime + 500);
+    await firstValueFrom(renderer.state$.pipe(filter(s => s === 'ready')));
     expect(renderer.state$.value).toBe('ready');
   });
 
