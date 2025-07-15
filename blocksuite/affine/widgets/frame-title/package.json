@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@blocksuite/affine-components": "workspace:*",
-    "@blocksuite/affine-ext-loader": "workspace:*",
+    "@blocksuite/affine-ext-loader": "0.21.0",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-rich-text": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
