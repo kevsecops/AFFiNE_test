@@ -72,7 +72,7 @@
     "@prisma/instrumentation": "^6.6.0",
     "@react-email/components": "0.0.36",
     "@socket.io/redis-adapter": "^8.3.0",
-    "ai": "^4.3.4",
+    "ai": "^5.0.52",
     "bullmq": "^5.40.2",
     "cookie-parser": "^1.4.7",
     "cross-env": "^7.0.3",
