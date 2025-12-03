@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@blocksuite/affine-model": "workspace:*",
-    "@blocksuite/affine-shared": "workspace:*",
+    "@blocksuite/affine-shared": "0.16.0",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.2.12",
     "@blocksuite/std": "workspace:*",
