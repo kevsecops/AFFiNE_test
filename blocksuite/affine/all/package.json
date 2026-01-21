@@ -23,7 +23,7 @@
     "@blocksuite/affine-block-image": "workspace:*",
     "@blocksuite/affine-block-latex": "workspace:*",
     "@blocksuite/affine-block-list": "workspace:*",
-    "@blocksuite/affine-block-note": "workspace:*",
+    "@blocksuite/affine-block-note": "0.20.0",
     "@blocksuite/affine-block-paragraph": "workspace:*",
     "@blocksuite/affine-block-root": "workspace:*",
     "@blocksuite/affine-block-surface": "workspace:*",
