@@ -13,7 +13,7 @@
     "@blocksuite/affine-block-callout": "workspace:*",
     "@blocksuite/affine-block-embed": "workspace:*",
     "@blocksuite/affine-block-list": "workspace:*",
-    "@blocksuite/affine-block-note": "workspace:*",
+    "@blocksuite/affine-block-note": "0.20.0",
     "@blocksuite/affine-block-paragraph": "workspace:*",
     "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
@@ -30,7 +30,7 @@
     "@toeverything/theme": "^1.1.14",
     "@types/lodash-es": "^4.17.12",
     "lit": "^3.2.0",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.23",
     "minimatch": "^10.0.1",
     "rxjs": "^7.8.1",
     "zod": "^3.23.8"
