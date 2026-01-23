@@ -10,7 +10,7 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/affine-block-embed": "workspace:*",
+    "@blocksuite/affine-block-embed": "0.17.10",
     "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-ext-loader": "workspace:*",
