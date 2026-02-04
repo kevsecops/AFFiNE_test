@@ -86,7 +86,7 @@
     "graphql": "^16.9.0",
     "graphql-scalars": "^1.24.0",
     "graphql-upload": "^17.0.0",
-    "html-validate": "^9.0.0",
+    "html-validate": "^10.5.0",
     "htmlrewriter": "^0.0.12",
     "http-errors": "^2.0.0",
     "ioredis": "^5.4.1",
