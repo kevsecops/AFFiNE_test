@@ -45,7 +45,7 @@
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",
     "@nestjs/graphql": "^13.0.4",
-    "@nestjs/platform-express": "^11.0.12",
+    "@nestjs/platform-express": "^11.1.15",
     "@nestjs/platform-socket.io": "^11.0.12",
     "@nestjs/schedule": "^6.0.0",
     "@nestjs/throttler": "^6.4.0",
