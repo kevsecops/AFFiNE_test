@@ -18,7 +18,7 @@
     "@affine/nbstore": "workspace:*",
     "@affine/templates": "workspace:*",
     "@affine/track": "workspace:*",
-    "@blocksuite/affine": "workspace:*",
+    "@blocksuite/affine": "0.17.13",
     "@blocksuite/icons": "^2.2.13",
     "@dotlottie/player-component": "^2.7.12",
     "@emotion/cache": "^11.14.0",
