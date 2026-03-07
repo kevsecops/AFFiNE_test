@@ -17,7 +17,7 @@
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-rich-text": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/affine-widget-drag-handle": "workspace:*",
+    "@blocksuite/affine-widget-drag-handle": "0.20.0",
     "@blocksuite/affine-widget-slash-menu": "workspace:*",
     "@blocksuite/data-view": "workspace:*",
     "@blocksuite/global": "workspace:*",
