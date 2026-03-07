@@ -12,7 +12,7 @@
   "dependencies": {
     "@blocksuite/affine-block-database": "workspace:*",
     "@blocksuite/affine-block-surface": "workspace:*",
-    "@blocksuite/affine-block-table": "workspace:*",
+    "@blocksuite/affine-block-table": "0.20.0",
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-ext-loader": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
