@@ -16,7 +16,7 @@
     "@blocksuite/affine-ext-loader": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/affine-widget-slash-menu": "workspace:*",
+    "@blocksuite/affine-widget-slash-menu": "0.20.0",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.2.12",
     "@blocksuite/std": "workspace:*",
