@@ -12,11 +12,11 @@
   "dependencies": {
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-ext-loader": "workspace:*",
-    "@blocksuite/affine-inline-preset": "workspace:*",
+    "@blocksuite/affine-inline-preset": "0.21.0",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-rich-text": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/affine-widget-slash-menu": "workspace:*",
+    "@blocksuite/affine-widget-slash-menu": "0.20.0",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.2.12",
     "@blocksuite/std": "workspace:*",
