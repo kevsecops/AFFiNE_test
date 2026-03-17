@@ -42,7 +42,7 @@
     "@nestjs-cls/transactional-adapter-prisma": "^1.2.19",
     "@nestjs/apollo": "^13.0.4",
     "@nestjs/bullmq": "^11.0.2",
-    "@nestjs/common": "^11.0.12",
+    "@nestjs/common": "^11.1.17",
     "@nestjs/core": "^11.0.12",
     "@nestjs/graphql": "^13.0.4",
     "@nestjs/platform-express": "^11.0.12",
