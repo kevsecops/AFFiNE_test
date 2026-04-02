@@ -12,7 +12,7 @@
   "dependencies": {
     "@blocksuite/affine-block-attachment": "workspace:*",
     "@blocksuite/affine-block-edgeless-text": "workspace:*",
-    "@blocksuite/affine-block-image": "workspace:*",
+    "@blocksuite/affine-block-image": "0.20.0",
     "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-ext-loader": "workspace:*",
