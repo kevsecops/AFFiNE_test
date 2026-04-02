@@ -13,7 +13,7 @@
     "@blocksuite/affine-block-callout": "workspace:*",
     "@blocksuite/affine-block-embed": "workspace:*",
     "@blocksuite/affine-block-list": "workspace:*",
-    "@blocksuite/affine-block-note": "workspace:*",
+    "@blocksuite/affine-block-note": "0.20.0",
     "@blocksuite/affine-block-paragraph": "workspace:*",
     "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
