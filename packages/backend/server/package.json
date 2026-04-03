@@ -92,7 +92,7 @@
     "ioredis": "^5.4.1",
     "is-mobile": "^5.0.0",
     "keyv": "^5.2.2",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.18.1",
     "mixpanel": "^0.18.0",
     "mustache": "^4.2.0",
     "nanoid": "^5.0.9",
