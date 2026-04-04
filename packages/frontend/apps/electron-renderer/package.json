@@ -15,7 +15,7 @@
     "@affine/i18n": "workspace:*",
     "@affine/nbstore": "workspace:*",
     "@affine/track": "workspace:*",
-    "@blocksuite/affine": "workspace:*",
+    "@blocksuite/affine": "0.17.13",
     "@emotion/react": "^11.14.0",
     "@sentry/react": "^9.2.0",
     "@toeverything/infra": "workspace:*",
