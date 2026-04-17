@@ -10,8 +10,8 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/affine-components": "workspace:*",
-    "@blocksuite/affine-shared": "workspace:*",
+    "@blocksuite/affine-components": "0.16.0",
+    "@blocksuite/affine-shared": "0.16.0",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.2.12",
     "@blocksuite/std": "workspace:*",
