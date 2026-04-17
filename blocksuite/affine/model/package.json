@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/std": "workspace:*",
+    "@blocksuite/std": "0.21.0",
     "@blocksuite/store": "workspace:*",
     "@toeverything/theme": "^1.1.14",
     "@types/lodash-es": "^4.17.12",
