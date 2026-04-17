@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/std": "workspace:*",
+    "@blocksuite/std": "0.21.0",
     "@blocksuite/store": "workspace:*",
     "rxjs": "^7.8.1"
   },
